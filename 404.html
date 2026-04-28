@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 • Lost in Space</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --space: #0a0e1a;
+  --space-light: #141b2e;
+  --accent: #7dd3fc;
+  --warm: #fed7aa;
+  --text: #e0e7ff;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  height: 100vh;
+  background: radial-gradient(circle at center, #141b2e 0%, #0a0e1a 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-family: 'Space Grotesk', system_ui, sans-serif;
+  color: var(--text);
+  overflow: hidden;
+  position: relative;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.container {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 40px 30px;
+  max-width: 520px;
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.8rem, 7vw, 4.5rem);
+  color: #e0e7ff;
+  margin-bottom: 12px;
+  letter-spacing: -1px;
+  text-shadow: 0 0 30px rgba(125, 211, 252, 0.3);
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: rgba(224, 231, 255, 0.65);
+  margin-bottom: 40px;
+  line-height: 1.7;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.message-box {
+  background: rgba(20, 27, 46, 0.6);
+  border: 1px solid rgba(125, 211, 252, 0.15);
+  border-radius: 16px;
+  padding: 26px 30px;
+  margin-bottom: 32px;
+  backdrop-filter: blur(20px);
+}
+
+#message {
+  font-size: 1.15rem;
+  line-height: 1.75;
+  color: #c7d2fe;
+  min-height: 75px;
+}
+
+.btn {
+  font-family: 'Space Grotesk', system_ui, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 500;
+  padding: 14px 36px;
+  background: rgba(125, 211, 252, 0.12);
+  border: 1px solid rgba(125, 211, 252, 0.35);
+  border-radius: 50px;
+  color: #7dd3fc;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.btn:hover {
+  background: rgba(125, 211, 252, 0.2);
+  border-color: #7dd3fc;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.back-home {
+  margin-top: 28px;
+  font-size: 0.95rem;
+  color: rgba(224, 231, 255, 0.45);
+  text-decoration: none;
+  transition: color 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.back-home:hover {
+  color: #7dd3fc;
+}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div class="container">
+  <h1>404 • Drifting</h1>
+  <p class="subtitle">This page seems to have floated away into the stars.</p>
+
+  <div class="message-box">
+    <div id="message"></div>
+  </div>
+
+  <button class="btn" onclick="newMessage()">New message from the void</button>
+
+  <a href="index.html" class="back-home">← Return to the station</a>
+</div>
+
+<script>
+// ================== GENTLE COSMIC MESSAGES ==================
+const messages = [
+  "Even in the vastness of space, some things remain connected.",
+  "This page drifted too far from the station.",
+  "Lost in the stars, but never truly alone.",
+  "Sometimes the best discoveries happen when we get lost.",
+  "The universe is big. This page just got a little too adventurous.",
+  "Every star has a story. This one is still being written.",
+  "Drifting through the cosmos… we’ll find our way back.",
+  "Not all who wander are lost. Some are just exploring.",
+  "The stars are quiet tonight. This page is too.",
+  "Even broken signals can carry beautiful messages.",
+  "Out here in the dark, small things still matter.",
+  "This page took the scenic route through the galaxy.",
+  "The universe doesn’t make mistakes. It just rearranges things.",
+  "Sometimes we need to get lost to find something new.",
+  "Floating through space and time… you found this anyway."
+];
+
+const messageEl = document.getElementById('message');
+
+function newMessage() {
+  const randomIndex = Math.floor(Math.random() * messages.length);
+  messageEl.style.transition = 'opacity 0.3s';
+  messageEl.style.opacity = '0';
+  
+  setTimeout(() => {
+    messageEl.innerText = messages[randomIndex];
+    messageEl.style.opacity = '1';
+  }, 300);
+}
+
+function showInitialMessage() {
+  const randomIndex = Math.floor(Math.random() * messages.length);
+  messageEl.innerText = messages[randomIndex];
+}
+showInitialMessage();
+
+// ================== SUBTLE STAR FIELD ==================
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+let stars = [];
+
+window.addEventListener('resize', () => {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+  createStars();
+});
+
+class Star {
+  constructor() {
+    this.reset();
+  }
+  
+  reset() {
+    this.x = Math.random() * width;
+    this.y = Math.random() * height;
+    this.size = Math.random() * 2.2 + 0.6;
+    this.speed = Math.random() * 0.035 + 0.012;
+    this.opacity = Math.random() * 0.7 + 0.3;
+    this.twinkleSpeed = Math.random() * 0.035 + 0.015;
+    this.twinklePhase = Math.random() * Math.PI * 2;
+  }
+  
+  update() {
+    this.twinklePhase += this.twinkleSpeed;
+    this.opacity = 0.4 + Math.sin(this.twinklePhase) * 0.35;
+  }
+  
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = this.opacity;
+    ctx.fillStyle = '#c7d2fe';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function createStars() {
+  stars = [];
+  const count = Math.floor((width * height) / 1800);
+  for (let i = 0; i < count; i++) {
+    stars.push(new Star());
+  }
+}
+
+function animate() {
+  ctx.clearRect(0, 0, width, height);
+  
+  stars.forEach(star => {
+    star.update();
+    star.draw();
+  });
+  
+  requestAnimationFrame(animate);
+}
+
+createStars();
+animate();
+</script>
+</body>
+</html>
