@@ -1,0 +1,2006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Numa's Constellation Planner ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --pink: #ff6fab;
+  --pink-s: #ffb3d1;
+  --pink-g: rgba(255, 111, 171, 0.4);
+  --pink-d: rgba(255, 111, 171, 0.14);
+  --glass: rgba(255, 255, 255, 0.06);
+  --glass-d: rgba(8, 8, 18, 0.78);
+  --border: rgba(255, 255, 255, 0.11);
+  --border-p: rgba(255, 111, 171, 0.32);
+  --fd: 'Great Vibes', cursive;
+  --fb: 'Cormorant Garamond', serif;
+  --fm: 'DM Mono', monospace;
+  --rc: 16px;
+  --rp: 999px;
+  --sh-c: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --sh-p: 0 0 24px rgba(255, 111, 171, 0.25), 0 4px 14px rgba(0, 0, 0, 0.45);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: var(--fb);
+  background: linear-gradient(160deg, #0a1020, #111830, #060c18);
+  color: white;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 48%, rgba(0, 0, 0, 0.65));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--rc);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--sh-c);
+}
+
+.glass:hover { border-color: var(--border-p); box-shadow: var(--sh-p); }
+
+h1, h2, h3 { font-family: var(--fd); }
+
+.page-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--glass-d);
+  border-bottom: 1px solid var(--border-p);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  backdrop-filter: blur(24px);
+  flex-wrap: wrap;
+}
+
+.page-title {
+  font-size: 1.85rem;
+  color: white;
+  text-shadow: 0 0 18px var(--pink-g);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(255,255,255,0.04);
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+.nav-tab {
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: rgba(255,255,255,0.7);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.nav-tab.active {
+  background: var(--pink-d);
+  color: white;
+  border: 1px solid var(--border-p);
+  box-shadow: 0 0 12px rgba(255,111,171,0.3);
+}
+
+.nav-tab:hover:not(.active) {
+  color: white;
+  background: rgba(255,111,171,0.1);
+}
+
+.main-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.view { display: none; }
+
+.view.active {
+  display: block;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #ff9ec4, var(--pink));
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 2rem;
+  box-shadow: 0 8px 24px rgba(255,111,171,0.5);
+  cursor: pointer;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.fab:hover { transform: scale(1.1) rotate(90deg); }
+
+.card { padding: 20px; margin-bottom: 18px; }
+
+.section-title {
+  font-size: 1.35rem;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--pink-s);
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.task-item:hover {
+  border-color: var(--border-p);
+  transform: translateX(4px);
+}
+
+.task-item.completed {
+  opacity: 0.5;
+}
+
+.task-item.completed .task-title {
+  text-decoration: line-through;
+}
+
+.task-checkbox {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--pink-s);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.task-checkbox.checked {
+  background: var(--pink);
+  border-color: var(--pink);
+}
+
+.task-content { flex: 1; min-width: 0; }
+
+.task-title {
+  font-weight: 600;
+  font-size: 1.02rem;
+  line-height: 1.3;
+}
+
+.task-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 0.68rem;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(255,111,171,0.15);
+  color: var(--pink-s);
+  font-family: var(--fm);
+}
+
+.due-date {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.55);
+  font-family: var(--fm);
+}
+
+.priority-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.cal-weekday-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.cal-weekday-label {
+  text-align: center;
+  font-family: var(--fm);
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.45);
+  padding: 4px 0;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px;
+  font-size: 0.85rem;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar-day:hover {
+  border-color: var(--border-p);
+  background: rgba(255,111,171,0.08);
+}
+
+.calendar-day.today {
+  border-color: var(--pink);
+  box-shadow: 0 0 12px rgba(255,111,171,0.3);
+}
+
+.calendar-day.other-month { opacity: 0.25; pointer-events: none; }
+
+.day-number {
+  font-family: var(--fm);
+  font-size: 0.78rem;
+  opacity: 0.7;
+}
+
+.day-tasks {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.task-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pink);
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(12px);
+  z-index: 300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal.active { display: flex; }
+
+.modal-content {
+  width: 100%;
+  max-width: 520px;
+  background: #0f1428;
+  border: 1px solid var(--border-p);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.6rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: 0.2s;
+  line-height: 1;
+}
+
+.close-btn:hover { opacity: 1; }
+
+.input-group { margin-bottom: 16px; }
+
+.input-label {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 6px;
+  display: block;
+  font-family: var(--fm);
+  letter-spacing: 0.06em;
+}
+
+input, textarea, select {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: white;
+  font-family: var(--fb);
+  font-size: 1rem;
+  outline: none;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--border-p);
+  box-shadow: 0 0 0 3px rgba(255,111,171,0.15);
+}
+
+select option { background: #0f1428; color: white; }
+
+textarea {
+  min-height: 110px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.btn {
+  padding: 12px 24px;
+  border-radius: 999px;
+  border: none;
+  font-family: var(--fb);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #ff9ec4, var(--pink));
+  color: white;
+  box-shadow: 0 4px 16px rgba(255,111,171,0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(255,111,171,0.5);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border-p);
+  color: white;
+}
+
+.btn-secondary:hover { background: rgba(255,111,171,0.08); }
+
+.btn-danger {
+  background: rgba(255, 80, 80, 0.15);
+  color: #ff8080;
+  border: 1px solid rgba(255, 80, 80, 0.3);
+}
+
+.btn-danger:hover { background: rgba(255, 80, 80, 0.25); }
+
+.color-picker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.color-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.color-swatch.selected-swatch {
+  border-color: white;
+  transform: scale(1.15);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.stat-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  text-align: center;
+}
+
+.stat-number {
+  font-family: var(--fm);
+  font-size: 1.85rem;
+  color: var(--pink-s);
+}
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+}
+
+.day-column {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  min-height: 280px;
+}
+
+.day-header {
+  font-family: var(--fm);
+  font-size: 0.85rem;
+  color: var(--pink-s);
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.day-column.today-col {
+  border-color: rgba(255,111,171,0.4);
+}
+
+.task-dropzone { min-height: 180px; }
+
+.search-bar {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.search-bar input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 0.95rem;
+}
+
+.note-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.note-card.highlight-yellow { border-left: 5px solid #ffeb3b; }
+.note-card.highlight-pink   { border-left: 5px solid #ff6fab; }
+.note-card.highlight-purple { border-left: 5px solid #b388ff; }
+.note-card.highlight-blue   { border-left: 5px solid #64b5f6; }
+
+.note-content { line-height: 1.6; font-size: 0.97rem; }
+
+.note-actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 6px;
+}
+
+.note-actions button {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 2px 4px;
+}
+
+.note-actions button:hover { color: white; }
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a2238;
+  border: 1px solid var(--border-p);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  z-index: 400;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast.show {
+  display: flex;
+  animation: slideUp 0.3s ease forwards;
+}
+
+@keyframes slideUp {
+  from { transform: translate(-50%, 20px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+.mood-btn {
+  cursor: pointer;
+  font-size: 1.3rem;
+  transition: all 0.2s ease;
+  opacity: 0.4;
+  display: inline-block;
+  user-select: none;
+}
+
+.mood-btn.active-mood {
+  opacity: 1;
+  transform: scale(1.3);
+}
+
+.highlight-toolbar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.highlight-btn {
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: white;
+  cursor: pointer;
+  font-family: var(--fb);
+  transition: 0.15s;
+}
+
+.note-highlight-select {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.note-hl-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.note-hl-swatch.active {
+  border-color: white;
+  transform: scale(1.15);
+}
+
+.empty-state {
+  padding: 32px 20px;
+  text-align: center;
+  color: rgba(255,255,255,0.38);
+  font-size: 0.95rem;
+}
+
+.progress-bar-wrap {
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  height: 6px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--pink), #b388ff);
+  transition: width 0.5s ease;
+}
+
+.overdue-badge {
+  font-size: 0.65rem;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(255,80,80,0.18);
+  color: #ff8080;
+  font-family: var(--fm);
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="page-header">
+  <div class="page-title">
+    <span>✨</span>
+    <span>Numa's Planner</span>
+  </div>
+
+  <div class="nav-tabs">
+    <div class="nav-tab active" data-view="today">Today</div>
+    <div class="nav-tab" data-view="week">Week</div>
+    <div class="nav-tab" data-view="calendar">Calendar</div>
+    <div class="nav-tab" data-view="assignments">Tasks</div>
+    <div class="nav-tab" data-view="notes">Notes</div>
+    <div class="nav-tab" data-view="insights">Insights</div>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 12px; flex-shrink: 0;">
+    <div id="streakDisplay" style="font-family: var(--fm); font-size: 0.85rem; background: rgba(255,159,67,0.1); padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(255,159,67,0.3); color: #ff9f43;">
+      🔥 <span id="streakCount">0</span> day streak
+    </div>
+    <button onclick="showExportModal()" class="btn btn-secondary" style="padding: 8px 14px; font-size: 0.8rem;">Export</button>
+  </div>
+</header>
+
+<div class="main-container">
+
+  <!-- TODAY VIEW -->
+  <div id="view-today" class="view active">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <div id="greetingText" style="font-size: 2.2rem; font-family: var(--fd);">Good morning, Numa ✨</div>
+        <div id="todayDate" style="font-family: var(--fm); color: rgba(255,255,255,0.6); font-size: 1rem;"></div>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-bottom: 4px;">Today's Energy</div>
+        <div id="moodSlider" style="display: flex; gap: 6px;">
+          <span class="mood-btn" data-level="1" onclick="setMood(1)">🌑</span>
+          <span class="mood-btn" data-level="2" onclick="setMood(2)">🌘</span>
+          <span class="mood-btn" data-level="3" onclick="setMood(3)">🌗</span>
+          <span class="mood-btn" data-level="4" onclick="setMood(4)">🌖</span>
+          <span class="mood-btn" data-level="5" onclick="setMood(5)">🌕</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="todayProgressBar" style="margin-bottom: 18px; display: none;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+        <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">Today's progress</span>
+        <span id="todayProgressLabel" style="font-family: var(--fm); font-size: 0.75rem; color: var(--pink-s);"></span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div id="todayProgressFill" class="progress-bar-fill" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="glass card">
+      <div class="section-title">📋 Today's Tasks</div>
+      <div id="todayTasks" class="task-dropzone"></div>
+
+      <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 6px;">Quick add</div>
+        <div style="display: flex; gap: 8px;">
+          <input id="quickAddInput" type="text" placeholder="Add a task for today..." style="flex: 1;"
+            onkeydown="if (event.key === 'Enter') quickAddTask()">
+          <button onclick="quickAddTask()" class="btn btn-primary" style="padding: 10px 22px;">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass card">
+      <div class="section-title">📝 Daily Reflection</div>
+      <textarea id="dailyNote" placeholder="How did the day go? What are you proud of?" style="width: 100%; min-height: 90px;" onblur="saveDailyNote()"></textarea>
+    </div>
+  </div>
+
+  <!-- WEEKLY VIEW -->
+  <div id="view-week" class="view">
+    <div style="margin-bottom: 20px;">
+      <div class="section-title">🗓 This Week</div>
+      <div class="glass card" style="padding: 18px;">
+        <label class="input-label">Weekly Focus</label>
+        <input id="weeklyFocus" type="text" placeholder="What 1–3 things matter most this week?" style="font-size: 1rem;" oninput="saveWeeklyFocus()">
+        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 6px;">Reminds you of your priorities throughout the week</div>
+      </div>
+    </div>
+    <div id="weekGrid" class="week-grid"></div>
+  </div>
+
+  <!-- CALENDAR VIEW -->
+  <div id="view-calendar" class="view">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+      <div class="section-title" id="calendarMonthTitle" style="margin-bottom: 0;"></div>
+      <div style="display: flex; gap: 8px;">
+        <button onclick="prevMonth()" class="btn btn-secondary" style="padding: 8px 16px;">←</button>
+        <button onclick="nextMonth()" class="btn btn-secondary" style="padding: 8px 16px;">→</button>
+        <button onclick="goToToday()" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;">Today</button>
+      </div>
+    </div>
+    <div class="glass card" style="padding: 20px 18px;">
+      <div class="cal-weekday-header">
+        <div class="cal-weekday-label">Sun</div>
+        <div class="cal-weekday-label">Mon</div>
+        <div class="cal-weekday-label">Tue</div>
+        <div class="cal-weekday-label">Wed</div>
+        <div class="cal-weekday-label">Thu</div>
+        <div class="cal-weekday-label">Fri</div>
+        <div class="cal-weekday-label">Sat</div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+    <div style="margin-top: 12px; font-size: 0.75rem; color: rgba(255,255,255,0.4); text-align: center;">
+      Click any day to view or add tasks
+    </div>
+  </div>
+
+  <!-- TASKS / ASSIGNMENTS VIEW -->
+  <div id="view-assignments" class="view">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+      <div class="section-title" style="margin-bottom: 0;">📚 All Tasks</div>
+      <button onclick="showAddTaskModal()" class="btn btn-primary" style="font-size: 0.85rem;">+ New Task</button>
+    </div>
+
+    <div class="glass card">
+      <div style="display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;">
+        <div class="search-bar" style="flex: 1; min-width: 240px; margin-bottom: 0;">
+          <span style="opacity: 0.5;">🔍</span>
+          <input id="assignmentSearch" type="text" placeholder="Search tasks..." oninput="renderAssignments()" style="background: transparent; border: none; padding: 0;">
+        </div>
+        <select id="assignmentFilter" onchange="renderAssignments()" style="max-width: 160px;">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="in-progress">In Progress</option>
+          <option value="done">Done</option>
+          <option value="overdue">Overdue</option>
+        </select>
+        <select id="categoryFilter" onchange="renderAssignments()" style="max-width: 160px;">
+          <option value="">All Categories</option>
+        </select>
+      </div>
+      <div id="assignmentsList"></div>
+    </div>
+  </div>
+
+  <!-- NOTES VIEW -->
+  <div id="view-notes" class="view">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+      <div class="section-title" style="margin-bottom: 0;">📖 Notes & Journal</div>
+      <button onclick="showAddNoteModal()" class="btn btn-primary" style="font-size: 0.85rem;">+ New Note</button>
+    </div>
+
+    <div class="glass card">
+      <div style="font-size: 0.78rem; color: rgba(255,255,255,0.5); margin-bottom: 8px; font-family: var(--fm); letter-spacing: 0.06em;">HIGHLIGHT COLOR FOR NEW NOTE</div>
+      <div class="highlight-toolbar">
+        <button onclick="setNoteHighlight(null)"  class="highlight-btn" id="hl-none"   style="background: rgba(255,255,255,0.06);">None</button>
+        <button onclick="setNoteHighlight('yellow')" class="highlight-btn" id="hl-yellow" style="background: #ffeb3b22; border-color: #ffeb3b55; color: #ffeb3b;">Yellow</button>
+        <button onclick="setNoteHighlight('pink')"   class="highlight-btn" id="hl-pink"   style="background: #ff6fab22; border-color: #ff6fab55; color: #ff6fab;">Pink</button>
+        <button onclick="setNoteHighlight('purple')" class="highlight-btn" id="hl-purple" style="background: #b388ff22; border-color: #b388ff55; color: #b388ff;">Purple</button>
+        <button onclick="setNoteHighlight('blue')"   class="highlight-btn" id="hl-blue"   style="background: #64b5f622; border-color: #64b5f655; color: #64b5f6;">Blue</button>
+      </div>
+      <div id="notesList"></div>
+    </div>
+  </div>
+
+  <!-- INSIGHTS VIEW -->
+  <div id="view-insights" class="view">
+    <div class="section-title">🌌 Your Progress</div>
+
+    <div class="stats-grid">
+      <div class="stat-card glass">
+        <div class="stat-number" id="totalDone">0</div>
+        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 4px;">Tasks Completed</div>
+      </div>
+      <div class="stat-card glass">
+        <div class="stat-number" id="completionRate">0%</div>
+        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 4px;">Completion Rate</div>
+      </div>
+      <div class="stat-card glass">
+        <div class="stat-number" id="overdueCount">0</div>
+        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 4px;">Overdue</div>
+      </div>
+      <div class="stat-card glass">
+        <div class="stat-number" id="streakBig">0 🔥</div>
+        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 4px;">Day Streak</div>
+      </div>
+    </div>
+
+    <div class="glass card" style="margin-top: 18px;">
+      <div class="section-title">Most Productive Days</div>
+      <div id="productiveDays" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <div class="empty-state" style="padding: 10px 0;">Complete tasks to see your most productive days.</div>
+      </div>
+    </div>
+
+    <div class="glass card" style="margin-top: 18px;">
+      <div class="section-title">Upcoming Deadlines</div>
+      <div id="upcomingList"></div>
+    </div>
+
+    <div class="glass card" style="margin-top: 18px;">
+      <div class="section-title">Tasks by Category</div>
+      <div id="categoryBreakdown"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FLOATING ACTION BUTTON -->
+<button class="fab" onclick="showAddTaskModal()" title="New task (Cmd+K)">+</button>
+
+<!-- TASK MODAL -->
+<div id="taskModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalTitle" style="font-family: var(--fd); font-size: 1.55rem;">New Task</h3>
+      <button class="close-btn" onclick="closeTaskModal()">×</button>
+    </div>
+
+    <div class="input-group">
+      <label class="input-label">Title</label>
+      <input id="taskTitle" type="text" placeholder="What needs to get done?">
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+      <div class="input-group">
+        <label class="input-label">Due Date & Time</label>
+        <input id="taskDue" type="datetime-local">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Priority</label>
+        <select id="taskPriority">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+          <option value="urgent">Urgent</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+      <div class="input-group">
+        <label class="input-label">Status</label>
+        <select id="taskStatus">
+          <option value="pending">Pending</option>
+          <option value="in-progress">In Progress</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Category</label>
+        <input id="taskCategory" type="text" placeholder="e.g. Study, Personal, Work...">
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label class="input-label">Color</label>
+      <div class="color-picker" id="colorPicker"></div>
+    </div>
+
+    <div class="input-group">
+      <label class="input-label">Time Block (optional)</label>
+      <input id="taskTimeBlock" type="text" placeholder="e.g. 09:00 – 10:30">
+    </div>
+
+    <div class="input-group">
+      <label class="input-label">Notes</label>
+      <textarea id="taskNotes" placeholder="Details, subtasks, links..."></textarea>
+    </div>
+
+    <div style="display: flex; gap: 10px; margin-top: 8px;">
+      <button onclick="saveTask()" class="btn btn-primary" style="flex: 1;">Save Task</button>
+      <button onclick="deleteCurrentTask()" class="btn btn-danger" id="deleteTaskBtn" style="display: none;">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTE MODAL -->
+<div id="noteModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="noteModalTitle" style="font-family: var(--fd); font-size: 1.55rem;">New Note</h3>
+      <button class="close-btn" onclick="closeNoteModal()">×</button>
+    </div>
+
+    <div class="input-group">
+      <label class="input-label">Title</label>
+      <input id="noteTitle" type="text" placeholder="Give your note a title...">
+    </div>
+
+    <div class="input-group">
+      <label class="input-label">Content</label>
+      <div id="noteContent" contenteditable="true"
+        style="min-height: 160px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 10px; padding: 14px; line-height: 1.6; outline: none; font-family: var(--fb); font-size: 1rem;"
+        onfocus="this.style.borderColor='rgba(255,111,171,0.5)'"
+        onblur="this.style.borderColor='rgba(255,255,255,0.11)'"></div>
+    </div>
+
+    <div class="input-group">
+      <label class="input-label">Highlight Color</label>
+      <div class="note-highlight-select" id="noteHighlightPicker">
+        <div class="note-hl-swatch active" data-hl="" style="background: rgba(255,255,255,0.1);" onclick="selectNoteHL(this, '')"></div>
+        <div class="note-hl-swatch" data-hl="yellow" style="background: #ffeb3b;" onclick="selectNoteHL(this, 'yellow')"></div>
+        <div class="note-hl-swatch" data-hl="pink"   style="background: #ff6fab;" onclick="selectNoteHL(this, 'pink')"></div>
+        <div class="note-hl-swatch" data-hl="purple" style="background: #b388ff;" onclick="selectNoteHL(this, 'purple')"></div>
+        <div class="note-hl-swatch" data-hl="blue"   style="background: #64b5f6;" onclick="selectNoteHL(this, 'blue')"></div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 10px; margin-top: 8px;">
+      <button onclick="saveNote()" class="btn btn-primary" style="flex: 1;">Save Note</button>
+      <button onclick="deleteCurrentNote()" class="btn btn-danger" id="deleteNoteBtn" style="display: none;">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div id="exportModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 style="font-family: var(--fd);">Export & Import</h3>
+      <button class="close-btn" onclick="closeExportModal()">×</button>
+    </div>
+    <p style="margin-bottom: 18px; line-height: 1.6; color: rgba(255,255,255,0.75); font-size: 0.95rem;">
+      Back up all your tasks and notes, or import a previous backup.
+    </p>
+
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+      <button onclick="exportToJSON()" class="btn btn-primary" style="flex: 1;">Download JSON Backup</button>
+      <button onclick="exportToICS()" class="btn btn-secondary" style="flex: 1;">Export to Calendar (.ics)</button>
+    </div>
+
+    <div style="margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border);">
+      <label class="input-label">Import from JSON</label>
+      <input type="file" id="importFile" accept=".json" style="margin-top: 8px; padding: 8px;">
+      <button onclick="importFromJSON()" class="btn btn-secondary" style="margin-top: 10px; width: 100%;">Import & Merge</button>
+    </div>
+  </div>
+</div>
+
+<!-- DAY DETAIL MODAL -->
+<div id="dayModal" class="modal">
+  <div class="modal-content" style="max-width: 620px;">
+    <div class="modal-header">
+      <h3 id="dayModalTitle" style="font-family: var(--fd); font-size: 1.45rem;"></h3>
+      <button class="close-btn" onclick="closeDayModal()">×</button>
+    </div>
+    <div id="dayModalBody"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// ==================== DATA MODEL ====================
+const DEFAULT_DATA = {
+  tasks: [],
+  weeklyFocus: '',
+  dailyNotes: {},
+  moodLog: {},
+  notes: [],
+  colorPalette: ['#ff6fab', '#ffb3d1', '#b388ff', '#64b5f6', '#ff9f43', '#4ade80'],
+  settings: { streak: 0, lastActive: null }
+};
+
+let plannerData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+let currentTaskId = null;
+let currentNoteId = null;
+let currentNoteHL = '';
+let currentMonth = new Date().getMonth();
+let currentYear  = new Date().getFullYear();
+let pendingDayTaskDate = null; // for adding task from day detail
+
+// ==================== STORAGE ====================
+function saveData() {
+  localStorage.setItem('numaPlannerData_v2', JSON.stringify(plannerData));
+}
+
+function loadData() {
+  const saved = localStorage.getItem('numaPlannerData_v2');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      plannerData = Object.assign(JSON.parse(JSON.stringify(DEFAULT_DATA)), parsed);
+      // Ensure nested objects exist
+      plannerData.dailyNotes = plannerData.dailyNotes || {};
+      plannerData.moodLog    = plannerData.moodLog    || {};
+      plannerData.notes      = plannerData.notes      || [];
+      plannerData.tasks      = plannerData.tasks      || [];
+      plannerData.settings   = plannerData.settings   || { streak: 0, lastActive: null };
+      plannerData.colorPalette = plannerData.colorPalette || DEFAULT_DATA.colorPalette;
+    } catch(e) {
+      console.warn('Failed to load saved data, using defaults.');
+    }
+  }
+}
+
+function checkStreak() {
+  const today = todayStr();
+  const { lastActive } = plannerData.settings;
+
+  if (!lastActive) {
+    plannerData.settings.lastActive = today;
+    plannerData.settings.streak = 1;
+  } else if (lastActive !== today) {
+    const last = new Date(lastActive);
+    const diff = Math.floor((new Date(today) - last) / 86400000);
+    if (diff === 1) {
+      plannerData.settings.streak = (plannerData.settings.streak || 0) + 1;
+    } else if (diff > 1) {
+      plannerData.settings.streak = 1;
+    }
+    plannerData.settings.lastActive = today;
+  }
+  saveData();
+  updateStreakDisplay();
+}
+
+function updateStreakDisplay() {
+  const s = plannerData.settings.streak || 0;
+  document.getElementById('streakCount').textContent = s;
+  const big = document.getElementById('streakBig');
+  if (big) big.textContent = s + ' 🔥';
+}
+
+// ==================== HELPERS ====================
+function todayStr() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function fmtDate(dateStr) {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function fmtDateTime(dateStr) {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
+function isOverdue(task) {
+  if (!task.dueDate || task.status === 'done') return false;
+  return new Date(task.dueDate) < new Date();
+}
+
+function getPriorityColor(priority) {
+  return { urgent: '#ff5252', high: '#ff9f43', medium: '#ffd54f', low: '#81c784' }[priority] || '#81c784';
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.innerHTML = msg;
+  toast.classList.remove('show');
+  void toast.offsetWidth; // reflow
+  toast.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+// ==================== NAVIGATION ====================
+function switchView(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+
+  if (view === 'today')       { renderTodayTasks(); renderTodayProgress(); }
+  if (view === 'week')        renderWeekView();
+  if (view === 'calendar')    renderCalendar();
+  if (view === 'assignments') { refreshCategoryFilter(); renderAssignments(); }
+  if (view === 'notes')       renderNotes();
+  if (view === 'insights')    renderInsights();
+}
+
+function refreshAllViews() {
+  renderTodayTasks();
+  renderTodayProgress();
+  const active = document.querySelector('.nav-tab.active');
+  if (active) switchView(active.dataset.view);
+}
+
+// ==================== TODAY ====================
+function renderTodayTasks() {
+  const container = document.getElementById('todayTasks');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const today = todayStr();
+  const tasks = plannerData.tasks.filter(t =>
+    (t.dueDate && t.dueDate.startsWith(today)) ||
+    (!t.dueDate && t.status !== 'done')
+  );
+
+  if (tasks.length === 0) {
+    container.innerHTML = '<div class="empty-state">No tasks for today. Add one below!</div>';
+    return;
+  }
+
+  // Sort: pending first, then done; within pending sort by priority
+  const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
+  tasks.sort((a, b) => {
+    if (a.status === 'done' && b.status !== 'done') return 1;
+    if (a.status !== 'done' && b.status === 'done') return -1;
+    return (priorityOrder[a.priority] || 2) - (priorityOrder[b.priority] || 2);
+  });
+
+  tasks.forEach(task => container.appendChild(createTaskElement(task)));
+}
+
+function renderTodayProgress() {
+  const today = todayStr();
+  const tasks = plannerData.tasks.filter(t => t.dueDate && t.dueDate.startsWith(today));
+  const wrap = document.getElementById('todayProgressBar');
+  if (!wrap) return;
+  if (tasks.length === 0) { wrap.style.display = 'none'; return; }
+
+  const done = tasks.filter(t => t.status === 'done').length;
+  const pct  = Math.round((done / tasks.length) * 100);
+
+  wrap.style.display = 'block';
+  document.getElementById('todayProgressLabel').textContent = done + ' / ' + tasks.length + ' done';
+  document.getElementById('todayProgressFill').style.width = pct + '%';
+}
+
+function quickAddTask() {
+  const input = document.getElementById('quickAddInput');
+  const title = input.value.trim();
+  if (!title) return;
+
+  const now = new Date();
+  const dateStr = now.toISOString().split('T')[0] + 'T09:00';
+
+  plannerData.tasks.unshift({
+    id: 't_' + Date.now(),
+    title,
+    dueDate: dateStr,
+    priority: 'medium',
+    status: 'pending',
+    color: '#ff6fab',
+    category: '',
+    timeBlock: '',
+    notes: '',
+    createdAt: now.toISOString()
+  });
+
+  saveData();
+  input.value = '';
+  renderTodayTasks();
+  renderTodayProgress();
+  showToast('Task added');
+}
+
+function saveDailyNote() {
+  const val = document.getElementById('dailyNote').value;
+  plannerData.dailyNotes[todayStr()] = val;
+  saveData();
+}
+
+function setMood(level) {
+  plannerData.moodLog[todayStr()] = level;
+  saveData();
+  renderMoodButtons(level);
+  showToast('Mood saved');
+}
+
+function renderMoodButtons(activeLevel) {
+  document.querySelectorAll('.mood-btn').forEach(btn => {
+    const l = parseInt(btn.dataset.level);
+    btn.classList.toggle('active-mood', l === activeLevel);
+    btn.style.opacity = (l === activeLevel) ? '1' : '0.4';
+    btn.style.transform = (l === activeLevel) ? 'scale(1.3)' : 'scale(1)';
+  });
+}
+
+function initializeDate() {
+  const now = new Date();
+  const hour = now.getHours();
+  let greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('greetingText').textContent = greeting + ', Numa ✨';
+  document.getElementById('todayDate').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+// ==================== TASK ELEMENT ====================
+function createTaskElement(task) {
+  const el = document.createElement('div');
+  el.className = 'task-item' + (task.status === 'done' ? ' completed' : '');
+  el.dataset.id = task.id;
+  el.draggable = true;
+
+  const due = task.dueDate ? new Date(task.dueDate) : null;
+  const overdue = isOverdue(task);
+  const dueFmt = due ? fmtDate(task.dueDate) : '';
+
+  el.innerHTML = `
+    <div class="task-checkbox${task.status === 'done' ? ' checked' : ''}" data-id="${task.id}">
+      ${task.status === 'done' ? '<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+    </div>
+    <div class="task-content">
+      <div class="task-title" style="color:${task.color || '#fff'}">${escapeHtml(task.title)}</div>
+      <div class="task-meta">
+        ${task.category ? `<span class="tag">${escapeHtml(task.category)}</span>` : ''}
+        ${dueFmt ? `<span class="due-date" style="${overdue ? 'color:#ff8080' : ''}">${overdue ? '⚠ ' : ''}${dueFmt}</span>` : ''}
+        ${task.timeBlock ? `<span class="tag" style="background:rgba(100,181,246,0.15);color:#64b5f6">${escapeHtml(task.timeBlock)}</span>` : ''}
+        ${task.status === 'in-progress' ? `<span class="tag" style="background:rgba(255,159,67,0.15);color:#ff9f43">In Progress</span>` : ''}
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="priority-dot" style="background:${getPriorityColor(task.priority)}"></div>
+      <button class="edit-btn" data-id="${task.id}" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:1.2rem;cursor:pointer;padding:2px 6px;line-height:1;">⋯</button>
+    </div>`;
+
+  el.querySelector('.task-checkbox').addEventListener('click', e => {
+    e.stopPropagation();
+    toggleTaskComplete(task.id);
+  });
+
+  el.querySelector('.edit-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    editTask(task.id);
+  });
+
+  el.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('text/plain', task.id);
+    el.style.opacity = '0.45';
+  });
+  el.addEventListener('dragend', () => el.style.opacity = '1');
+
+  return el;
+}
+
+function escapeHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toggleTaskComplete(id) {
+  const task = plannerData.tasks.find(t => t.id === id);
+  if (!task) return;
+  task.status = task.status === 'done' ? 'pending' : 'done';
+  saveData();
+  refreshCurrentView();
+  showToast(task.status === 'done' ? 'Task completed ✓' : 'Task reopened');
+}
+
+function refreshCurrentView() {
+  const active = document.querySelector('.nav-tab.active');
+  if (active) switchView(active.dataset.view);
+  renderTodayTasks();
+  renderTodayProgress();
+}
+
+// ==================== TASK MODAL ====================
+function showAddTaskModal(prefillDate) {
+  currentTaskId = null;
+  document.getElementById('modalTitle').textContent = 'New Task';
+  document.getElementById('deleteTaskBtn').style.display = 'none';
+  document.getElementById('taskTitle').value = '';
+  document.getElementById('taskDue').value = prefillDate
+    ? (prefillDate + 'T09:00')
+    : '';
+  document.getElementById('taskPriority').value = 'medium';
+  document.getElementById('taskStatus').value = 'pending';
+  document.getElementById('taskCategory').value = '';
+  document.getElementById('taskTimeBlock').value = '';
+  document.getElementById('taskNotes').value = '';
+  renderColorPicker('#ff6fab');
+  document.getElementById('taskModal').classList.add('active');
+  setTimeout(() => document.getElementById('taskTitle').focus(), 100);
+}
+
+function editTask(id) {
+  const task = plannerData.tasks.find(t => t.id === id);
+  if (!task) return;
+  currentTaskId = id;
+  document.getElementById('modalTitle').textContent = 'Edit Task';
+  document.getElementById('deleteTaskBtn').style.display = 'inline-flex';
+  document.getElementById('taskTitle').value = task.title;
+  document.getElementById('taskDue').value = task.dueDate ? task.dueDate.slice(0,16) : '';
+  document.getElementById('taskPriority').value = task.priority || 'medium';
+  document.getElementById('taskStatus').value = task.status || 'pending';
+  document.getElementById('taskCategory').value = task.category || '';
+  document.getElementById('taskTimeBlock').value = task.timeBlock || '';
+  document.getElementById('taskNotes').value = task.notes || '';
+  renderColorPicker(task.color || '#ff6fab');
+  document.getElementById('taskModal').classList.add('active');
+}
+
+function renderColorPicker(selectedColor) {
+  const container = document.getElementById('colorPicker');
+  container.innerHTML = '';
+  plannerData.colorPalette.forEach(color => {
+    const sw = document.createElement('div');
+    sw.className = 'color-swatch' + (color === selectedColor ? ' selected-swatch' : '');
+    sw.style.background = color;
+    sw.title = color;
+    sw.addEventListener('click', () => {
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected-swatch'));
+      sw.classList.add('selected-swatch');
+    });
+    container.appendChild(sw);
+  });
+}
+
+function getSelectedColor() {
+  const sw = document.querySelector('.color-swatch.selected-swatch');
+  return sw ? sw.style.background : '#ff6fab';
+}
+
+function saveTask() {
+  const title = document.getElementById('taskTitle').value.trim();
+  if (!title) { showToast('Please enter a task title'); return; }
+
+  const taskData = {
+    title,
+    dueDate:   document.getElementById('taskDue').value || null,
+    priority:  document.getElementById('taskPriority').value,
+    status:    document.getElementById('taskStatus').value,
+    color:     getSelectedColor(),
+    category:  document.getElementById('taskCategory').value.trim(),
+    timeBlock: document.getElementById('taskTimeBlock').value.trim(),
+    notes:     document.getElementById('taskNotes').value.trim()
+  };
+
+  if (currentTaskId) {
+    Object.assign(plannerData.tasks.find(t => t.id === currentTaskId), taskData);
+    showToast('Task updated');
+  } else {
+    plannerData.tasks.unshift({ id: 't_' + Date.now(), ...taskData, createdAt: new Date().toISOString() });
+    showToast('Task added');
+  }
+
+  saveData();
+  closeTaskModal();
+  refreshCurrentView();
+}
+
+function deleteCurrentTask() {
+  if (!currentTaskId) return;
+  if (!confirm('Delete this task?')) return;
+  plannerData.tasks = plannerData.tasks.filter(t => t.id !== currentTaskId);
+  saveData();
+  closeTaskModal();
+  refreshCurrentView();
+  showToast('Task deleted');
+}
+
+function closeTaskModal() {
+  document.getElementById('taskModal').classList.remove('active');
+  currentTaskId = null;
+}
+
+// ==================== ASSIGNMENTS / TASKS VIEW ====================
+function refreshCategoryFilter() {
+  const sel = document.getElementById('categoryFilter');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">All Categories</option>';
+  const cats = [...new Set(plannerData.tasks.map(t => t.category).filter(Boolean))].sort();
+  cats.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    sel.appendChild(opt);
+  });
+  if (cats.includes(current)) sel.value = current;
+}
+
+function renderAssignments() {
+  const container = document.getElementById('assignmentsList');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const search = (document.getElementById('assignmentSearch').value || '').toLowerCase();
+  const statusF = document.getElementById('assignmentFilter').value;
+  const catF    = document.getElementById('categoryFilter').value;
+
+  let tasks = plannerData.tasks.filter(t => {
+    const matchSearch = !search ||
+      t.title.toLowerCase().includes(search) ||
+      (t.notes || '').toLowerCase().includes(search) ||
+      (t.category || '').toLowerCase().includes(search);
+    const matchCat = !catF || t.category === catF;
+    let matchStatus = true;
+    if (statusF === 'overdue')     matchStatus = isOverdue(t);
+    else if (statusF === 'done')   matchStatus = t.status === 'done';
+    else if (statusF === 'pending') matchStatus = t.status === 'pending' && !isOverdue(t);
+    else if (statusF === 'in-progress') matchStatus = t.status === 'in-progress';
+    return matchSearch && matchCat && matchStatus;
+  });
+
+  // Sort: overdue first, then by date, then undated
+  tasks.sort((a, b) => {
+    const ao = isOverdue(a), bo = isOverdue(b);
+    if (ao && !bo) return -1;
+    if (!ao && bo) return 1;
+    if (a.dueDate && b.dueDate) return new Date(a.dueDate) - new Date(b.dueDate);
+    if (a.dueDate) return -1;
+    if (b.dueDate) return 1;
+    return 0;
+  });
+
+  if (tasks.length === 0) {
+    container.innerHTML = '<div class="empty-state">No tasks found. Add your first one!</div>';
+    return;
+  }
+
+  tasks.forEach(task => container.appendChild(createTaskElement(task)));
+}
+
+// ==================== WEEK VIEW ====================
+function renderWeekView() {
+  const container = document.getElementById('weekGrid');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+
+  if (document.getElementById('weeklyFocus') && plannerData.weeklyFocus) {
+    document.getElementById('weeklyFocus').value = plannerData.weeklyFocus;
+  }
+
+  for (let i = 0; i < 7; i++) {
+    const day = new Date(startOfWeek);
+    day.setDate(startOfWeek.getDate() + i);
+    const dateStr = day.toISOString().split('T')[0];
+    const isToday = dateStr === todayStr();
+
+    const dayTasks = plannerData.tasks.filter(t =>
+      t.dueDate && t.dueDate.startsWith(dateStr)
+    );
+    const pending = dayTasks.filter(t => t.status !== 'done').length;
+    const done    = dayTasks.filter(t => t.status === 'done').length;
+
+    const col = document.createElement('div');
+    col.className = 'day-column glass' + (isToday ? ' today-col' : '');
+
+    col.innerHTML = `
+      <div class="day-header">
+        <div>
+          <div style="font-weight:700; ${isToday ? 'color:var(--pink-s)' : ''}">${day.toLocaleDateString('en-US',{weekday:'short'})}</div>
+          <div style="font-size:1.2rem; font-family:var(--fm);">${day.getDate()}</div>
+        </div>
+        <div style="text-align:right; font-size:0.68rem; color:rgba(255,255,255,0.4);">
+          ${pending > 0 ? `<div>${pending} pending</div>` : ''}
+          ${done > 0    ? `<div style="color:#4ade80">${done} done</div>` : ''}
+        </div>
+      </div>
+      <div class="task-dropzone" data-date="${dateStr}"></div>
+      <button onclick="showAddTaskModal('${dateStr}')" style="width:100%;margin-top:8px;background:rgba(255,111,171,0.07);border:1px dashed rgba(255,111,171,0.25);border-radius:8px;color:rgba(255,255,255,0.4);padding:6px;cursor:pointer;font-size:0.8rem;">+ Add</button>
+    `;
+
+    const dropzone = col.querySelector('.task-dropzone');
+    dropzone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropzone.style.background = 'rgba(255,111,171,0.08)';
+    });
+    dropzone.addEventListener('dragleave', () => { dropzone.style.background = ''; });
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.style.background = '';
+      const taskId = e.dataTransfer.getData('text/plain');
+      assignTaskToDate(taskId, dateStr);
+    });
+
+    dayTasks.forEach(task => dropzone.appendChild(createTaskElement(task)));
+    container.appendChild(col);
+  }
+}
+
+function assignTaskToDate(taskId, dateStr) {
+  const task = plannerData.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  const time = task.dueDate ? task.dueDate.slice(11) || 'T09:00' : 'T09:00';
+  task.dueDate = dateStr + (time.startsWith('T') ? time : 'T' + time);
+  saveData();
+  renderWeekView();
+  showToast('Task rescheduled');
+}
+
+function saveWeeklyFocus() {
+  plannerData.weeklyFocus = document.getElementById('weeklyFocus').value;
+  saveData();
+}
+
+// ==================== CALENDAR ====================
+function renderCalendar() {
+  const grid = document.getElementById('calendarGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calendarMonthTitle').innerHTML =
+    `${monthNames[currentMonth]} <span style="color:var(--pink-s);">${currentYear}</span>`;
+
+  const firstDay     = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth  = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const today        = new Date();
+
+  for (let i = 0; i < firstDay; i++) {
+    const empty = document.createElement('div');
+    empty.className = 'calendar-day other-month';
+    grid.appendChild(empty);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date    = new Date(currentYear, currentMonth, day);
+    const dateStr = date.toISOString().split('T')[0];
+    const tasks   = plannerData.tasks.filter(t => t.dueDate && t.dueDate.startsWith(dateStr));
+    const isToday = date.toDateString() === today.toDateString();
+
+    const dayEl = document.createElement('div');
+    dayEl.className = 'calendar-day' + (isToday ? ' today' : '');
+    dayEl.innerHTML = `<div class="day-number">${day}</div><div class="day-tasks"></div>`;
+
+    const dotsContainer = dayEl.querySelector('.day-tasks');
+    tasks.slice(0, 5).forEach(task => {
+      const dot = document.createElement('div');
+      dot.className = 'task-dot';
+      dot.style.background = task.color || '#ff6fab';
+      if (task.status === 'done') dot.style.opacity = '0.4';
+      dotsContainer.appendChild(dot);
+    });
+    if (tasks.length > 5) {
+      const more = document.createElement('div');
+      more.style.cssText = 'font-size:0.58rem; color:rgba(255,255,255,0.5); margin-top:1px;';
+      more.textContent = '+' + (tasks.length - 5);
+      dotsContainer.appendChild(more);
+    }
+
+    dayEl.addEventListener('click', () => showDayDetail(dateStr));
+    grid.appendChild(dayEl);
+  }
+}
+
+function prevMonth()  { currentMonth--; if (currentMonth < 0)  { currentMonth = 11; currentYear--; } renderCalendar(); }
+function nextMonth()  { currentMonth++; if (currentMonth > 11) { currentMonth = 0;  currentYear++; } renderCalendar(); }
+function goToToday()  { const t = new Date(); currentMonth = t.getMonth(); currentYear = t.getFullYear(); renderCalendar(); }
+
+function showDayDetail(dateStr) {
+  const dayTasks = plannerData.tasks.filter(t => t.dueDate && t.dueDate.startsWith(dateStr));
+  const note     = plannerData.dailyNotes[dateStr] || '';
+  const label    = new Date(dateStr + 'T12:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  document.getElementById('dayModalTitle').textContent = label;
+
+  let html = '';
+  if (dayTasks.length > 0) {
+    html += `<div style="font-size:0.88rem;color:var(--pink-s);margin-bottom:10px;font-family:var(--fm);">TASKS</div>`;
+    dayTasks.forEach(task => {
+      html += `
+        <div style="padding:10px 14px;background:rgba(255,255,255,0.04);border-radius:10px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">
+          <div style="width:8px;height:8px;background:${task.color || '#ff6fab'};border-radius:50%;flex-shrink:0;${task.status==='done'?'opacity:0.4':''}"></div>
+          <div style="flex:1;${task.status==='done'?'opacity:0.5;text-decoration:line-through':''}">${escapeHtml(task.title)}</div>
+          <button onclick="editTask('${task.id}'); document.getElementById('dayModal').classList.remove('active');" class="btn btn-secondary" style="padding:4px 10px;font-size:0.75rem;">Edit</button>
+        </div>`;
+    });
+  } else {
+    html += '<div style="padding:16px 0; color:rgba(255,255,255,0.38); text-align:center; font-size:0.9rem;">No tasks on this day.</div>';
+  }
+
+  html += `
+    <button onclick="showAddTaskModal('${dateStr}'); closeDayModal();" class="btn btn-primary" style="width:100%; margin-top:4px; margin-bottom:20px;">+ Add Task</button>
+    <div class="input-label">Day Note</div>
+    <textarea id="dayNoteTA" style="width:100%; min-height:80px;">${escapeHtml(note)}</textarea>
+    <div style="display:flex;gap:10px;margin-top:12px;">
+      <button onclick="saveDayNote('${dateStr}')" class="btn btn-primary" style="flex:1;">Save Note</button>
+      <button onclick="closeDayModal()" class="btn btn-secondary" style="flex:1;">Close</button>
+    </div>`;
+
+  document.getElementById('dayModalBody').innerHTML = html;
+  document.getElementById('dayModal').classList.add('active');
+}
+
+function closeDayModal() {
+  document.getElementById('dayModal').classList.remove('active');
+}
+
+function saveDayNote(dateStr) {
+  const ta = document.getElementById('dayNoteTA');
+  if (!ta) return;
+  plannerData.dailyNotes[dateStr] = ta.value;
+  saveData();
+  showToast('Note saved');
+  closeDayModal();
+}
+
+// ==================== NOTES ====================
+let newNoteHighlight = '';
+
+function setNoteHighlight(color) {
+  newNoteHighlight = color || '';
+  document.querySelectorAll('.highlight-btn').forEach(b => b.style.fontWeight = '400');
+  const btn = document.getElementById('hl-' + (color || 'none'));
+  if (btn) btn.style.fontWeight = '700';
+}
+
+function selectNoteHL(el, val) {
+  document.querySelectorAll('.note-hl-swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  currentNoteHL = val;
+}
+
+function renderNotes() {
+  const container = document.getElementById('notesList');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (plannerData.notes.length === 0) {
+    container.innerHTML = '<div class="empty-state">Your journal is empty. Write your first note!</div>';
+    return;
+  }
+
+  [...plannerData.notes]
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .forEach(note => {
+      const el = document.createElement('div');
+      el.className = 'note-card' + (note.highlight ? ' highlight-' + note.highlight : '');
+      el.innerHTML = `
+        <div class="note-actions">
+          <button title="Edit" onclick="editNote('${note.id}')">✎</button>
+          <button title="Delete" onclick="deleteNote('${note.id}')">🗑</button>
+        </div>
+        ${note.title ? `<div style="font-weight:700;margin-bottom:6px;padding-right:50px;">${escapeHtml(note.title)}</div>` : ''}
+        <div class="note-content">${note.content || ''}</div>
+        <div style="font-size:0.65rem;color:rgba(255,255,255,0.3);margin-top:10px;font-family:var(--fm);">
+          ${new Date(note.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
+        </div>`;
+      container.appendChild(el);
+    });
+}
+
+function showAddNoteModal() {
+  currentNoteId = null;
+  currentNoteHL = '';
+  document.getElementById('noteModalTitle').textContent = 'New Note';
+  document.getElementById('deleteNoteBtn').style.display = 'none';
+  document.getElementById('noteTitle').value = '';
+  document.getElementById('noteContent').innerHTML = '';
+  document.querySelectorAll('.note-hl-swatch').forEach((s,i) => s.classList.toggle('active', i === 0));
+  document.getElementById('noteModal').classList.add('active');
+  setTimeout(() => document.getElementById('noteTitle').focus(), 100);
+}
+
+function editNote(id) {
+  const note = plannerData.notes.find(n => n.id === id);
+  if (!note) return;
+  currentNoteId = id;
+  currentNoteHL = note.highlight || '';
+  document.getElementById('noteModalTitle').textContent = 'Edit Note';
+  document.getElementById('deleteNoteBtn').style.display = 'inline-flex';
+  document.getElementById('noteTitle').value = note.title || '';
+  document.getElementById('noteContent').innerHTML = note.content || '';
+  // Set highlight swatch
+  document.querySelectorAll('.note-hl-swatch').forEach(s => {
+    s.classList.toggle('active', s.dataset.hl === currentNoteHL);
+  });
+  document.getElementById('noteModal').classList.add('active');
+}
+
+function saveNote() {
+  const title   = document.getElementById('noteTitle').value.trim();
+  const content = document.getElementById('noteContent').innerHTML.trim();
+  if (!title && !content) { showToast('Add some content first'); return; }
+
+  const activeHL = document.querySelector('.note-hl-swatch.active');
+  const hl = activeHL ? (activeHL.dataset.hl || '') : '';
+
+  if (currentNoteId) {
+    const note = plannerData.notes.find(n => n.id === currentNoteId);
+    if (note) { note.title = title; note.content = content; note.highlight = hl; }
+    showToast('Note updated');
+  } else {
+    plannerData.notes.unshift({
+      id: 'n_' + Date.now(),
+      title,
+      content,
+      highlight: hl,
+      createdAt: new Date().toISOString()
+    });
+    showToast('Note saved');
+  }
+
+  saveData();
+  closeNoteModal();
+  renderNotes();
+}
+
+function deleteCurrentNote() {
+  if (!currentNoteId || !confirm('Delete this note?')) return;
+  plannerData.notes = plannerData.notes.filter(n => n.id !== currentNoteId);
+  saveData();
+  closeNoteModal();
+  renderNotes();
+  showToast('Note deleted');
+}
+
+function deleteNote(id) {
+  if (!confirm('Delete this note?')) return;
+  plannerData.notes = plannerData.notes.filter(n => n.id !== id);
+  saveData();
+  renderNotes();
+  showToast('Note deleted');
+}
+
+function closeNoteModal() {
+  document.getElementById('noteModal').classList.remove('active');
+  currentNoteId = null;
+}
+
+// ==================== INSIGHTS ====================
+function renderInsights() {
+  const total     = plannerData.tasks.length;
+  const completed = plannerData.tasks.filter(t => t.status === 'done').length;
+  const rate      = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const overdue   = plannerData.tasks.filter(isOverdue).length;
+
+  document.getElementById('totalDone').textContent       = completed;
+  document.getElementById('completionRate').textContent  = rate + '%';
+  document.getElementById('overdueCount').textContent    = overdue;
+  updateStreakDisplay();
+
+  // Productive days
+  const pd = document.getElementById('productiveDays');
+  const dayCounts = {};
+  plannerData.tasks.forEach(t => {
+    if (t.dueDate && t.status === 'done') {
+      const d = t.dueDate.split('T')[0];
+      dayCounts[d] = (dayCounts[d] || 0) + 1;
+    }
+  });
+  const topDays = Object.entries(dayCounts).sort((a,b) => b[1]-a[1]).slice(0,5);
+  if (topDays.length === 0) {
+    pd.innerHTML = '<div class="empty-state" style="padding:10px 0;">Complete tasks to see your most productive days.</div>';
+  } else {
+    pd.innerHTML = '';
+    topDays.forEach(([day, count]) => {
+      const d = document.createElement('div');
+      d.style.cssText = 'background:rgba(255,111,171,0.1);padding:8px 14px;border-radius:999px;font-size:0.82rem;';
+      d.innerHTML = `${new Date(day + 'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})} <span style="color:#ff9f43;">${count} done</span>`;
+      pd.appendChild(d);
+    });
+  }
+
+  // Upcoming
+  const ul = document.getElementById('upcomingList');
+  const upcoming = plannerData.tasks
+    .filter(t => t.dueDate && t.status !== 'done' && new Date(t.dueDate) >= new Date())
+    .sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate))
+    .slice(0, 8);
+
+  if (upcoming.length === 0) {
+    ul.innerHTML = '<div class="empty-state">No upcoming deadlines.</div>';
+  } else {
+    ul.innerHTML = '';
+    upcoming.forEach(task => {
+      const d = document.createElement('div');
+      d.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);';
+      d.innerHTML = `
+        <div style="width:6px;height:6px;background:${task.color || '#ff6fab'};border-radius:50%;flex-shrink:0;"></div>
+        <div style="flex:1;">${escapeHtml(task.title)}</div>
+        ${task.category ? `<span class="tag">${escapeHtml(task.category)}</span>` : ''}
+        <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);white-space:nowrap;">${fmtDate(task.dueDate)}</div>`;
+      ul.appendChild(d);
+    });
+  }
+
+  // Category breakdown
+  const cb = document.getElementById('categoryBreakdown');
+  const cats = {};
+  plannerData.tasks.forEach(t => {
+    const c = t.category || 'Uncategorized';
+    if (!cats[c]) cats[c] = { total: 0, done: 0 };
+    cats[c].total++;
+    if (t.status === 'done') cats[c].done++;
+  });
+  if (Object.keys(cats).length === 0) {
+    cb.innerHTML = '<div class="empty-state">Add tasks with categories to see a breakdown.</div>';
+  } else {
+    cb.innerHTML = '';
+    Object.entries(cats).sort((a,b) => b[1].total - a[1].total).forEach(([cat, data]) => {
+      const pct = Math.round((data.done / data.total) * 100);
+      const row = document.createElement('div');
+      row.style.marginBottom = '14px';
+      row.innerHTML = `
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-size:0.9rem;">${escapeHtml(cat)}</span>
+          <span style="font-family:var(--fm);font-size:0.78rem;color:rgba(255,255,255,0.5);">${data.done}/${data.total}</span>
+        </div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>`;
+      cb.appendChild(row);
+    });
+  }
+}
+
+// ==================== EXPORT / IMPORT ====================
+function showExportModal()  { document.getElementById('exportModal').classList.add('active'); }
+function closeExportModal() { document.getElementById('exportModal').classList.remove('active'); }
+
+function exportToJSON() {
+  const blob = new Blob([JSON.stringify(plannerData, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `numa-planner-backup-${todayStr()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  closeExportModal();
+  showToast('Backup downloaded');
+}
+
+function exportToICS() {
+  let ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Numa//Constellation Planner//EN\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:Numa Planner\r\n`;
+
+  plannerData.tasks.forEach(task => {
+    if (!task.dueDate) return;
+    const dtStart = new Date(task.dueDate);
+    const dtEnd   = new Date(dtStart.getTime() + 3600000);
+    const fmt = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    ics += `BEGIN:VEVENT\r\nUID:${task.id}@numaplannerapp\r\nDTSTART:${fmt(dtStart)}\r\nDTEND:${fmt(dtEnd)}\r\nSUMMARY:${(task.title || '').replace(/,/g,'\\,')}\r\nDESCRIPTION:${(task.notes || '').replace(/\n/g,'\\n')}\r\nCATEGORIES:${task.category || 'General'}\r\nEND:VEVENT\r\n`;
+  });
+
+  ics += 'END:VCALENDAR';
+  const blob = new Blob([ics], { type: 'text/calendar' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'numa-planner.ics';
+  a.click();
+  URL.revokeObjectURL(url);
+  closeExportModal();
+  showToast('Calendar file ready — import into Google Calendar or Apple Calendar');
+}
+
+function importFromJSON() {
+  const fi = document.getElementById('importFile');
+  if (!fi.files.length) { showToast('Select a JSON file first'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imp = JSON.parse(e.target.result);
+      const merge = confirm('Merge with current data?\n\nOK = merge (keeps existing)\nCancel = replace everything');
+      if (merge) {
+        if (imp.tasks) {
+          const existing = new Set(plannerData.tasks.map(t => t.id));
+          imp.tasks.forEach(t => { if (!existing.has(t.id)) plannerData.tasks.push(t); });
+        }
+        if (imp.notes) {
+          const existing = new Set(plannerData.notes.map(n => n.id));
+          imp.notes.forEach(n => { if (!existing.has(n.id)) plannerData.notes.push(n); });
+        }
+        if (imp.dailyNotes) Object.assign(plannerData.dailyNotes, imp.dailyNotes);
+        if (imp.moodLog)    Object.assign(plannerData.moodLog,    imp.moodLog);
+        if (imp.weeklyFocus) plannerData.weeklyFocus = imp.weeklyFocus;
+      } else {
+        plannerData = Object.assign(JSON.parse(JSON.stringify(DEFAULT_DATA)), imp);
+      }
+      saveData();
+      closeExportModal();
+      refreshCurrentView();
+      showToast('Import successful');
+    } catch(err) {
+      alert('Could not read this file. Make sure it\'s a valid backup.');
+    }
+  };
+  reader.readAsText(fi.files[0]);
+}
+
+// ==================== INIT ====================
+function initPlanner() {
+  loadData();
+  checkStreak();
+  initializeDate();
+
+  // Load today's note & mood
+  const dn = plannerData.dailyNotes[todayStr()];
+  if (dn) document.getElementById('dailyNote').value = dn;
+
+  const mood = plannerData.moodLog[todayStr()];
+  if (mood) renderMoodButtons(mood);
+
+  // Navigation
+  document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => switchView(tab.dataset.view));
+  });
+
+  // Close modals on backdrop click
+  document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('click', e => {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+      }
+    });
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
+    }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      showAddTaskModal();
+    }
+  });
+
+  // Render initial view
+  switchView('today');
+
+  // Auto-save daily note every 30s
+  setInterval(() => {
+    const el = document.getElementById('dailyNote');
+    if (el) { plannerData.dailyNotes[todayStr()] = el.value; saveData(); }
+  }, 30000);
+
+  console.log('%c[Numa Planner] Ready', 'color:#ff6fab;font-weight:bold');
+}
+
+window.addEventListener('load', initPlanner);
+</script>
+</body>
+</html>
