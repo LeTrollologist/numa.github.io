@@ -7,7 +7,7 @@
 <script src="compute-optimizer.js"></script>
 <script src="mobile-optimizer.js"></script>
 <meta property="og:title" content="Numa's Space">
-<meta property="og:description" content="A space for Numa — study, dream, play, explore.">
+<meta property="og:description" content="A space for Numa, study, dream, play, explore.">
 
 <meta property="og:image" content="https://raw.githubusercontent.com/LeTrollologist/numa.github.io/refs/heads/main/OurMagicalLove.png">
 <meta property="og:url" content="https://letrollologist.github.io/numa.github.io/index.html">
@@ -25548,8 +25548,13 @@ function resizeSG() {
   if (!sgCanvas) return;
   var cont = document.getElementById('page-stargazer');
   if (!cont) return;
-  sgCanvas.width  = cont.clientWidth  || innerWidth;
-  sgCanvas.height = cont.clientHeight || innerHeight;
+
+  // Force proper mobile height
+  var h = cont.clientHeight;
+  if (h < 200) h = window.innerHeight - 120; // fallback for mobile
+
+  sgCanvas.width  = cont.clientWidth || window.innerWidth;
+  sgCanvas.height = h;
   sgInitProjection();
 }
 
