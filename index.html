@@ -25568,6 +25568,19 @@ function sgLoop() {
   var ctx = sgCtx || sgCanvas.getContext('2d');
   var W = sgCanvas.width, H = sgCanvas.height;
 
+  // Mobile fix: re-resize when window resizes or orientation changes
+window.addEventListener('resize', () => {
+  if (currentPage === 'stargazer') {
+    resizeSG();
+  }
+});
+
+window.addEventListener('orientationchange', () => {
+  if (currentPage === 'stargazer') {
+    setTimeout(resizeSG, 300);
+  }
+});
+  
   // Background
   ctx.fillStyle = '#010110';
   ctx.fillRect(0, 0, W, H);
