@@ -25560,31 +25560,22 @@ function resizeSG() {
 
 // ── Render loop ─────────────────────────────────────────────────────────────
 var sgFrame = 0;
+
 function sgLoop() {
   if (!sgCanvas || currentPage !== 'stargazer') {
     requestAnimationFrame(sgLoop);
     return;
   }
+
   var ctx = sgCtx || sgCanvas.getContext('2d');
-  var W = sgCanvas.width, H = sgCanvas.height;
+  var W = sgCanvas.width;
+  var H = sgCanvas.height;
 
-  // Mobile fix: re-resize when window resizes or orientation changes
-window.addEventListener('resize', () => {
-  if (currentPage === 'stargazer') {
-    resizeSG();
-  }
-});
-
-window.addEventListener('orientationchange', () => {
-  if (currentPage === 'stargazer') {
-    setTimeout(resizeSG, 300);
-  }
-});
-  
   // Background
   ctx.fillStyle = '#010110';
   ctx.fillRect(0, 0, W, H);
-  var grad = ctx.createRadialGradient(W*0.6, H*0.4, 0, W*0.6, H*0.4, W*0.55);
+
+  var grad = ctx.createRadialGradient(W * 0.6, H * 0.4, 0, W * 0.6, H * 0.4, W * 0.55);
   grad.addColorStop(0, 'rgba(80,40,140,0.12)');
   grad.addColorStop(0.5, 'rgba(40,20,80,0.06)');
   grad.addColorStop(1, 'transparent');
@@ -25592,18 +25583,19 @@ window.addEventListener('orientationchange', () => {
   ctx.fillRect(0, 0, W, H);
 
   sgFrame++;
+
+  // Milky Way
   sgDrawMilkyWay(ctx, W, H);
 
-  // Advance view RA with Earth's sidereal rotation (sky drifts westward in real time)
+  // Advance view RA with sidereal rotation
   if (!sgDrag) {
     sgViewRA = ((sgTrackRA + (Date.now() - sgTrackTime) / 1000 * SG_SIDEREAL_RATE) % 360 + 360) % 360;
   }
 
-  // Build projection cache
+  // Build projection cache for stars
   sgProjectCache = [];
   for (var i = 0; i < sgStars.length; i++) {
-    var s = sgStars[i];
-    sgProjectCache[i] = sgProject(s.ra, s.dec);
+    sgProjectCache[i] = sgProject(sgStars[i].ra, sgStars[i].dec);
   }
 
   // Build DSO projection cache
@@ -25614,37 +25606,44 @@ window.addEventListener('orientationchange', () => {
       sgDSOCache.push(sgProject(_dD[_di], _dD[_di + 1]));
     }
   }
-  sgDrawDSOs(ctx, W, H);
 
-  // Constellation lines + labels
+  // Draw layers
+  sgDrawDSOs(ctx, W, H);
   sgDrawConstellations(ctx, W, H);
 
-  // Batch draw by colour bucket
+  // Batch draw stars by color (performance optimization)
   var buckets = {};
   for (var i = 0; i < sgStars.length; i++) {
     var p = sgProjectCache[i];
     if (!p || !p.visible) continue;
-    if (p.x < -20 || p.x > W+20 || p.y < -20 || p.y > H+20) continue;
+    if (p.x < -20 || p.x > W + 20 || p.y < -20 || p.y > H + 20) continue;
+
     var s = sgStars[i];
     var col = sgNamed[s.idx] ? '__named__' : s.color;
+
     if (!buckets[col]) buckets[col] = [];
     buckets[col].push(i);
   }
 
+  // Draw normal stars
   ctx.shadowBlur = 0;
   for (var col in buckets) {
     if (col === '__named__') continue;
+
     ctx.fillStyle = col;
     ctx.globalAlpha = 0.85;
     ctx.beginPath();
+
     var list = buckets[col];
     for (var j = 0; j < list.length; j++) {
       var idx = list[j];
       var p = sgProjectCache[idx];
       var s = sgStars[idx];
+
       s.twinklePhase += s.twinkleSpeed;
       var alpha = 0.65 + 0.35 * Math.sin(s.twinklePhase);
       var r = s.r * (0.85 + 0.15 * alpha);
+
       ctx.moveTo(p.x + r, p.y);
       ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
     }
@@ -25655,8 +25654,10 @@ window.addEventListener('orientationchange', () => {
   for (var i = 0; i < sgStars.length; i++) {
     var s = sgStars[i];
     if (s.vmag >= 1.5) continue;
+
     var p = sgProjectCache[i];
     if (!p || !p.visible) continue;
+
     ctx.shadowBlur = 12 - s.vmag * 4;
     ctx.shadowColor = s.color;
     ctx.fillStyle = s.color;
@@ -25667,14 +25668,16 @@ window.addEventListener('orientationchange', () => {
   }
   ctx.shadowBlur = 0;
 
-  // Named stars
+  // Named stars (special glow + label)
   if (buckets['__named__']) {
     var namedList = buckets['__named__'];
     for (var j = 0; j < namedList.length; j++) {
       var idx = namedList[j];
       var p = sgProjectCache[idx];
       var s = sgStars[idx];
+
       s.twinklePhase += s.twinkleSpeed;
+
       ctx.shadowBlur = 14;
       ctx.shadowColor = '#c9b8ff';
       ctx.globalAlpha = 0.9;
@@ -25682,6 +25685,7 @@ window.addEventListener('orientationchange', () => {
       ctx.beginPath();
       ctx.arc(p.x, p.y, s.r + 1.5, 0, Math.PI * 2);
       ctx.fill();
+
       ctx.shadowBlur = 0;
       ctx.globalAlpha = 0.8;
       ctx.fillStyle = '#c9b8ff';
