@@ -1,29 +1,62 @@
 /**
  * mobile-optimizer.js
- * Unorthodox Mobile & Battery Optimizations
- * Intercepts rendering to save battery and prevent thermal throttling on phones.
+ * Advanced Mobile & Battery Optimization Engine v2.1
+ * - Stargazer Safe + Battery Aware + Boost Mode
  */
-
 (function() {
-    // Check if the user is on a mobile device
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
-    
-    if (!isMobile) return; // Only apply these aggressive hacks on mobile
+    if (!isMobile) return;
 
-    console.log("📱 Mobile Optimizer Engine Initialized");
+    console.log("📱 Mobile Optimizer v2.1 Initialized");
 
     // ==========================================
-    // 1. DYNAMIC CANVAS SUB-SAMPLING (Retina Hack)
+    // GLOBAL STATE
     // ==========================================
-    // Intercept Canvas Width/Height setters to lower internal resolution
+    let batteryLevel = 1;           // 0.0 to 1.0
+    let stargazerBoost = false;     // When true, reduce optimizations
+
+    // ==========================================
+    // 1. BATTERY MONITORING
+    // ==========================================
+    if (navigator.getBattery) {
+        navigator.getBattery().then(function(battery) {
+            batteryLevel = battery.level;
+            battery.addEventListener('levelchange', function() {
+                batteryLevel = battery.level;
+            });
+        });
+    }
+
+    // ==========================================
+    // 2. STARGazer BOOST DETECTION
+    // ==========================================
+    function updateStargazerBoost() {
+        const stargazerPage = document.getElementById('page-stargazer');
+        stargazerBoost = stargazerPage && stargazerPage.classList.contains('active');
+    }
+
+    // Check boost status when page changes
+    const observer = new MutationObserver(updateStargazerBoost);
+    observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class'] });
+
+    // Also check on touch/click (user is actively using it)
+    document.addEventListener('touchstart', function() {
+        if (document.getElementById('page-stargazer')?.classList.contains('active')) {
+            stargazerBoost = true;
+            setTimeout(() => { stargazerBoost = false; }, 8000); // Boost lasts 8 seconds after interaction
+        }
+    }, { passive: true });
+
+    // ==========================================
+    // 3. DYNAMIC CANVAS SUB-SAMPLING
+    // ==========================================
     const origWidthDescr = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, 'width');
     const origHeightDescr = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, 'height');
 
     function applySubSampling(canvas, val, descriptor, property) {
-        // Only scale the heavy background canvases, leave Minigame (Pong) untouched for physics accuracy
-        if (canvas.id === 'stars') {
-            canvas.style[property] = val + 'px'; // Keep visual size 100%
-            descriptor.set.call(canvas, Math.floor(val * 0.75)); // Drop actual pixels by 25%
+        if (canvas.id === 'stars' && !stargazerBoost) {
+            canvas.style[property] = val + 'px';
+            descriptor.set.call(canvas, Math.floor(val * 0.72));
         } else {
             descriptor.set.call(canvas, val);
         }
@@ -40,21 +73,15 @@
     });
 
     // ==========================================
-    // 2. THE "BLIND RENDER" ASSASSIN
+    // 4. BLIND RENDER ASSASSIN (Stargazer Safe)
     // ==========================================
-    // Don't draw the background sky if it's covered by a solid background (StudyBuddy/Dreamland)
     const originalFill = CanvasRenderingContext2D.prototype.fill;
     const originalClearRect = CanvasRenderingContext2D.prototype.clearRect;
 
     function isCanvasCovered(ctx) {
         if (ctx.canvas.id === 'stars') {
-            // Sky canvas is invisible whenever one of these pages/modes is active:
-            // - Study mode: solid gradient covers the sky
-            // - Dreamland: solid dark background
-            // - Stargazer: its own canvas fills the screen on top of the sky
             if (document.body.classList.contains('studyMode') ||
-                document.getElementById('page-dreamland').classList.contains('active') ||
-                document.getElementById('page-stargazer').classList.contains('active')) {
+                document.getElementById('page-dreamland').classList.contains('active')) {
                 return true;
             }
         }
@@ -62,54 +89,89 @@
     }
 
     CanvasRenderingContext2D.prototype.fill = function(...args) {
-        if (isCanvasCovered(this)) return; // Abort GPU command
+        if (isCanvasCovered(this)) return;
         return originalFill.apply(this, args);
     };
 
     CanvasRenderingContext2D.prototype.clearRect = function(...args) {
-        if (isCanvasCovered(this)) return; // Abort GPU command
+        if (isCanvasCovered(this)) return;
         return originalClearRect.apply(this, args);
     };
 
     // ==========================================
-    // 3. ADAPTIVE FRAME DROPPER (Battery Saver)
+    // 5. BATTERY + BOOST AWARE FRAME DROPPER
     // ==========================================
-    // Intentionally drops 1 out of every 3 frames on mobile to cap at ~40fps
     const originalRAF = window.requestAnimationFrame;
     let frameCounter = 0;
 
     window.requestAnimationFrame = function(callback) {
         return originalRAF(function(time) {
             frameCounter++;
-            // Skip the 3rd frame to save battery, EXCEPT if playing Pong
-            if (frameCounter % 3 === 0 && document.getElementById('page-minigame').classList.contains('active') === false) {
-                // Instantly re-queue the frame without executing the heavy drawing logic
-                window.requestAnimationFrame(callback);
-                return; 
+
+            const minigameActive = document.getElementById('page-minigame').classList.contains('active');
+
+            // Calculate how aggressive we should be
+            let skipRate = 3; // Default: skip every 3rd frame
+
+            if (stargazerBoost) {
+                skipRate = 1; // Full performance when using Stargazer
+            } else if (batteryLevel < 0.3) {
+                skipRate = 4; // Very aggressive when battery is low
+            } else if (batteryLevel < 0.5) {
+                skipRate = 3; // Moderate saving
             }
+
+            if (frameCounter % skipRate === 0 && !minigameActive && !stargazerBoost) {
+                window.requestAnimationFrame(callback);
+                return;
+            }
+
             callback(time);
         });
     };
 
     // ==========================================
-    // 4. LOW-TIER DEVICE GLASS DOWNGRADE
+    // 6. LOW-END DEVICE DOWNGRADE
     // ==========================================
-    // If the phone has 4GB of RAM or less, or <= 4 CPU cores, reduce blur radius.
     const ram = navigator.deviceMemory || 4;
     const cores = navigator.hardwareConcurrency || 4;
 
     if (ram <= 4 || cores <= 4) {
-        console.log("📱 Low-end device detected: Downgrading Glassmorphism");
-        const lowEndStyles = document.createElement('style');
-        lowEndStyles.innerHTML = `
-            /* Massive blurs kill cheap phone GPUs. Cap them at 6px. */
+        console.log("📱 Low-end device → Glassmorphism downgraded");
+        const style = document.createElement('style');
+        style.innerHTML = `
             #nav-bar, .glass-card, .contact-card, #mob-overlay, .status-card, #studyPanel .study-inner {
-                backdrop-filter: blur(6px) !important;
-                -webkit-backdrop-filter: blur(6px) !important;
-                background: rgba(8, 8, 18, 0.88) !important; /* Make slightly darker to compensate for less blur */
+                backdrop-filter: blur(5px) !important;
+                -webkit-backdrop-filter: blur(5px) !important;
+                background: rgba(8, 8, 18, 0.90) !important;
             }
         `;
-        document.head.appendChild(lowEndStyles);
+        document.head.appendChild(style);
     }
 
+    // ==========================================
+    // 7. TOUCH THROTTLING + VISIBILITY PAUSE
+    // ==========================================
+    let lastTouchMove = 0;
+    const originalAddEventListener = EventTarget.prototype.addEventListener;
+
+    EventTarget.prototype.addEventListener = function(type, listener, options) {
+        if (type === 'touchmove' && isMobile) {
+            const throttled = function(e) {
+                const now = Date.now();
+                if (now - lastTouchMove > 16) {
+                    lastTouchMove = now;
+                    listener.call(this, e);
+                }
+            };
+            return originalAddEventListener.call(this, type, throttled, options);
+        }
+        return originalAddEventListener.call(this, type, listener, options);
+    };
+
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) console.log("📱 Tab hidden → Saving resources");
+    });
+
+    console.log("📱 All mobile optimizations applied (Stargazer Boost Enabled)");
 })();
