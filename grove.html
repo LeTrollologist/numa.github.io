@@ -68,16 +68,19 @@ header {
   top: 0;
   left: 0;
   z-index: 1;
+  pointer-events: none;
 }
 #plants-svg {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
   z-index: 10;
-  width: 900px;
-  height: 700px;
-  overflow: visible;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 .sidebar {
-  width: 280px;
+  width: 300px;
   background: var(--panel);
   border-left: 1px solid rgba(196, 181, 253, 0.15);
   padding: 24px;
@@ -88,30 +91,43 @@ header {
   backdrop-filter: blur(10px);
 }
 .action-btn {
+  position: relative;
   background: var(--btn-bg);
   border: 1px solid var(--btn-border);
   color: #c7d2fe;
-  padding: 12px 16px;
+  padding: 14px 16px;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 0.95rem;
   font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  overflow: hidden;
+}
+.action-btn span {
+  position: relative;
+  z-index: 2;
+}
+.cooldown-bar {
+  position: absolute;
+  top: 0; left: 0; height: 100%;
+  background: rgba(196, 181, 253, 0.2);
+  width: 0%;
+  z-index: 1;
 }
 .action-btn:hover:not(:disabled) {
-  background: rgba(196, 181, 253, 0.2);
+  background: rgba(196, 181, 253, 0.15);
   border-color: #c4b5fd;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(196, 181, 253, 0.1);
 }
 .action-btn:disabled {
-  opacity: 0.5;
   cursor: not-allowed;
-  background: rgba(255, 255, 255, 0.02);
-  border-color: rgba(255, 255, 255, 0.1);
+  opacity: 0.8;
+  border-color: rgba(196, 181, 253, 0.1);
 }
 .theme-btn {
   padding: 10px 14px;
@@ -133,50 +149,41 @@ header {
 }
 .themes-grid { display: flex; gap: 8px; }
 .status {
-  height: 40px;
+  height: 44px;
   background: var(--bg-bottom);
   border-top: 1px solid rgba(196, 181, 253, 0.1);
   display: flex;
   align-items: center;
   padding: 0 24px;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--muted);
   transition: background 1.5s ease;
 }
+
+/* SVG Elements & Animations */
 .plant-name {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 14px;
   fill: var(--accent);
   text-anchor: middle;
-  pointer-events: all;
+  pointer-events: auto;
   cursor: pointer;
   transition: opacity 0.3s;
 }
-.plant-name:hover {
-  text-decoration: underline;
-  opacity: 0.8;
-}
-/* Animations */
+.plant-name:hover { text-decoration: underline; fill: #fff; }
+.plant-lvl { font-size: 11px; fill: #8b9dc3; text-anchor: middle; }
+
 @keyframes sway {
   0% { transform: rotate(-2deg); }
   100% { transform: rotate(2deg); }
-}
-@keyframes sway-leaf {
-  0% { transform: rotate(-4deg); }
-  100% { transform: rotate(4deg); }
 }
 @keyframes pulse-glow {
   0% { filter: drop-shadow(0 0 4px currentColor); transform: scale(0.98); }
   100% { filter: drop-shadow(0 0 16px currentColor); transform: scale(1.02); }
 }
-@keyframes grow-up {
-  0% { transform: scale(0.8) translateY(20px); opacity: 0; }
-  100% { transform: scale(1) translateY(0); opacity: 1; }
-}
-.plant-group { animation: sway 7s ease-in-out infinite alternate; }
-.leaf-group { animation: sway-leaf 5s ease-in-out infinite alternate; }
-.flower-group { animation: pulse-glow 3s ease-in-out infinite alternate; }
-.plant-wrapper { animation: grow-up 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+.sway { animation: sway 6s ease-in-out infinite alternate; }
+.sway-slow { animation: sway 8s ease-in-out infinite alternate-reverse; }
+.pulse { animation: pulse-glow 3s ease-in-out infinite alternate; }
 </style>
 </head>
 <body>
@@ -187,7 +194,7 @@ header {
       <div style="color: #8b9dc3; font-size: 0.9rem; margin-top: 4px;">Numa's Quiet Place</div>
     </div>
     <div style="margin-left: auto; display: flex; gap: 12px;">
-      <button onclick="showStats()" style="background: rgba(196,181,253,0.1); border: 1px solid rgba(196, 181, 253, 0.3); color: #c7d2fe; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: 0.2s;">Stats</button>
+      <button onclick="showStats()" style="background: transparent; border: 1px solid var(--btn-border); color: #c7d2fe; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: 0.2s;">View Stats</button>
       <button onclick="exportGarden()" style="background: #c4b5fd; color: #0a0c14; border: none; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85rem; box-shadow: 0 0 15px rgba(196,181,253,0.3); transition: 0.2s;">Export Data</button>
     </div>
   </header>
@@ -195,21 +202,36 @@ header {
   <div class="main">
     <div class="garden-container" id="garden-container">
       <canvas id="garden-canvas"></canvas>
-      <svg id="plants-svg"></svg>
+      <svg id="plants-svg">
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <g id="plants-layer"></g>
+        <g id="ui-layer"></g>
+      </svg>
     </div>
 
     <div class="sidebar">
       <div>
-        <h4 style="margin-bottom: 16px; color: #e0e7ff; font-weight: 500; font-family: 'Playfair Display', serif; font-size: 1.2rem;">Care for the Grove</h4>
+        <h4 style="margin-bottom: 16px; color: #e0e7ff; font-weight: 500; font-family: 'Playfair Display', serif; font-size: 1.2rem;">Nurture the Grove</h4>
         
-        <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
           <button id="btn-water" onclick="performAction('water')" class="action-btn">
+            <div class="cooldown-bar" id="cd-water"></div>
             <span>💧 Water Garden</span> <span class="timer"></span>
           </button>
           <button id="btn-talk" onclick="performAction('talk')" class="action-btn">
+            <div class="cooldown-bar" id="cd-talk"></div>
             <span>💬 Talk to Plants</span> <span class="timer"></span>
           </button>
           <button id="btn-pet" onclick="performAction('pet')" class="action-btn">
+            <div class="cooldown-bar" id="cd-pet"></div>
             <span>✨ Pet the Leaves</span> <span class="timer"></span>
           </button>
         </div>
@@ -225,53 +247,56 @@ header {
       </div>
       
       <div style="margin-top: auto; font-size: 0.8rem; color: #6b7280; line-height: 1.5;">
-        The garden grows with time and care.<br>
+        Plants need care (XP) to bloom.<br>
         Click a plant's name to rename it.<br>
-        Come back often.
+        The garden grows while you rest.
       </div>
     </div>
   </div>
 
   <div class="status">
     <span id="status-text">The Grove is quiet tonight...</span>
-    <span style="margin-left: auto;" id="growth-text">Growth Stage: 0/15</span>
+    <span style="margin-left: auto; color: var(--accent); font-weight: 600;" id="growth-text">Total Mastery: 0</span>
   </div>
 </div>
 
 <script>
-// ================== STATE ==================
+// ================== STATE & CONFIG ==================
+const XP_REQ =[0, 50, 120, 250, 450, 99999]; // XP needed for stages 1 to 5
+const COOLDOWNS = { water: 10000, talk: 8000, pet: 5000 }; // milliseconds
+
 let plants = {
-  moonflower: { stage: 1, health: 100, name: "Moonflower" },
-  star: { stage: 1, health: 100, name: "Starbloom" },
-  ember: { stage: 1, health: 100, name: "Emberleaf" }
+  moonflower: { stage: 1, xp: 0, name: "Moonflower", x: 0.25 },
+  star: { stage: 1, xp: 0, name: "Starbloom", x: 0.50 },
+  ember: { stage: 1, xp: 0, name: "Emberleaf", x: 0.75 }
 };
 
+let activeCooldowns = { water: 0, talk: 0, pet: 0 };
 let lastVisit = localStorage.getItem('grove_lastVisit') || Date.now();
 let currentTheme = localStorage.getItem('grove_theme') || 'mist';
 let milestones = JSON.parse(localStorage.getItem('grove_milestones') || '[]');
 
-const COOLDOWNS = { water: 15000, talk: 8000, pet: 5000 };
-let activeCooldowns = { water: 0, talk: 0, pet: 0 };
-
 const themesData = {
-  mist: { top: '#05070f', bottom: '#0a0c14', accent: '#c4b5fd', fog: 'rgba(180, 200, 255, 0.05)', fly: '#e0e7ff' },
-  moonlit: { top: '#0a0f1f', bottom: '#161b33', accent: '#a5b4fc', fog: 'rgba(165, 180, 252, 0.07)', fly: '#a5b4fc' },
-  ember: { top: '#1a0b05', bottom: '#2a1205', accent: '#fdba74', fog: 'rgba(253, 186, 116, 0.05)', fly: '#fef08c' }
+  mist: { top: '#05070f', bottom: '#0a0c14', accent: '#c4b5fd', fog: 'rgba(180, 200, 255, 0.04)', fly: '#e0e7ff' },
+  moonlit: { top: '#0a0f1f', bottom: '#161b33', accent: '#a5b4fc', fog: 'rgba(165, 180, 252, 0.05)', fly: '#a5b4fc' },
+  ember: { top: '#1a0b05', bottom: '#2a1205', accent: '#fdba74', fog: 'rgba(253, 186, 116, 0.04)', fly: '#fef08c' }
 };
 
 const canvas = document.getElementById('garden-canvas');
 const ctx = canvas.getContext('2d');
-let fogParticles =[];
-let fireflies =[];
-let animationFrameId;
+let fogParticles = [], fireflies = [], actionParticles = [], floatingTexts =[];
 
-// ================== INITIALIZE ==================
+// ================== INITIALIZATION ==================
 function init() {
   const savedPlants = localStorage.getItem('grove_plants');
-  if (savedPlants) plants = JSON.parse(savedPlants);
+  if (savedPlants) {
+    let parsed = JSON.parse(savedPlants);
+    // Merge to preserve structural updates
+    Object.keys(plants).forEach(k => { if(parsed[k]) plants[k] = {...plants[k], ...parsed[k]}; });
+  }
   
   resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
+  window.addEventListener('resize', () => { resizeCanvas(); drawSVGPlants(); });
   
   calculatePassiveGrowth();
   setTheme(currentTheme, true);
@@ -281,11 +306,11 @@ function init() {
   drawSVGPlants();
   updateUI();
   
-  animateCanvas();
-  setInterval(saveToLocalStorage, 30000);
-  setInterval(updateCooldownUI, 100);
+  requestAnimationFrame(animateCanvas);
+  setInterval(saveToLocalStorage, 15000); // Save every 15s
+  setInterval(updateCooldownUI, 50); // Fluid cooldown updates
   
-  setStatus("The garden remembers your last visit...", 4000);
+  setStatus("The garden remembers your presence...", 4000);
 }
 
 function resizeCanvas() {
@@ -302,256 +327,26 @@ function setStatus(msg, timeout = 3000) {
   }, timeout);
 }
 
-function updateUI() {
-  const totalStage = Object.values(plants).reduce((sum, p) => sum + p.stage, 0);
-  document.getElementById('growth-text').innerText = `Combined Growth: ${totalStage}/15`;
-  checkMilestones(totalStage);
-}
-
+// ================== GAMEPLAY MECHANICS ==================
 function calculatePassiveGrowth() {
   const now = Date.now();
   const hoursPassed = (now - lastVisit) / (1000 * 60 * 60);
   
-  if (hoursPassed > 0.5) {
-    let grown = false;
-    Object.keys(plants).forEach(key => {
-      if (plants[key].stage < 5) {
-        let boost = Math.floor(hoursPassed / 6);
-        if (boost > 0) {
-          plants[key].stage = Math.min(5, plants[key].stage + boost);
-          grown = true;
-        }
+  if (hoursPassed > 0.1) {
+    const xpGain = Math.floor(hoursPassed * 30); // 30 XP per hour
+    let leveledUp = false;
+    
+    Object.keys(plants).forEach(k => {
+      if (plants[k].stage < 5) {
+        plants[k].xp += xpGain;
+        if (checkLevelUp(k)) leveledUp = true;
       }
     });
-    if (grown) setStatus(`The garden grew while you were away...`);
+    
+    setStatus(leveledUp ? `Your plants bloomed while you were resting!` : `The garden gained ${xpGain} XP while you were away.`);
   }
   lastVisit = now;
   saveToLocalStorage();
-}
-
-// ================== SVG DRAWING ==================
-function createSVG(tag, attrs) {
-  const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
-  for (let k in attrs) el.setAttribute(k, attrs[k]);
-  return el;
-}
-
-function drawSVGPlants() {
-  const svg = document.getElementById('plants-svg');
-  svg.innerHTML = ''; 
-  
-  const width = 900;
-  const groundY = 550;
-
-  drawMoonflower(svg, 220, groundY, plants.moonflower.stage);
-  drawStarbloom(svg, 450, groundY + 20, plants.star.stage);
-  drawEmberleaf(svg, 680, groundY - 10, plants.ember.stage);
-
-  // Draw Names
-  Object.entries({moonflower: [220, groundY+30], star:[450, groundY+50], ember: [680, groundY+20]}).forEach(([key, pos]) => {
-    const text = createSVG('text', {
-      x: pos[0], y: pos[1], 
-      class: 'plant-name',
-      onclick: `renamePlant('${key}')`
-    });
-    text.textContent = plants[key].name;
-    text.style.opacity = plants[key].stage >= 2 ? '1' : '0.5';
-    svg.appendChild(text);
-  });
-}
-
-// Complex SVG Generation per plant type
-function drawMoonflower(svg, x, y, stage) {
-  const scale = 0.5 + (stage * 0.1);
-  const color = stage >= 4 ? '#e0e7ff' : '#c4b5fd';
-  const h = 180 * scale;
-
-  const wrapper = createSVG('g', { class: 'plant-wrapper' });
-  const g = createSVG('g', { transform: `translate(${x}, ${y})`, class: 'plant-group', style: 'transform-origin: 0px 0px;' });
-  
-  // Stem
-  g.appendChild(createSVG('path', { d: `M 0,0 Q -30,${-h/2} 0,${-h}`, stroke: '#4a5568', 'stroke-width': 4 * scale, fill: 'none', 'stroke-linecap': 'round' }));
-  
-  // Leaves
-  const lGroup = createSVG('g', { class: 'leaf-group', style: 'transform-origin: 0px -50px;' });
-  lGroup.appendChild(createSVG('path', { d: `M 0,${-h*0.4} Q -40,${-h*0.4} -50,${-h*0.6} Q -20,${-h*0.7} 0,${-h*0.4}`, fill: '#2d3748' }));
-  lGroup.appendChild(createSVG('path', { d: `M 0,${-h*0.6} Q 40,${-h*0.5} 45,${-h*0.7} Q 15,${-h*0.8} 0,${-h*0.6}`, fill: '#2d3748' }));
-  g.appendChild(lGroup);
-
-  // Flower
-  if (stage >= 3) {
-    const fGroup = createSVG('g', { transform: `translate(0, ${-h})`, class: 'flower-group', style: `color: ${color}` });
-    for (let i = 0; i < 6; i++) {
-      const petal = createSVG('path', {
-        d: `M 0,0 C -15,-20 -20,-45 0,-60 C 20,-45 15,-20 0,0`,
-        fill: color,
-        transform: `rotate(${i * 60})`,
-        opacity: 0.85
-      });
-      fGroup.appendChild(petal);
-    }
-    fGroup.appendChild(createSVG('circle', { cx: 0, cy: 0, r: 8 * scale, fill: '#fef3c7' }));
-    g.appendChild(fGroup);
-  }
-  wrapper.appendChild(g);
-  svg.appendChild(wrapper);
-}
-
-function drawStarbloom(svg, x, y, stage) {
-  const scale = 0.5 + (stage * 0.1);
-  const color = stage >= 4 ? '#fef08c' : '#a5f3fc';
-  const h = 160 * scale;
-
-  const wrapper = createSVG('g', { class: 'plant-wrapper' });
-  const g = createSVG('g', { transform: `translate(${x}, ${y})`, class: 'plant-group', style: 'transform-origin: 0px 0px; animation-duration: 6s;' });
-  
-  // Stem (Angular)
-  g.appendChild(createSVG('path', { d: `M 0,0 L 10,${-h*0.3} L -5,${-h*0.6} L 0,${-h}`, stroke: '#3f3f46', 'stroke-width': 3.5 * scale, fill: 'none', 'stroke-linejoin': 'round' }));
-  
-  // Leaves (Sharp)
-  const lGroup = createSVG('g', { class: 'leaf-group', style: 'transform-origin: 0px -40px; animation-duration: 4s;' });
-  lGroup.appendChild(createSVG('polygon', { points: `0,${-h*0.3} -40,${-h*0.4} -10,${-h*0.45}`, fill: '#27272a' }));
-  lGroup.appendChild(createSVG('polygon', { points: `0,${-h*0.5} 35,${-h*0.6} 10,${-h*0.65}`, fill: '#27272a' }));
-  g.appendChild(lGroup);
-
-  // Flower
-  if (stage >= 3) {
-    const fGroup = createSVG('g', { transform: `translate(0, ${-h})`, class: 'flower-group', style: `color: ${color}` });
-    for (let i = 0; i < 8; i++) {
-      fGroup.appendChild(createSVG('polygon', {
-        points: `0,0 -8,-25 0,-45 8,-25`,
-        fill: (i%2===0) ? color : '#ffffff',
-        transform: `rotate(${i * 45})`,
-        opacity: 0.9
-      }));
-    }
-    fGroup.appendChild(createSVG('circle', { cx: 0, cy: 0, r: 6 * scale, fill: '#fffbeb' }));
-    g.appendChild(fGroup);
-  }
-  wrapper.appendChild(g);
-  svg.appendChild(wrapper);
-}
-
-function drawEmberleaf(svg, x, y, stage) {
-  const scale = 0.5 + (stage * 0.1);
-  const color = stage >= 4 ? '#fdba74' : '#fed7aa';
-  const h = 140 * scale;
-
-  const wrapper = createSVG('g', { class: 'plant-wrapper' });
-  const g = createSVG('g', { transform: `translate(${x}, ${y})`, class: 'plant-group', style: 'transform-origin: 0px 0px; animation-duration: 8s;' });
-  
-  // Stem (Thick)
-  g.appendChild(createSVG('path', { d: `M -3,0 L -2,${-h} L 2,${-h} L 3,0 Z`, fill: '#4b2110' }));
-  
-  // Leaves (Broad)
-  const lGroup = createSVG('g', { class: 'leaf-group', style: 'transform-origin: 0px -30px; animation-duration: 6s;' });
-  lGroup.appendChild(createSVG('path', { d: `M 0,${-h*0.3} C -60,${-h*0.2} -50,${-h*0.6} 0,${-h*0.4}`, fill: '#3f160e' }));
-  lGroup.appendChild(createSVG('path', { d: `M 0,${-h*0.45} C 50,${-h*0.35} 60,${-h*0.75} 0,${-h*0.55}`, fill: '#3f160e' }));
-  g.appendChild(lGroup);
-
-  // Flower (Flame-like)
-  if (stage >= 3) {
-    const fGroup = createSVG('g', { transform: `translate(0, ${-h})`, class: 'flower-group', style: `color: ${color}` });
-    fGroup.appendChild(createSVG('path', { d: `M 0,0 C -30,-20 -20,-60 0,-70 C 20,-60 30,-20 0,0`, fill: '#ea580c', opacity: 0.8 }));
-    fGroup.appendChild(createSVG('path', { d: `M 0,0 C -20,-15 -15,-45 0,-55 C 15,-45 20,-15 0,0`, fill: '#f97316', opacity: 0.9 }));
-    fGroup.appendChild(createSVG('path', { d: `M 0,0 C -10,-10 -5,-30 0,-40 C 5,-30 10,-10 0,0`, fill: '#fcd34d' }));
-    g.appendChild(fGroup);
-  }
-  wrapper.appendChild(g);
-  svg.appendChild(wrapper);
-}
-
-// ================== CANVAS ANIMATIONS ==================
-function createFog() {
-  fogParticles =[];
-  for (let i = 0; i < 12; i++) {
-    fogParticles.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      size: Math.random() * 150 + 100,
-      speed: (Math.random() - 0.5) * 0.4,
-      opacity: Math.random() * 0.05 + 0.02
-    });
-  }
-}
-
-function createFireflies() {
-  fireflies =[];
-  for (let i = 0; i < 15; i++) {
-    fireflies.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * (canvas.height * 0.8),
-      size: Math.random() * 2 + 1,
-      speedX: (Math.random() - 0.5) * 0.6,
-      speedY: (Math.random() - 0.5) * 0.4,
-      twinkle: Math.random() * Math.PI * 2
-    });
-  }
-}
-
-function animateCanvas() {
-  const theme = themesData[currentTheme];
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-  // Ground
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-  ctx.fillRect(0, canvas.height - 150, canvas.width, 150);
-  
-  // Draw fog
-  ctx.fillStyle = theme.fog;
-  fogParticles.forEach(p => {
-    p.x += p.speed;
-    if (p.x < -p.size) p.x = canvas.width + p.size;
-    if (p.x > canvas.width + p.size) p.x = -p.size;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-    ctx.fill();
-  });
-  
-  // Draw fireflies
-  fireflies.forEach(f => {
-    f.x += f.speedX;
-    f.y += f.speedY;
-    f.twinkle += 0.05;
-    const opacity = 0.3 + Math.abs(Math.sin(f.twinkle)) * 0.7;
-    
-    if (f.x < 0 || f.x > canvas.width) f.speedX *= -1;
-    if (f.y < 0 || f.y > canvas.height * 0.8) f.speedY *= -1;
-    
-    ctx.save();
-    ctx.globalAlpha = opacity;
-    ctx.fillStyle = theme.fly;
-    ctx.beginPath();
-    ctx.arc(f.x, f.y, f.size, 0, Math.PI * 2);
-    ctx.fill();
-    
-    ctx.fillStyle = theme.fly;
-    ctx.globalAlpha = opacity * 0.3;
-    ctx.beginPath();
-    ctx.arc(f.x, f.y, f.size * 3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  });
-  
-  animationFrameId = requestAnimationFrame(animateCanvas);
-}
-
-// ================== INTERACTIONS & COOLDOWNS ==================
-function updateCooldownUI() {
-  const now = Date.now();
-  ['water', 'talk', 'pet'].forEach(action => {
-    const btn = document.getElementById(`btn-${action}`);
-    const timerSpan = btn.querySelector('.timer');
-    const timeRemaining = activeCooldowns[action] - now;
-    
-    if (timeRemaining > 0) {
-      btn.disabled = true;
-      timerSpan.innerText = `(${Math.ceil(timeRemaining / 1000)}s)`;
-    } else {
-      btn.disabled = false;
-      timerSpan.innerText = '';
-    }
-  });
 }
 
 function performAction(action) {
@@ -559,30 +354,54 @@ function performAction(action) {
   if (now < activeCooldowns[action]) return;
 
   activeCooldowns[action] = now + COOLDOWNS[action];
-  let updated = false;
-
-  if (action === 'water') {
-    Object.keys(plants).forEach(key => {
-      if (plants[key].stage < 5) {
-        plants[key].stage++;
-        updated = true;
-      }
-    });
-    setStatus("The garden drinks deeply... (+ Growth)");
-  } 
-  else if (action === 'talk') {
-    const msgs =["The plants lean in gently...", "A soft glow spreads through the leaves...", "The garden listens..."];
-    setStatus(msgs[Math.floor(Math.random() * msgs.length)]);
-  }
-  else if (action === 'pet') {
-    setStatus("The leaves tremble softly at your touch...");
-  }
   
-  if (updated) {
-    drawSVGPlants();
-    updateUI();
-  }
+  let xpGains = { water: 15, talk: 12, pet: 8 };
+  let xpGain = xpGains[action];
+  
+  let msgs = {
+    water: "The soil drinks deeply... (+15 XP)",
+    talk: "A soft glow answers your voice... (+12 XP)",
+    pet: "The leaves tremble softly at your touch... (+8 XP)"
+  };
+  
+  setStatus(msgs[action]);
+  
+  // Apply XP & Effects
+  let leveledUpAny = false;
+  Object.keys(plants).forEach(k => {
+    let p = plants[k];
+    if (p.stage < 5) {
+      p.xp += xpGain;
+      if (checkLevelUp(k)) leveledUpAny = true;
+    }
+    
+    // Spawn Particles & Text at plant locations
+    const px = canvas.width * p.x;
+    const py = canvas.height - 180;
+    
+    spawnFloatingText(`+${xpGain} XP`, px, py - 60 - (p.stage * 20), themesData[currentTheme].accent);
+    spawnActionParticles(action, px, py);
+  });
+  
+  drawSVGPlants();
+  updateUI();
   saveToLocalStorage();
+}
+
+function checkLevelUp(key) {
+  let p = plants[key];
+  let leveled = false;
+  while (p.stage < 5 && p.xp >= XP_REQ[p.stage]) {
+    p.xp -= XP_REQ[p.stage];
+    p.stage++;
+    leveled = true;
+    
+    // Big celebration particles
+    spawnActionParticles('levelup', canvas.width * p.x, canvas.height - 200);
+    spawnFloatingText("✨ BLOOM! ✨", canvas.width * p.x, canvas.height - 250, "#fcd34d", 1.5);
+  }
+  if (p.stage === 5) p.xp = 0; // Maxed
+  return leveled;
 }
 
 function renamePlant(key) {
@@ -595,11 +414,37 @@ function renamePlant(key) {
   }
 }
 
-// ================== THEMES & MILESTONES ==================
+// ================== UI & COOLDOWNS ==================
+function updateUI() {
+  const totalStage = Object.values(plants).reduce((sum, p) => sum + p.stage, 0);
+  document.getElementById('growth-text').innerText = `Total Mastery: Level ${totalStage}`;
+  
+  if (totalStage >= 9 && !milestones.includes('first_bloom')) {
+    milestones.push('first_bloom');
+    spawnFloatingText("Achievement: First Blooms!", canvas.width/2, 100, "#fcd34d");
+  }
+}
+
+function updateCooldownUI() {
+  const now = Date.now();
+  ['water', 'talk', 'pet'].forEach(action => {
+    const btn = document.getElementById(`btn-${action}`);
+    const bar = document.getElementById(`cd-${action}`);
+    const timeRemaining = activeCooldowns[action] - now;
+    
+    if (timeRemaining > 0) {
+      btn.disabled = true;
+      const pct = (timeRemaining / COOLDOWNS[action]) * 100;
+      bar.style.width = `${pct}%`;
+    } else {
+      btn.disabled = false;
+      bar.style.width = `0%`;
+    }
+  });
+}
+
 function setTheme(theme, initial = false) {
   currentTheme = theme;
-  localStorage.setItem('grove_theme', theme);
-  
   document.querySelectorAll('.theme-btn').forEach(el => el.classList.remove('active'));
   document.getElementById('theme-' + theme).classList.add('active');
   
@@ -609,57 +454,285 @@ function setTheme(theme, initial = false) {
   root.style.setProperty('--bg-bottom', tData.bottom);
   root.style.setProperty('--accent', tData.accent);
   
-  if (!initial) {
-    setStatus(`Theme changed to ${theme}`);
+  if (!initial) setStatus(`Atmosphere shifted to ${theme}...`);
+}
+
+// ================== SVG DRAWING SYSTEM ==================
+function drawSVGPlants() {
+  const pLayer = document.getElementById('plants-layer');
+  const uiLayer = document.getElementById('ui-layer');
+  
+  let pHTML = '';
+  let uiHTML = '';
+  
+  const groundY = canvas.height - 120;
+
+  Object.keys(plants).forEach(key => {
+    const p = plants[key];
+    const x = canvas.width * p.x;
+    const y = groundY;
+    
+    // Plant Graphic
+    pHTML += `<g transform="translate(${x}, ${y})" class="sway" style="transform-origin: ${x}px ${y}px;">`;
+    if(key === 'moonflower') pHTML += getMoonflowerSVG(p.stage);
+    if(key === 'star') pHTML += getStarbloomSVG(p.stage);
+    if(key === 'ember') pHTML += getEmberleafSVG(p.stage);
+    pHTML += `</g>`;
+    
+    // UI (Name, Level, XP Bar)
+    const uiY = y + 30;
+    uiHTML += `<text x="${x}" y="${uiY}" class="plant-name" onclick="renamePlant('${key}')">${p.name}</text>`;
+    uiHTML += `<text x="${x}" y="${uiY + 16}" class="plant-lvl">${p.stage === 5 ? 'MAX LEVEL' : 'Lvl ' + p.stage}</text>`;
+    
+    // XP Bar (if not maxed)
+    if (p.stage < 5) {
+      const barW = 60;
+      const pct = Math.min(1, p.xp / XP_REQ[p.stage]);
+      uiHTML += `
+        <rect x="${x - barW/2}" y="${uiY + 24}" width="${barW}" height="4" rx="2" fill="rgba(255,255,255,0.1)" />
+        <rect x="${x - barW/2}" y="${uiY + 24}" width="${barW * pct}" height="4" rx="2" fill="var(--accent)" />
+      `;
+    }
+  });
+  
+  pLayer.innerHTML = pHTML;
+  uiLayer.innerHTML = uiHTML;
+}
+
+// Distinct SVG Generators per plant stage
+function getMoonflowerSVG(stage) {
+  let s = `<g class="sway-slow">`;
+  const scale = 0.6 + (stage * 0.15);
+  const h = 100 * scale;
+  
+  // Stem
+  s += `<path d="M 0,0 Q -20,${-h*0.5} 0,${-h}" stroke="#4a5568" stroke-width="${4*scale}" fill="none" stroke-linecap="round"/>`;
+  
+  // Leaves
+  if (stage >= 2) {
+    s += `<path d="M 0,${-h*0.3} Q -40,${-h*0.2} -30,${-h*0.6} Q -10,${-h*0.6} 0,${-h*0.3}" fill="#2d3748"/>`;
+    s += `<path d="M 0,${-h*0.5} Q 40,${-h*0.4} 30,${-h*0.8} Q 10,${-h*0.8} 0,${-h*0.5}" fill="#2d3748"/>`;
+  }
+  
+  // Flower
+  if (stage >= 3) {
+    const color = stage >= 4 ? '#e0e7ff' : '#c4b5fd';
+    s += `<g transform="translate(0, ${-h})" class="${stage === 5 ? 'pulse' : ''}" style="color:${color}; filter:${stage===5 ? 'url(#glow)' : 'none'};">`;
+    const petals = stage >= 4 ? 6 : 4;
+    for (let i = 0; i < petals; i++) {
+      s += `<path d="M 0,0 C -15,-20 -25,-40 0,-55 C 25,-40 15,-20 0,0" fill="${color}" transform="rotate(${i * (360/petals)})" opacity="0.9"/>`;
+    }
+    s += `<circle cx="0" cy="0" r="${8*scale}" fill="#fef3c7"/>`;
+    s += `</g>`;
+  }
+  return s + `</g>`;
+}
+
+function getStarbloomSVG(stage) {
+  let s = `<g class="sway">`;
+  const scale = 0.6 + (stage * 0.15);
+  const h = 110 * scale;
+  
+  // Stem
+  s += `<polyline points="0,0 8,${-h*0.3} -5,${-h*0.6} 0,${-h}" stroke="#3f3f46" stroke-width="${3.5*scale}" fill="none" stroke-linejoin="round"/>`;
+  
+  // Leaves
+  if (stage >= 2) {
+    s += `<polygon points="4,${-h*0.2} -35,${-h*0.3} -10,${-h*0.4}" fill="#27272a"/>`;
+    s += `<polygon points="-3,${-h*0.5} 35,${-h*0.6} 10,${-h*0.7}" fill="#27272a"/>`;
+  }
+  
+  // Flower
+  if (stage >= 3) {
+    const color = stage >= 4 ? '#fef08c' : '#a5f3fc';
+    s += `<g transform="translate(0, ${-h})" class="${stage === 5 ? 'pulse' : ''}" style="color:${color}; filter:${stage===5 ? 'url(#glow)' : 'none'};">`;
+    const spikes = stage >= 4 ? 8 : 4;
+    for (let i = 0; i < spikes; i++) {
+      s += `<polygon points="0,0 -6,-25 0,-45 6,-25" fill="${i%2===0 ? color : '#ffffff'}" transform="rotate(${i * (360/spikes)})" opacity="0.9"/>`;
+    }
+    s += `<circle cx="0" cy="0" r="${6*scale}" fill="#fffbeb"/>`;
+    s += `</g>`;
+  }
+  return s + `</g>`;
+}
+
+function getEmberleafSVG(stage) {
+  let s = `<g class="sway-slow">`;
+  const scale = 0.6 + (stage * 0.15);
+  const h = 90 * scale;
+  
+  // Stem
+  s += `<path d="M -3,0 L -1,${-h} L 1,${-h} L 3,0 Z" fill="#4b2110"/>`;
+  
+  // Leaves
+  if (stage >= 2) {
+    s += `<path d="M 0,${-h*0.3} C -50,${-h*0.1} -40,${-h*0.6} 0,${-h*0.4}" fill="#3f160e"/>`;
+    s += `<path d="M 0,${-h*0.5} C 50,${-h*0.3} 40,${-h*0.8} 0,${-h*0.6}" fill="#3f160e"/>`;
+  }
+  
+  // Flower (Flame)
+  if (stage >= 3) {
+    const color = stage >= 4 ? '#fdba74' : '#fed7aa';
+    s += `<g transform="translate(0, ${-h})" class="${stage === 5 ? 'pulse' : ''}" style="color:${color}; filter:${stage===5 ? 'url(#glow)' : 'none'};">`;
+    
+    s += `<path d="M 0,0 C -25,-20 -15,-60 0,-70 C 15,-60 25,-20 0,0" fill="${stage>=4?'#ea580c':'#c2410c'}" opacity="0.9"/>`;
+    s += `<path d="M 0,0 C -15,-15 -10,-45 0,-55 C 10,-45 15,-15 0,0" fill="${stage>=4?'#f97316':'#ea580c'}" opacity="0.95"/>`;
+    if (stage >= 4) {
+      s += `<path d="M 0,0 C -8,-10 -5,-30 0,-40 C 5,-30 8,-10 0,0" fill="#fcd34d"/>`;
+    }
+    s += `</g>`;
+  }
+  return s + `</g>`;
+}
+
+// ================== CANVAS PARTICLES & EFFECTS ==================
+function createFog() {
+  fogParticles =[];
+  for (let i = 0; i < 15; i++) {
+    fogParticles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 120 + 80,
+      speed: (Math.random() - 0.5) * 0.3,
+      opacity: Math.random() * 0.05 + 0.01
+    });
   }
 }
 
-function checkMilestones(totalStage) {
-  if (totalStage >= 9 && !milestones.includes('first_bloom')) {
-    milestones.push('first_bloom');
-    setStatus("✨ First Blooms achieved!");
+function createFireflies() {
+  fireflies =[];
+  for (let i = 0; i < 20; i++) {
+    fireflies.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * (canvas.height * 0.8),
+      size: Math.random() * 2 + 0.5,
+      speedX: (Math.random() - 0.5) * 0.5,
+      speedY: (Math.random() - 0.5) * 0.3,
+      twinkle: Math.random() * Math.PI * 2
+    });
   }
-  if (totalStage === 15 && !milestones.includes('full_bloom')) {
-    milestones.push('full_bloom');
-    setStatus("🌿 The Grove is in Full Bloom!");
-  }
-  localStorage.setItem('grove_milestones', JSON.stringify(milestones));
 }
 
-// ================== UTILS ==================
+function spawnActionParticles(type, x, y) {
+  const count = type === 'levelup' ? 40 : 15;
+  for(let i=0; i<count; i++) {
+    let color = '#fff';
+    if(type === 'water') color = '#93c5fd';
+    if(type === 'talk') color = '#fbcfe8';
+    if(type === 'pet') color = '#fde047';
+    if(type === 'levelup') color =['#fde047', '#a5b4fc', '#fda4af'][Math.floor(Math.random()*3)];
+    
+    actionParticles.push({
+      x: x + (Math.random() - 0.5) * 40,
+      y: type === 'water' ? y - 150 - Math.random()*50 : y - Math.random()*40,
+      vx: (Math.random() - 0.5) * (type==='levelup'? 4 : 2),
+      vy: type === 'water' ? Math.random() * 3 + 1 : (Math.random() - 1) * 3,
+      life: 1.0,
+      color: color,
+      size: Math.random() * 3 + 1
+    });
+  }
+}
+
+function spawnFloatingText(text, x, y, color, scale = 1) {
+  floatingTexts.push({ text, x, y, color, life: 1.0, scale });
+}
+
+function animateCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const theme = themesData[currentTheme];
+  
+  // Ground
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.fillRect(0, canvas.height - 120, canvas.width, 120);
+  
+  // Fog
+  ctx.fillStyle = theme.fog;
+  fogParticles.forEach(p => {
+    p.x += p.speed;
+    if (p.x < -p.size) p.x = canvas.width + p.size;
+    if (p.x > canvas.width + p.size) p.x = -p.size;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+  });
+  
+  // Fireflies
+  fireflies.forEach(f => {
+    f.x += f.speedX; f.y += f.speedY; f.twinkle += 0.05;
+    const opacity = 0.2 + Math.abs(Math.sin(f.twinkle)) * 0.8;
+    if (f.x < 0 || f.x > canvas.width) f.speedX *= -1;
+    if (f.y < 0 || f.y > canvas.height * 0.8) f.speedY *= -1;
+    
+    ctx.globalAlpha = opacity;
+    ctx.fillStyle = theme.fly;
+    ctx.beginPath(); ctx.arc(f.x, f.y, f.size, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = opacity * 0.3;
+    ctx.beginPath(); ctx.arc(f.x, f.y, f.size * 3, 0, Math.PI * 2); ctx.fill();
+  });
+  ctx.globalAlpha = 1.0;
+
+  // Action Particles
+  for (let i = actionParticles.length - 1; i >= 0; i--) {
+    let p = actionParticles[i];
+    p.x += p.vx; p.y += p.vy; p.life -= 0.015;
+    if (p.life <= 0) { actionParticles.splice(i, 1); continue; }
+    
+    ctx.globalAlpha = p.life;
+    ctx.fillStyle = p.color;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1.0;
+
+  // Floating Text
+  for (let i = floatingTexts.length - 1; i >= 0; i--) {
+    let t = floatingTexts[i];
+    t.y -= 0.5; t.life -= 0.012;
+    if (t.life <= 0) { floatingTexts.splice(i, 1); continue; }
+    
+    ctx.globalAlpha = t.life;
+    ctx.fillStyle = t.color;
+    ctx.font = `bold ${16 * t.scale}px 'Space Grotesk'`;
+    ctx.textAlign = 'center';
+    // Text stroke for readability
+    ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+    ctx.lineWidth = 3;
+    ctx.strokeText(t.text, t.x, t.y);
+    ctx.fillText(t.text, t.x, t.y);
+  }
+  ctx.globalAlpha = 1.0;
+
+  requestAnimationFrame(animateCanvas);
+}
+
+// ================== DATA MANAGEMENT ==================
 function saveToLocalStorage() {
   localStorage.setItem('grove_plants', JSON.stringify(plants));
   localStorage.setItem('grove_lastVisit', lastVisit);
+  localStorage.setItem('grove_theme', currentTheme);
 }
 
 function exportGarden() {
   const data = { plants, theme: currentTheme, milestones, exportedAt: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'numas_grove_backup.json';
-  a.click();
+  const a = document.createElement('a'); a.href = url; a.download = 'numas_grove_backup.json'; a.click();
   setStatus("Garden data exported safely!");
 }
 
 function showStats() {
   const totalStage = Object.values(plants).reduce((sum, p) => sum + p.stage, 0);
-  alert(`The Grove Stats:
-Combined Growth Stage: ${totalStage}/15
+  const totalXp = Object.values(plants).reduce((sum, p) => sum + p.xp, 0);
+  alert(`=== THE GROVE STATS ===
+Combined Level: ${totalStage}/15
+Total Accumulated XP: ${totalXp}
 Milestones Unlocked: ${milestones.length}
-Theme: ${currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1)}
+Current Atmosphere: ${currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1)}
 
-The garden remembers every visit.`);
+"The garden is a reflection of your care."`);
 }
 
+// Kickoff
 init();
 
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'w') document.getElementById('btn-water').click();
-  if (e.key === 't') document.getElementById('btn-talk').click();
-  if (e.key === 'p') document.getElementById('btn-pet').click();
-});
 </script>
 </body>
 </html>
