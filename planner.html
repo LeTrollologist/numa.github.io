@@ -1038,6 +1038,27 @@ textarea {
 <div id="toast" class="toast"></div>
 
 <script>
+  // ================== SENTINEL ANALYTICS UPLINK ==================
+  (function(){
+    var SENTINEL_URL = 'https://analytics-server-bdrm.onrender.com/log';
+    var sessionId = sessionStorage.getItem('_sid');
+    if (!sessionId) {
+      sessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      sessionStorage.setItem('_sid', sessionId);
+    }
+    fetch(SENTINEL_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        ua:navigator.userAgent,
+        page:window.location.pathname||'/',
+        screen:window.innerWidth+'x'+window.innerHeight,
+        referrer:document.referrer||'',
+        sessionId:sessionId
+      }),
+      keepalive:true
+    }).catch(function(){});
+  })();
 // ==================== DATA MODEL ====================
 const DEFAULT_DATA = {
   tasks: [],
