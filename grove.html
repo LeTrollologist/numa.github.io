@@ -557,8 +557,9 @@
         .cdf {
             height: 100%;
             background: var(--accent);
-            width: 0%;
-            transition: width .12s linear;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform .12s linear;
         }
 
         /* Plant health bars */
@@ -1122,6 +1123,46 @@
                 display: none;
             }
         }
+
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column-reverse;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 35vh;
+                border-left: none;
+                border-top: 1px solid var(--border);
+                flex-direction: row;
+                overflow-x: auto;
+                overflow-y: hidden;
+            }
+
+            .sbsec {
+                min-width: 180px;
+                border-bottom: none;
+                border-right: 1px solid rgba(168, 159, 216, .05);
+            }
+
+            .sbsec:last-child {
+                border-right: none;
+            }
+
+            #topbar {
+                flex-wrap: wrap;
+                height: auto;
+                padding: 8px 12px;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .top-actions {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 
@@ -1142,6 +1183,7 @@
             <div class="hsp"></div>
             <div class="coins-badge" id="coins-badge">0</div>
             <div class="mbadge" id="mbadge">Mastery · 3</div>
+            <button class="hbtn" id="audio-btn" onclick="toggleAudio()" title="Toggle Audio">🎵 Off</button>
             <button class="hbtn gold" onclick="openMarket()">Market</button>
             <button class="hbtn" onclick="openStats()">Records</button>
             <button class="hbtn" onclick="doImport()">Import</button>
@@ -1280,6 +1322,27 @@
         </div>
     </div>
 
+    <!-- Nursery Modal -->
+    <div id="nursery-modal" class="modal">
+        <div class="mbox" style="max-width:380px">
+            <div class="mtitle">The Nursery <span class="mclose" onclick="closeModal('nursery-modal')">✕ Close</span>
+            </div>
+            <div class="sblbl" style="margin-bottom:12px; line-height: 1.4; text-transform:none;">Combine the essence of
+                two Ancient plants to cultivate a rare hybrid. (Requires an empty plot)</div>
+            <div style="display:flex; gap:12px; margin-bottom: 16px;">
+                <select id="nursery-p1"
+                    style="flex:1; background:var(--panel); border:1px solid var(--border); color:var(--text); padding:8px; font-family:'Josefin Sans', sans-serif; outline:none; cursor:pointer;">
+                </select>
+                <div style="color:var(--accent); font-size:1.2rem; display:flex; align-items:center;">+</div>
+                <select id="nursery-p2"
+                    style="flex:1; background:var(--panel); border:1px solid var(--border); color:var(--text); padding:8px; font-family:'Josefin Sans', sans-serif; outline:none; cursor:pointer;">
+                </select>
+            </div>
+            <button class="hbtn gold" style="width:100%; justify-content:center;"
+                onclick="crossPollinate()">Cross-Pollinate</button>
+        </div>
+    </div>
+
     <script>
 
         function mkRand(s) { s = s >>> 0; return () => { s += 0x6d2b79f5; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
@@ -1306,6 +1369,12 @@
 
         function emberleafSVG(stage, health) { let s = ''; const mR = [14, 18, 22, 27, 32][stage - 1]; const wilt = health < 40; s += `<ellipse cx="0" cy="3" rx="${mR}" ry="${Math.round(mR * .38)}" fill="#0a1520" opacity=".9"/>`; if (stage === 1) { s += `<ellipse cx="0" cy="0" rx="12" ry="7" fill="${wilt ? '#2a1408' : '#f97316'}" opacity=".95"/>`; s += `<ellipse cx="0" cy="-1" rx="8" ry="5" fill="${wilt ? '#3a1c0a' : '#fb923c'}" opacity=".9"/>`; s += `<ellipse cx="0" cy="-2" rx="5" ry="3" fill="${wilt ? '#5a280e' : '#c2410c'}" opacity=".85"/>`; s += `<ellipse cx="0" cy="-2" rx="2.5" ry="1.5" fill="${wilt ? '#7a3410' : '#f97316'}" opacity=".8"/>`; if (!wilt) { s += `<path d="M-2,-7 C-4,-14 -2,-18 0,-20 C2,-18 4,-14 2,-7" fill="#ea580c" opacity=".7"><animate attributeName="opacity" values=".7;.3;.7" dur="1.2s" repeatCount="indefinite"/></path>`; s += `<path d="M1,-6 C2,-11 1,-14 0,-16 C-1,-14 -2,-11 0,-6" fill="#f97316" opacity=".5"><animate attributeName="opacity" values=".5;.1;.5" dur=".9s" repeatCount="indefinite"/></path>`; } } else if (stage === 2) { s += `<path d="M0,0 C-3,-18 3,-36 0,-50" stroke="${wilt ? '#2a1408' : '#f97316'}" stroke-width="3" fill="none" stroke-linecap="round"/>`; s += `<path d="M-1,-18 C-18,-12 -24,-4 -20,1 C-12,-2 -6,-8 -1,-18Z" fill="${wilt ? '#3a1c0a' : '#fb923c'}"/>`; s += `<ellipse cx="-14" cy="-10" rx="4" ry="2.5" fill="${wilt ? '#5a240c' : '#ea580c'}" opacity=".7" transform="rotate(-20,-14,-10)"/>`; s += `<path d="M1,-32 C18,-26 24,-18 20,-13 C12,-14 6,-20 1,-32Z" fill="${wilt ? '#3a1c0a' : '#fb923c'}"/>`; s += `<ellipse cx="14" cy="-22" rx="4" ry="2.5" fill="${wilt ? '#5a240c' : '#ea580c'}" opacity=".7" transform="rotate(20,14,-22)"/>`; if (!wilt) s += `<path d="M0,-50 C-4,-55 -3,-60 0,-64 C3,-60 4,-55 0,-50Z" fill="#ea580c" opacity=".8"><animate attributeName="opacity" values=".8;.4;.8" dur="1.1s" repeatCount="indefinite"/></path>`; } else if (stage === 3) { s += `<path d="M0,0 C-5,-28 5,-57 0,-87" stroke="${wilt ? '#2a1408' : '#f97316'}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-44 C-12,-50 -18,-58 -16,-68" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="2" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-60 C12,-66 18,-74 16,-84" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="2" fill="none" stroke-linecap="round"/>`; s += `<path d="M-1,-22 C-22,-14 -28,-4 -21,2 C-11,-2 -4,-10 -1,-22Z" fill="${wilt ? '#3a1c0a' : '#fb923c'}"/>`; s += `<path d="M1,-38 C22,-30 28,-20 21,-14 C11,-16 4,-24 1,-38Z" fill="${wilt ? '#3a1c0a' : '#fb923c'}"/>`; s += `<path d="M-14,-55 C-28,-52 -34,-45 -28,-42 C-22,-44 -18,-50 -14,-55Z" fill="${wilt ? '#3a1010' : '#ef4444'}"/>`; s += `<path d="M14,-70 C28,-67 34,-60 28,-57 C22,-59 18,-65 14,-70Z" fill="${wilt ? '#3a1010' : '#ef4444'}"/>`; s += `<g transform="translate(0,-87)"><path d="M0,0 C-6,-10 -5,-20 0,-28 C5,-20 6,-10 0,0Z" fill="${wilt ? '#3a1010' : '#ef4444'}" opacity=".9"/>`; s += `<path d="M0,0 C-4,-8 -3,-17 0,-23 C3,-17 4,-8 0,0Z" fill="${wilt ? '#5a1c10' : '#ea580c'}" opacity="${wilt ? '.6' : '.85'}"/>`; if (!wilt) s += `<path d="M0,-2 C-2,-8 -1,-15 0,-19" stroke="#f97316" stroke-width=".8" fill="none"/>`; s += `</g>`; } else if (stage === 4) { s += `<path d="M0,0 C-8,-42 8,-85 0,-130" stroke="${wilt ? '#2a1408' : '#f97316'}" stroke-width="4" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-50 C-16,-58 -24,-70 -20,-84" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-70 C16,-78 24,-90 20,-104" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-92 C-12,-98 -16,-110 -12,-120" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`; s += `<path d="M-1,-28 C-26,-18 -32,-5 -23,2 C-12,-2 -4,-13 -1,-28Z" fill="${wilt ? '#3a1c0a' : '#fb923c'}"/>`; s += `<path d="M1,-48 C26,-38 32,-25 23,-18 C12,-20 4,-33 1,-48Z" fill="${wilt ? '#3a1c0a' : '#fb923c'}"/>`; s += `<path d="M-18,-62 C-32,-59 -38,-52 -32,-49 C-26,-51 -22,-57 -18,-62Z" fill="${wilt ? '#3a1010' : '#ef4444'}"/>`; s += `<path d="M18,-80 C32,-77 38,-70 32,-67 C26,-69 22,-75 18,-80Z" fill="${wilt ? '#3a1010' : '#ef4444'}"/>`; s += `<path d="M-10,-102 C-22,-100 -26,-94 -21,-92 C-16,-93 -14,-99 -10,-102Z" fill="${wilt ? '#421212' : '#f87171'}" opacity=".9"/>`; s += `<g transform="translate(0,-130)">`; for (let r = 0; r < 360; r += 72)s += `<path d="M0,0 C-9,-16 -8,-34 0,-44 C8,-34 9,-16 0,0Z" fill="${wilt ? '#3a1010' : '#ef4444'}" transform="rotate(${r})" opacity=".9"/>`; for (let r = 36; r < 360; r += 72)s += `<path d="M0,0 C-7,-12 -6,-26 0,-34 C6,-26 7,-12 0,0Z" fill="${wilt ? '#5a1c10' : '#ea580c'}" transform="rotate(${r})" opacity="${wilt ? '.5' : '.9'}"/>`; if (!wilt) { for (let r = 0; r < 360; r += 72)s += `<path d="M0,0 C-4,-8 -4,-18 0,-24 C4,-18 4,-8 0,0Z" fill="#f59e0b" transform="rotate(${r})" opacity=".9"/>`; } s += `<circle cx="0" cy="0" r="8" fill="${wilt ? '#1e1810' : '#fef08a'}"/><circle cx="0" cy="0" r="4" fill="${wilt ? '#2a2018' : '#fff'}"/>`; if (!wilt) { s += `<circle cx="-5" cy="-48" r="2" fill="#f97316"><animate attributeName="opacity" values=".9;0;.9" dur="1.5s" repeatCount="indefinite"/><animate attributeName="cy" values="-48;-62;-48" dur="1.5s" repeatCount="indefinite"/></circle>`; s += `<circle cx="7" cy="-44" r="1.5" fill="#fb923c"><animate attributeName="opacity" values=".7;0;.7" dur="1.1s" repeatCount="indefinite"/><animate attributeName="cy" values="-44;-58;-44" dur="1.1s" repeatCount="indefinite"/></circle>`; } s += `</g>`; } else { s += `<path d="M0,0 C-10,-50 10,-100 0,-165" stroke="${wilt ? '#2a1408' : '#c2410c'}" stroke-width="4.5" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-55 C-20,-65 -30,-80 -26,-96" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="2.8" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-78 C20,-88 30,-103 26,-119" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="2.8" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-102 C-14,-110 -18,-124 -14,-136" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="2" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-118 C14,-126 18,-140 14,-152" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="2" fill="none" stroke-linecap="round"/>`; s += `<path d="M-1,-30 C-28,-20 -35,-5 -25,2 C-14,-2 -4,-14 -1,-30Z" fill="${wilt ? '#3a1c0a' : '#fb923c'}"/>`; s += `<path d="M1,-52 C28,-42 35,-27 25,-20 C14,-22 4,-36 1,-52Z" fill="${wilt ? '#3a1c0a' : '#fb923c'}"/>`; s += `<path d="M-24,-70 C-38,-67 -44,-60 -38,-57 C-32,-59 -28,-65 -24,-70Z" fill="${wilt ? '#3a1010' : '#ef4444'}"/>`; s += `<path d="M24,-90 C38,-87 44,-80 38,-77 C32,-79 28,-85 24,-90Z" fill="${wilt ? '#3a1010' : '#ef4444'}"/>`; s += `<path d="M-12,-118 C-24,-116 -28,-110 -23,-108 C-18,-109 -15,-115 -12,-118Z" fill="${wilt ? '#421212' : '#f87171'}"/>`; s += `<path d="M12,-134 C24,-132 28,-126 23,-124 C18,-125 15,-131 12,-134Z" fill="${wilt ? '#421212' : '#f87171'}"/>`; s += `<g transform="translate(0,-165)" filter="url(#glow-fire)">`; for (let r = 0; r < 360; r += 45)s += `<path d="M0,0 C-11,-20 -10,-42 0,-54 C10,-42 11,-20 0,0Z" fill="${wilt ? '#3a1010' : '#ef4444'}" transform="rotate(${r})" opacity=".9"/>`; for (let r = 22.5; r < 360; r += 45)s += `<path d="M0,0 C-9,-16 -8,-34 0,-44 C8,-34 9,-16 0,0Z" fill="${wilt ? '#5a1c10' : '#ea580c'}" transform="rotate(${r})" opacity="${wilt ? '.4' : '.9'}"/>`; if (!wilt) { for (let r = 0; r < 360; r += 45)s += `<path d="M0,0 C-6,-11 -5,-24 0,-32 C5,-24 6,-11 0,0Z" fill="#f59e0b" transform="rotate(${r})" opacity=".9"/>`; for (let r = 22.5; r < 360; r += 45)s += `<path d="M0,0 C-3,-7 -2,-15 0,-20 C2,-15 3,-7 0,0Z" fill="#fef08a" transform="rotate(${r})" opacity=".9"/>`; } s += `<circle cx="0" cy="0" r="12" fill="${wilt ? '#1e1410' : '#fefce8'}"/><circle cx="0" cy="0" r="6" fill="${wilt ? '#241a14' : '#fff'}"/>`; if (!wilt) { for (let i = 0; i < 6; i++) { const x = (-14 + i * 6).toFixed(0), sy = (-58 - i * 4).toFixed(0), ey = (-84 - i * 4).toFixed(0), dur = (1.2 + i * .25).toFixed(2), del = (i * .18).toFixed(2), sz = (1.5 + (i % 3) * .5).toFixed(1); s += `<circle cx="${x}" cy="${sy}" r="${sz}" fill="${i % 2 === 0 ? '#f97316' : '#fbbf24'}"><animate attributeName="opacity" values=".9;0;.9" dur="${dur}s" begin="${del}s" repeatCount="indefinite"/><animate attributeName="cy" values="${sy};${ey};${sy}" dur="${dur}s" begin="${del}s" repeatCount="indefinite"/></circle>`; } } s += `</g>`; } return s; }
 
+        function brambleSVG(stage, health) { let s = ''; const mR = [14, 18, 22, 27, 32][stage - 1]; const wilt = health < 40; s += `<ellipse cx="0" cy="3" rx="${mR}" ry="${Math.round(mR * .38)}" fill="#0a1520" opacity=".9"/>`; if (stage === 1) { s += `<path d="M0,0 Q5,-10 0,-20 Q-5,-10 0,0" fill="${wilt ? '#4a1d4a' : '#d946ef'}" opacity=".8"/>`; s += `<path d="M0,0 Q-4,-8 -8,-12 Q-4,-4 0,0" fill="${wilt ? '#2d1a3a' : '#a855f7'}" opacity=".9"/>`; s += `<path d="M0,0 Q4,-8 8,-12 Q4,-4 0,0" fill="${wilt ? '#2d1a3a' : '#a855f7'}" opacity=".9"/>`; } else if (stage === 2) { s += `<path d="M0,0 Q10,-20 -5,-40 T0,-60" stroke="${wilt ? '#3a1a3a' : '#c026d3'}" stroke-width="2.5" fill="none"/>`; s += `<path d="M-1,-20 Q-15,-15 -20,-25 Q-10,-30 -1,-20" fill="${wilt ? '#2d1a3a' : '#a855f7'}"/>`; s += `<path d="M1,-40 Q15,-35 20,-45 Q10,-50 1,-40" fill="${wilt ? '#2d1a3a' : '#a855f7'}"/>`; } else if (stage === 3) { s += `<path d="M0,0 Q15,-30 -10,-60 T5,-100" stroke="${wilt ? '#3a1a3a' : '#c026d3'}" stroke-width="3" fill="none"/>`; s += `<path d="M-2,-25 Q-20,-20 -25,-35 Q-10,-40 -2,-25" fill="${wilt ? '#2d1a3a' : '#a855f7'}"/>`; s += `<path d="M3,-55 Q25,-45 30,-65 Q15,-70 3,-55" fill="${wilt ? '#2d1a3a' : '#a855f7'}"/>`; s += `<path d="M-4,-80 Q-25,-75 -30,-90 Q-15,-95 -4,-80" fill="${wilt ? '#4a1d4a' : '#d946ef'}"/>`; s += `<g transform="translate(5,-100)"><circle cx="0" cy="0" r="6" fill="${wilt ? '#2d1a3a' : '#f9a8d4'}"/></g>`; } else if (stage === 4) { s += `<path d="M0,0 C20,-40 -20,-80 0,-120 S-10,-140 10,-160" stroke="${wilt ? '#3a1a3a' : '#c026d3'}" stroke-width="3.5" fill="none"/>`; s += `<path d="M0,0 C-15,-30 15,-60 5,-100" stroke="${wilt ? '#2a1408' : '#ea580c'}" stroke-width="2" fill="none"/>`; s += `<g transform="translate(10,-160)">`; for (let r = 0; r < 360; r += 60) s += `<path d="M0,0 Q-8,-15 0,-25 Q8,-15 0,0" fill="${wilt ? '#2d1a3a' : '#d946ef'}" transform="rotate(${r})" opacity=".8"/>`; s += `<circle cx="0" cy="0" r="5" fill="#fbcfe8"/></g>`; } else { s += `<path d="M0,0 C30,-50 -30,-100 0,-150 S-20,-180 20,-210" stroke="${wilt ? '#3a1a3a' : '#c026d3'}" stroke-width="4" fill="none"/>`; s += `<path d="M0,0 C-25,-40 25,-80 5,-130" stroke="${wilt ? '#2a1408' : '#ea580c'}" stroke-width="3" fill="none"/>`; s += `<path d="M0,0 C-10,-30 -30,-50 -40,-80" stroke="${wilt ? '#2a1408' : '#ea580c'}" stroke-width="2" fill="none"/>`; s += `<g transform="translate(20,-210)" filter="url(#glow-soft)">`; for (let r = 0; r < 360; r += 45) s += `<path d="M0,0 Q-10,-20 0,-35 Q10,-20 0,0" fill="${wilt ? '#2d1a3a' : '#d946ef'}" transform="rotate(${r})" opacity=".8"/>`; for (let r = 22.5; r < 360; r += 45) s += `<path d="M0,0 Q-5,-15 0,-25 Q5,-15 0,0" fill="${wilt ? '#4a1d4a' : '#f472b6'}" transform="rotate(${r})" opacity=".6"/>`; s += `<circle cx="0" cy="0" r="8" fill="#fbcfe8"/><circle cx="0" cy="0" r="4" fill="#fff"/></g>`; } return s; }
+
+        function frostlilySVG(stage, health) { let s = ''; const mR = [14, 18, 22, 27, 32][stage - 1]; const wilt = health < 40; s += `<ellipse cx="0" cy="3" rx="${mR}" ry="${Math.round(mR * .38)}" fill="#0a1520" opacity=".9"/>`; if (stage === 1) { s += `<path d="M0,0 L-5,-15 L0,-25 L5,-15 Z" fill="${wilt ? '#1a2a3a' : '#bae6fd'}"/>`; } else if (stage === 2) { s += `<path d="M0,0 L-3,-25 L0,-50" stroke="${wilt ? '#1a2a3a' : '#7dd3fc'}" stroke-width="2" fill="none"/>`; s += `<path d="M-1,-20 L-15,-25 L-2,-30 Z" fill="${wilt ? '#0f172a' : '#38bdf8'}"/>`; s += `<path d="M1,-35 L15,-40 L2,-45 Z" fill="${wilt ? '#0f172a' : '#38bdf8'}"/>`; } else if (stage === 3) { s += `<path d="M0,0 L-4,-40 L0,-80" stroke="${wilt ? '#1a2a3a' : '#7dd3fc'}" stroke-width="2.5" fill="none"/>`; s += `<path d="M-2,-30 L-20,-35 L-3,-40 Z" fill="${wilt ? '#0f172a' : '#38bdf8'}"/>`; s += `<path d="M2,-55 L20,-60 L3,-65 Z" fill="${wilt ? '#0f172a' : '#38bdf8'}"/>`; s += `<g transform="translate(0,-80)">`; for (let r = 0; r < 360; r += 72) s += `<path d="M0,0 L-5,-15 L0,-25 L5,-15 Z" fill="${wilt ? '#1a2a3a' : '#bae6fd'}" transform="rotate(${r})"/>`; s += `</g>`; } else if (stage === 4) { s += `<path d="M0,0 L-5,-60 L0,-120" stroke="${wilt ? '#1a2a3a' : '#7dd3fc'}" stroke-width="3" fill="none"/>`; s += `<path d="M-2,-40 L-25,-45 L-3,-50 Z" fill="${wilt ? '#0f172a' : '#38bdf8'}"/>`; s += `<path d="M2,-75 L25,-80 L3,-85 Z" fill="${wilt ? '#0f172a' : '#38bdf8'}"/>`; s += `<g transform="translate(0,-120)">`; for (let r = 0; r < 360; r += 60) s += `<path d="M0,0 L-8,-20 L0,-35 L8,-20 Z" fill="${wilt ? '#1a2a3a' : '#bae6fd'}" transform="rotate(${r})"/>`; s += `<circle cx="0" cy="0" r="4" fill="#e0f2fe"/></g>`; } else { s += `<path d="M0,0 L-6,-80 L0,-160" stroke="${wilt ? '#1a2a3a' : '#7dd3fc'}" stroke-width="4" fill="none"/>`; s += `<path d="M-3,-50 L-30,-55 L-4,-60 Z" fill="${wilt ? '#0f172a' : '#38bdf8'}"/>`; s += `<path d="M3,-100 L30,-105 L4,-110 Z" fill="${wilt ? '#0f172a' : '#38bdf8'}"/>`; s += `<g transform="translate(0,-160)" filter="url(#glow-soft)">`; for (let r = 0; r < 360; r += 45) s += `<path d="M0,0 L-10,-25 L0,-45 L10,-25 Z" fill="${wilt ? '#1a2a3a' : '#bae6fd'}" transform="rotate(${r})"/>`; for (let r = 22.5; r < 360; r += 45) s += `<path d="M0,0 L-5,-15 L0,-25 L5,-15 Z" fill="${wilt ? '#2a3a4a' : '#e0f2fe'}" transform="rotate(${r})"/>`; s += `<circle cx="0" cy="0" r="6" fill="#fff"/></g>`; } return s; }
+
+        function sunflareSVG(stage, health) { let s = ''; const mR = [14, 18, 22, 27, 32][stage - 1]; const wilt = health < 40; s += `<ellipse cx="0" cy="3" rx="${mR}" ry="${Math.round(mR * .38)}" fill="#0a1520" opacity=".9"/>`; if (stage === 1) { s += `<path d="M0,0 C-10,-10 10,-10 0,-20" fill="${wilt ? '#3a2a0a' : '#fde047'}"/>`; } else if (stage === 2) { s += `<path d="M0,0 C-15,-20 15,-30 0,-50" stroke="${wilt ? '#3a2a0a' : '#facc15'}" stroke-width="2.5" fill="none"/>`; s += `<path d="M-1,-20 C-10,-25 -10,-15 0,-30" fill="${wilt ? '#2a1a0a' : '#f59e0b'}"/>`; s += `<path d="M1,-35 C10,-40 10,-30 0,-45" fill="${wilt ? '#1a2a3a' : '#22d3ee'}"/>`; } else if (stage === 3) { s += `<path d="M0,0 C-20,-30 20,-50 0,-80" stroke="${wilt ? '#3a2a0a' : '#facc15'}" stroke-width="3" fill="none"/>`; s += `<path d="M-2,-30 C-15,-35 -15,-25 -1,-45" fill="${wilt ? '#2a1a0a' : '#f59e0b'}"/>`; s += `<path d="M2,-55 C15,-60 15,-50 1,-70" fill="${wilt ? '#1a2a3a' : '#22d3ee'}"/>`; s += `<g transform="translate(0,-80)">`; for (let r = 0; r < 360; r += 72) s += `<path d="M0,0 C-5,-15 5,-15 0,-25" fill="${wilt ? '#3a2a0a' : '#fde047'}" transform="rotate(${r})"/>`; s += `</g>`; } else if (stage === 4) { s += `<path d="M0,0 C-30,-40 30,-80 0,-120" stroke="${wilt ? '#3a2a0a' : '#facc15'}" stroke-width="3.5" fill="none"/>`; s += `<path d="M-3,-40 C-20,-45 -20,-35 -2,-60" fill="${wilt ? '#2a1a0a' : '#f59e0b'}"/>`; s += `<path d="M3,-80 C20,-85 20,-75 2,-100" fill="${wilt ? '#1a2a3a' : '#22d3ee'}"/>`; s += `<g transform="translate(0,-120)">`; for (let r = 0; r < 360; r += 60) s += `<path d="M0,0 C-8,-20 8,-20 0,-35" fill="${wilt ? '#3a2a0a' : '#fde047'}" transform="rotate(${r})"/>`; s += `<circle cx="0" cy="0" r="5" fill="#fef08a"/></g>`; } else { s += `<path d="M0,0 C-40,-50 40,-100 0,-150" stroke="${wilt ? '#3a2a0a' : '#facc15'}" stroke-width="4" fill="none"/>`; s += `<path d="M-4,-50 C-25,-55 -25,-45 -3,-75" fill="${wilt ? '#2a1a0a' : '#f59e0b'}"/>`; s += `<path d="M4,-100 C25,-105 25,-95 3,-125" fill="${wilt ? '#1a2a3a' : '#22d3ee'}"/>`; s += `<g transform="translate(0,-150)" filter="url(#glow-fire)">`; for (let r = 0; r < 360; r += 45) s += `<path d="M0,0 C-10,-25 10,-25 0,-45" fill="${wilt ? '#3a2a0a' : '#fde047'}" transform="rotate(${r})"/>`; for (let r = 22.5; r < 360; r += 45) s += `<path d="M0,0 C-5,-15 5,-15 0,-25" fill="${wilt ? '#1a2a3a' : '#67e8f9'}" transform="rotate(${r})"/>`; s += `<circle cx="0" cy="0" r="7" fill="#fff"/></g>`; } return s; }
+
         /* ══════════════════════════════════════════════════════════
            GROVE GAME ENGINE v2
            - Plant health system (hydration, nourishment, happiness)
@@ -1321,6 +1390,9 @@
             moonflower: { emoji: '🌙', color: '#a78bfa', incomeBase: 1.2 },
             starbloom: { emoji: '✧', color: '#38bdf8', incomeBase: 1.0 },
             emberleaf: { emoji: '🔥', color: '#f97316', incomeBase: 1.4 },
+            bramble: { emoji: '🔮', color: '#d946ef', incomeBase: 3.5, label: 'Twilight Bramble' },
+            frostlily: { emoji: '❄️', color: '#bae6fd', incomeBase: 3.0, label: 'Frost Lily' },
+            sunflare: { emoji: '☀️', color: '#fde047', incomeBase: 4.0, label: 'Sunflare Lotus' },
         };
 
         // XP needed per stage (1→2, 2→3, 3→4, 4→5) — deliberately slow
@@ -1380,6 +1452,9 @@
             totalCare: 0,
             nextEventAt: Date.now() + 120000,
             renamingId: null,
+            wiltWardUntil: 0,
+            nightbloomLeft: 0,
+            cooldownHalf: 0
         };
 
         /* ── SHOP ITEMS ── */
@@ -1499,12 +1574,15 @@
         function plantPos(idx) {
             const ga = document.getElementById('garden-area');
             const W = ga.clientWidth, H = ga.clientHeight;
-            return { x: W * [0.23, 0.51, 0.78][idx], y: H * 0.81 };
+            const pos3 = [0.23, 0.51, 0.78];
+            const pos4 = [0.16, 0.38, 0.62, 0.84];
+            const arr = G.plants.length === 4 ? pos4 : pos3;
+            return { x: W * arr[idx], y: H * 0.81 };
         }
 
         /* ── RENDER PLANTS ── */
         const pSvg = document.getElementById('plants-svg');
-        const GENS = { moonflower: moonflowerSVG, starbloom: starbloomSVG, emberleaf: emberleafSVG };
+        const GENS = { moonflower: moonflowerSVG, starbloom: starbloomSVG, emberleaf: emberleafSVG, bramble: brambleSVG, frostlily: frostlilySVG, sunflare: sunflareSVG };
         const STAGE_COLS = ['', '#6b7280', '#22d3ee', '#a78bfa', '#c084fc', '#e9d5ff'];
         const STAGE_LBL = ['', 'Seedling', 'Sprout', 'Sapling', 'Bloom', 'Ancient'];
 
@@ -1530,14 +1608,14 @@
             // Scale per stage so seedlings are still clearly visible
             const PLANT_SCALE = [0, 2.2, 1.7, 1.3, 1.1, 1.0];
             // Glow color per plant type
-            const GLOW_COL = { moonflower: 'rgba(167,139,250,0.18)', starbloom: 'rgba(56,189,248,0.18)', emberleaf: 'rgba(249,115,22,0.18)' };
+            const GLOW_COL = { moonflower: 'rgba(167,139,250,0.18)', starbloom: 'rgba(56,189,248,0.18)', emberleaf: 'rgba(249,115,22,0.18)', bramble: 'rgba(217,70,239,0.22)', frostlily: 'rgba(186,230,253,0.22)', sunflare: 'rgba(253,224,71,0.22)' };
 
             let plants = '', labels = '';
             G.plants.forEach((p, i) => {
                 const pos = plantPos(i);
                 const avgH = plantAvgHealth(p);
                 const col = STAGE_COLS[p.stage];
-                const swCls = ['psa', 'psb', 'psc'][i];
+                const swCls = ['psa', 'psb', 'psc', 'psa'][i];
                 const sc = PLANT_SCALE[p.stage];
                 const glowR = [0, 38, 52, 68, 85, 105][p.stage];
                 const glowCol = GLOW_COL[p.type];
@@ -1546,12 +1624,12 @@
                 plants += `<g transform="translate(${pos.x.toFixed(1)},${pos.y.toFixed(1)})">`;
                 // Soft glow halo so plant reads against dark bg
                 plants += `<ellipse cx="0" cy="${-(glowR * 0.45).toFixed(0)}" rx="${glowR}" ry="${(glowR * 0.7).toFixed(0)}" fill="${glowCol}" filter="url(#glow-soft)"/>`;
-                
+
                 // Animated group: sway animation and scale
                 plants += `<g class="${swCls}" transform="scale(${sc})">`;
                 plants += GENS[p.type](p.stage, avgH);
                 plants += `</g>`; // End animated group
-                
+
                 if (avgH < 20) plants += `<ellipse cx="0" cy="-20" rx="18" ry="4" fill="rgba(180,50,50,0.10)"/>`;
                 plants += `</g>`; // End outer group
 
@@ -1626,14 +1704,18 @@
         let nightbloomLeft = 0, wiltWardUntil = 0, cooldownHalf = 0;
 
         function doAction(action) {
+            if (!A.started) initAudio();
             const now = Date.now();
             const cdKey = action;
-            const cdTime = cooldownHalf > now
+            const cdTime = G.cooldownHalf > now
                 ? CARE_EFFECTS[action].cd * 0.5
                 : CARE_EFFECTS[action].cd;
             if (now < G.cd[cdKey]) return;
             G.cd[cdKey] = now + cdTime;
             G.totalCare++;
+
+            if (action === 'water') playSfx('water');
+            else playSfx('chime');
 
             const fx = CARE_EFFECTS[action];
             const xpMult = 1 + (G.upgrades.richsoil || 0) * 0.25;
@@ -1647,7 +1729,7 @@
 
                 // XP
                 const avgH = plantAvgHealth(p);
-                const xp = Math.round(actionXP(action, avgH) * xpMult * (nightbloomLeft > 0 ? 2 : 1));
+                const xp = Math.round(actionXP(action, avgH) * xpMult * (G.nightbloomLeft > 0 ? 2 : 1));
                 if (p.stage < 5) {
                     p.xp += xp; p.totalXp = (p.totalXp || 0) + xp;
                 }
@@ -1657,7 +1739,7 @@
                 if (checkLevelUp(p, pos)) anyBloomed = true;
             });
 
-            if (nightbloomLeft > 0) nightbloomLeft--;
+            if (G.nightbloomLeft > 0) G.nightbloomLeft--;
 
             const msgs = {
                 water: 'The soil drinks deeply.',
@@ -1696,7 +1778,8 @@
                 if (!btn || !bar) return;
                 const rem = G.cd[a] - now;
                 btn.disabled = rem > 0;
-                bar.style.width = rem > 0 ? ((rem / CARE_EFFECTS[a].cd) * 100) + '%' : '0%';
+                const pct = rem > 0 ? (rem / CARE_EFFECTS[a].cd) : 0;
+                bar.style.transform = `scaleX(${pct})`;
             });
         }
 
@@ -1706,7 +1789,7 @@
             const elapsed = (now - G.lastTick) / 60000; // minutes
             G.lastTick = now;
 
-            const decayMult = wiltWardUntil > now ? 0 : (1 - (G.upgrades.deeproots || 0) * 0.2);
+            const decayMult = G.wiltWardUntil > now ? 0 : (1 - (G.upgrades.deeproots || 0) * 0.2);
             const incMult = 1 + (G.upgrades.resonance || 0) * 0.3;
 
             G.plants.forEach(p => {
@@ -1786,7 +1869,7 @@
         function burnWiltWard() {
             if ((G.inventory.wiltward || 0) > 0) {
                 G.inventory.wiltward--;
-                wiltWardUntil = Date.now() + 600000;
+                G.wiltWardUntil = Date.now() + 600000;
                 toast('Wilt Ward active for 10 minutes!');
             } else {
                 applyBlight();
@@ -1849,17 +1932,19 @@
         }
         function useItem(id) {
             if (!(G.inventory[id] > 0)) return;
+            if (!A.started) initAudio();
             const now = Date.now();
             switch (id) {
                 case 'moonwater': healAll('hydration', 50); toast('All plants +50 Hydration!'); break;
                 case 'soulsoil': healAll('nourishment', 50); toast('All plants +50 Nourishment!'); break;
                 case 'songcrystal': healAll('happiness', 50); toast('All plants +50 Happiness!'); break;
-                case 'sunvial': cooldownHalf = now + 300000; toast('Cooldowns halved for 5 minutes!'); break;
-                case 'wiltward': wiltWardUntil = now + 600000; toast('Wilt Ward active for 10 minutes!'); break;
-                case 'nightbloom': nightbloomLeft = 3; toast('Next 3 care actions give double XP!'); break;
+                case 'sunvial': G.cooldownHalf = now + 300000; toast('Cooldowns halved for 5 minutes!'); break;
+                case 'wiltward': G.wiltWardUntil = now + 600000; toast('Wilt Ward active for 10 minutes!'); break;
+                case 'nightbloom': G.nightbloomLeft = 3; toast('Next 3 care actions give double XP!'); break;
                 default: toast('Item has no effect.'); return;
             }
             G.inventory[id]--;
+            playSfx('poof');
             spawnParticles('bloom', document.getElementById('garden-area').clientWidth / 2,
                 document.getElementById('garden-area').clientHeight / 2, 30);
             renderPlants(); renderHealth(); renderPlantList(); renderMarket(); updateBadge(); save();
@@ -1895,6 +1980,60 @@
             toast(`${p.name} whispers quietly.`);
         }
 
+        /* ── CROSS POLLINATION ── */
+        function openNursery() {
+            if (!A.started) initAudio();
+            const p1 = document.getElementById('nursery-p1');
+            const p2 = document.getElementById('nursery-p2');
+            p1.innerHTML = ''; p2.innerHTML = '';
+            G.plants.forEach(p => {
+                if (p.stage === 5 && p.type !== 'bramble' && p.type !== 'frostlily' && p.type !== 'sunflare') {
+                    p1.innerHTML += `<option value="${p.type}">${p.name}</option>`;
+                    p2.innerHTML += `<option value="${p.type}">${p.name}</option>`;
+                }
+            });
+            document.getElementById('nursery-modal').classList.add('open');
+        }
+
+        function crossPollinate() {
+            if (G.plants.length >= 4) {
+                toast("The Grove is full. No more plots are available.");
+                return;
+            }
+            const t1 = document.getElementById('nursery-p1').value;
+            const t2 = document.getElementById('nursery-p2').value;
+            if (t1 === t2) {
+                toast("You must select two different plants.");
+                return;
+            }
+
+            let hybridType = '';
+            if ((t1 === 'moonflower' && t2 === 'emberleaf') || (t2 === 'moonflower' && t1 === 'emberleaf')) hybridType = 'bramble';
+            else if ((t1 === 'moonflower' && t2 === 'starbloom') || (t2 === 'moonflower' && t1 === 'starbloom')) hybridType = 'frostlily';
+            else if ((t1 === 'starbloom' && t2 === 'emberleaf') || (t2 === 'starbloom' && t1 === 'emberleaf')) hybridType = 'sunflare';
+            else {
+                toast("These essences are incompatible.");
+                return;
+            }
+
+            closeModal('nursery-modal');
+
+            const newPlant = {
+                id: 'p' + Date.now(),
+                type: hybridType, name: PLANT_META[hybridType].label, stage: 1, xp: 0, totalXp: 0,
+                health: { hydration: 100, nourishment: 100, happiness: 100 }
+            };
+            G.plants.push(newPlant);
+
+            playSfx('poof');
+            spawnParticles('bloom', document.getElementById('garden-area').clientWidth / 2, document.getElementById('garden-area').clientHeight / 2, 40);
+
+            renderPlants(); renderHealth(); renderPlantList(); updateBadge();
+            toast(`A ${newPlant.name} seedling has emerged!`);
+            addLog(`Cross-pollinated ${PLANT_META[t1].emoji} and ${PLANT_META[t2].emoji} to create a ${PLANT_META[hybridType].emoji}.`);
+            save();
+        }
+
         /* ── MILESTONES ── */
         const MILE = [
             { id: 'first_care', test: () => G.totalCare >= 1, label: 'First care given' },
@@ -1919,6 +2058,19 @@
                         document.getElementById('garden-area').clientHeight * 0.5, 40);
                 }
             });
+            if (G.milestones.includes('all_s5')) {
+                if (!document.getElementById('nursery-btn')) {
+                    const btn = document.createElement('button');
+                    btn.id = 'nursery-btn';
+                    btn.className = 'hbtn';
+                    btn.style.color = '#d946ef';
+                    btn.style.borderColor = 'rgba(217,70,239,0.3)';
+                    btn.textContent = 'Nursery';
+                    btn.onclick = openNursery;
+                    const h = document.querySelector('header');
+                    h.insertBefore(btn, document.getElementById('audio-btn'));
+                }
+            }
         }
 
         /* ── LOG ── */
@@ -1992,6 +2144,7 @@
                     theme: G.theme, milestones: G.milestones, log: G.log.slice(0, 25),
                     inventory: G.inventory, upgrades: G.upgrades, totalCare: G.totalCare,
                     nextEventAt: G.nextEventAt,
+                    wiltWardUntil: G.wiltWardUntil, nightbloomLeft: G.nightbloomLeft, cooldownHalf: G.cooldownHalf
                 }));
             } catch (e) { }
         }
@@ -2010,6 +2163,9 @@
                 if (d.upgrades) G.upgrades = d.upgrades;
                 if (d.totalCare) G.totalCare = d.totalCare;
                 if (d.nextEventAt) G.nextEventAt = d.nextEventAt;
+                if (d.wiltWardUntil) G.wiltWardUntil = d.wiltWardUntil;
+                if (d.nightbloomLeft) G.nightbloomLeft = d.nightbloomLeft;
+                if (d.cooldownHalf) G.cooldownHalf = d.cooldownHalf;
                 return true;
             } catch (e) { return false; }
         }
@@ -2019,9 +2175,9 @@
             const now = Date.now();
             const elapsed = Math.min((now - G.lastTick) / 60000, 480); // cap at 8 hours
             if (elapsed < 0.5) return;
-            const decayMult = 1 - (G.upgrades.deeproots || 0) * 0.2;
+            const decayMult = G.wiltWardUntil > now ? 0 : (1 - (G.upgrades.deeproots || 0) * 0.2);
             const incMult = 1 + (G.upgrades.resonance || 0) * 0.3;
-            G.plants.forEach(p => {
+            G.plants.forEach((p, i) => {
                 p.health.hydration = Math.max(0, p.health.hydration - DECAY.hydration * elapsed * decayMult);
                 p.health.nourishment = Math.max(0, p.health.nourishment - DECAY.nourishment * elapsed * decayMult);
                 p.health.happiness = Math.max(0, p.health.happiness - DECAY.happiness * elapsed * decayMult);
@@ -2029,6 +2185,7 @@
                     const avgH = plantAvgHealth(p);
                     const passXp = avgH / 100 * 0.6 * elapsed * p.stage;
                     p.xp += passXp; p.totalXp = (p.totalXp || 0) + passXp;
+                    checkLevelUp(p, plantPos(i));
                 }
                 G.coins += incomeRate(p) * elapsed * incMult;
             });
@@ -2041,7 +2198,8 @@
             const blob = new Blob([JSON.stringify({
                 plants: G.plants, coins: G.coins, milestones: G.milestones,
                 log: G.log, inventory: G.inventory, upgrades: G.upgrades,
-                totalCare: G.totalCare, theme: G.theme, exportedAt: new Date().toISOString()
+                totalCare: G.totalCare, theme: G.theme, exportedAt: new Date().toISOString(),
+                wiltWardUntil: G.wiltWardUntil, nightbloomLeft: G.nightbloomLeft, cooldownHalf: G.cooldownHalf
             }, null, 2)], { type: 'application/json' });
             const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
             a.download = 'grove_backup.json'; a.click();
@@ -2062,6 +2220,9 @@
                         if (d.inventory) G.inventory = d.inventory;
                         if (d.upgrades) G.upgrades = d.upgrades;
                         if (d.totalCare) G.totalCare = d.totalCare;
+                        if (d.wiltWardUntil) G.wiltWardUntil = d.wiltWardUntil;
+                        if (d.nightbloomLeft) G.nightbloomLeft = d.nightbloomLeft;
+                        if (d.cooldownHalf) G.cooldownHalf = d.cooldownHalf;
                         if (d.theme) setTheme(d.theme);
                         save(); renderPlants(); renderHealth(); renderPlantList(); updateBadge();
                         toast('Garden imported successfully.');
@@ -2086,6 +2247,56 @@
 
         /* ── RESIZE ── */
         let resizeTO;
+        /* ── AUDIO ENGINE ── */
+        const AUDIO_SRCS = {
+            bg: "https://letrollologist.github.io/numa.github.io/forestnight.ogg",
+            water: "https://letrollologist.github.io/496739__16gpanskakomarkova_marina__13-1-watering-kettle.ogg",
+            chime: "https://letrollologist.github.io/talk.ogg",
+            poof: "https://letrollologist.github.io/talk.ogg"
+        };
+        let A = { bg: null, sfx: {}, started: false, muted: true };
+
+        function initAudio() {
+            if (A.started) return;
+            A.started = true;
+            A.muted = false;
+
+            A.bg = new Audio(AUDIO_SRCS.bg);
+            A.bg.loop = true;
+            A.bg.volume = 0.25;
+
+            ['water', 'chime', 'poof'].forEach(k => {
+                A.sfx[k] = new Audio(AUDIO_SRCS[k]);
+                A.sfx[k].volume = 0.4;
+            });
+
+            document.getElementById('audio-btn').innerText = '🎵 On';
+            document.getElementById('audio-btn').classList.add('gold');
+
+            A.bg.play().catch(() => { });
+        }
+
+        function toggleAudio() {
+            if (!A.started) { initAudio(); return; }
+            A.muted = !A.muted;
+            if (A.muted) {
+                if (A.bg) A.bg.pause();
+                document.getElementById('audio-btn').innerText = '🎵 Off';
+                document.getElementById('audio-btn').classList.remove('gold');
+            } else {
+                if (A.bg) A.bg.play().catch(() => { });
+                document.getElementById('audio-btn').innerText = '🎵 On';
+                document.getElementById('audio-btn').classList.add('gold');
+            }
+        }
+
+        function playSfx(type) {
+            if (!A.started || A.muted || !A.sfx[type]) return;
+            let snd = A.sfx[type].cloneNode();
+            snd.volume = A.sfx[type].volume;
+            snd.play().catch(() => { });
+        }
+
         window.addEventListener('resize', () => {
             clearTimeout(resizeTO);
             resizeTO = setTimeout(() => {
