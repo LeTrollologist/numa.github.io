@@ -1,737 +1,2117 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>The Grove · Numa's Garden</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400;1,500&amp;family=Cinzel:wght@400;500&amp;family=Josefin+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;overflow:hidden;background:#04060e;}
-:root{ --bg:#04060e;--panel:rgba(5,8,22,0.92); --border:rgba(168,159,216,0.14);--border-h:rgba(168,159,216,0.32); --accent:#a89fd8;--accent-d:rgba(168,159,216,0.16); --text:#cdd5ed;--muted:#58697f; }
-body.moonlit{--accent:#7eb8f7;--accent-d:rgba(126,184,247,0.15);--border:rgba(126,184,247,0.13);--border-h:rgba(126,184,247,0.30);}
-body.ember{--accent:#f0a96a;--accent-d:rgba(240,169,106,0.14);--border:rgba(240,169,106,0.13);--border-h:rgba(240,169,106,0.30);}
-body{font-family:'Josefin Sans',sans-serif;color:var(--text);}
-.bgcvs{position:fixed;inset:0;pointer-events:none;}
-#stars-cvs{z-index:1;}
-#forest-svg{position:fixed;bottom:0;left:0;width:100%;height:100%;z-index:2;overflow:visible;pointer-events:none;}
-#ff-cvs{z-index:4;}
-.sw1,.sw2,.sw3,.sw4,.swb{transform-box:fill-box;transform-origin:50% 100%;}
-.sw1{animation:sw1 9s ease-in-out infinite alternate;}
-.sw2{animation:sw2 12s ease-in-out infinite alternate;}
-.sw3{animation:sw3 7s ease-in-out infinite alternate;}
-.sw4{animation:sw4 15s ease-in-out infinite alternate;}
-.swb{animation:sw1 19s ease-in-out infinite alternate;}
-@keyframes sw1{from{transform:rotate(-.55deg)}to{transform:rotate(.65deg)}}
-@keyframes sw2{from{transform:rotate(.30deg)}to{transform:rotate(-.70deg)}}
-@keyframes sw3{from{transform:rotate(-.45deg)}to{transform:rotate(.50deg)}}
-@keyframes sw4{from{transform:rotate(.25deg)}to{transform:rotate(-.55deg)}}
-.psa{animation:psa 7s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%;}
-.psb{animation:psb 9.5s ease-in-out infinite alternate-reverse;transform-box:fill-box;transform-origin:50% 100%;}
-.psc{animation:psc 11.5s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%;}
-@keyframes psa{from{transform:rotate(-1.5deg)}to{transform:rotate(1.5deg)}}
-@keyframes psb{from{transform:rotate(1.4deg)}to{transform:rotate(-1.8deg)}}
-@keyframes psc{from{transform:rotate(-1.2deg)}to{transform:rotate(1.4deg)}}
-.fog-wrap{position:fixed;inset:0;z-index:3;pointer-events:none;}
-.fog{position:absolute;bottom:0;left:-60%;width:220%;border-radius:50%;}
-.fog-a{height:260px;filter:blur(36px);animation:fda 26s ease-in-out infinite alternate;bottom:-30px;}
-.fog-b{height:190px;filter:blur(55px);animation:fdb 40s ease-in-out infinite alternate;bottom:-10px;}
-.fog-c{height:340px;filter:blur(68px);animation:fdc 55s ease-in-out infinite alternate;bottom:-55px;}
-.fog-d{height:115px;filter:blur(24px);animation:fdd 19s ease-in-out infinite alternate;bottom:55px;}
-@keyframes fda{from{transform:translateX(0) scaleY(1)}to{transform:translateX(9%) scaleY(1.18)}}
-@keyframes fdb{from{transform:translateX(-6%) scaleY(.9)}to{transform:translateX(11%) scaleY(1.12)}}
-@keyframes fdc{from{transform:translateX(6%) scaleY(1)}to{transform:translateX(-9%) scaleY(1.22)}}
-@keyframes fdd{from{transform:translateX(-3%)}to{transform:translateX(7%)}}
-.fog-a{background:radial-gradient(ellipse 60% 100% at 50% 100%,rgba(120,145,210,.11) 0%,rgba(100,130,190,.055) 40%,transparent 70%);}
-.fog-b{background:radial-gradient(ellipse 70% 100% at 40% 100%,rgba(145,165,215,.07) 0%,transparent 65%);}
-.fog-c{background:radial-gradient(ellipse 45% 100% at 25% 100%,rgba(110,135,200,.06) 0%,transparent 60%),radial-gradient(ellipse 45% 100% at 75% 100%,rgba(110,135,200,.06) 0%,transparent 60%);}
-.fog-d{background:radial-gradient(ellipse 80% 100% at 60% 100%,rgba(160,175,220,.05) 0%,transparent 70%);}
-#app{position:relative;z-index:10;display:flex;flex-direction:column;height:100vh;width:100%;}
-header{height:50px;flex-shrink:0;background:var(--panel);border-bottom:1px solid var(--border);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);display:flex;align-items:center;padding:0 16px;gap:11px;}
-.logo{font-family:'Cinzel',serif;font-size:1.0rem;font-weight:400;color:var(--text);letter-spacing:.10em;flex-shrink:0;}
-.logo em{color:var(--accent);font-style:normal;}
-.logo-sub{font-size:.60rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);flex-shrink:0;}
-.hsp{flex:1;}
-.mbadge{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);border:1px solid var(--border);background:var(--accent-d);padding:4px 12px;flex-shrink:0;}
-.hbtn{font-family:'Josefin Sans',sans-serif;font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .22s;flex-shrink:0;}
-.hbtn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-d);}
-.main{flex:1;display:flex;overflow:hidden;min-height:0;}
-#garden-area{flex:1;position:relative;overflow:hidden;min-width:0;}
-#ground-cvs{position:absolute;inset:0;pointer-events:none;z-index:5;}
-#plants-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:8;overflow:visible;}
-#pcvs{position:absolute;inset:0;pointer-events:none;z-index:9;}
-.pname{font-family:'Cinzel',serif;font-size:11px;font-weight:400;letter-spacing:.07em;text-anchor:middle;cursor:pointer;}
-.pname:hover{opacity:.65;}
-.plvl{font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:.12em;text-transform:uppercase;fill:#485a6a;text-anchor:middle;}
-.sidebar{width:242px;flex-shrink:0;background:var(--panel);border-left:1px solid var(--border);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:none;}
-.sidebar::-webkit-scrollbar{display:none;}
-.sbsec{padding:12px 13px 10px;border-bottom:1px solid rgba(168,159,216,.055);}
-.sbsec:last-child{flex:1;border-bottom:none;}
-.sblbl{display:block;font-size:.58rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;}
-.abtn{width:100%;margin-bottom:6px;padding:0;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;position:relative;overflow:hidden;transition:border-color .2s,color .2s;display:flex;flex-direction:column;}
-.abtn:hover:not(:disabled){border-color:var(--border-h);color:var(--text);}
-.abtn:disabled{cursor:not-allowed;opacity:.68;}
-.abtn:last-child{margin-bottom:0;}
-.ainn{padding:8px 12px;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;font-family:'Josefin Sans',sans-serif;font-size:.66rem;letter-spacing:.10em;text-transform:uppercase;}
-.axp{font-size:.60rem;color:var(--accent);}
-.cdb{height:2px;background:var(--accent-d);position:relative;z-index:1;}
-.cdf{height:100%;background:var(--accent);width:0%;}
-.prow{border:1px solid var(--border);padding:9px 10px;cursor:pointer;transition:border-color .2s;margin-bottom:5px;}
-.prow:hover{border-color:var(--border-h);}
-.prow:last-child{margin-bottom:0;}
-.prowtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
-.prowname{font-size:.70rem;letter-spacing:.06em;color:var(--text);}
-.prowstage{font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;}
-.pxpbar{height:2px;background:rgba(168,159,216,.10);margin-bottom:3px;}
-.pxpfill{height:100%;transition:width .6s ease;}
-.pxptxt{font-size:.58rem;color:var(--muted);letter-spacing:.05em;}
-.thrw{display:flex;gap:5px;}
-.thbtn{flex:1;padding:7px 0;cursor:pointer;border:1px solid var(--border);background:transparent;font-family:'Josefin Sans',sans-serif;font-size:.60rem;letter-spacing:.10em;text-transform:uppercase;color:var(--muted);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:4px;}
-.thbtn::before{content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.thbtn[data-t="mist"]::before{background:#a89fd8;}
-.thbtn[data-t="moonlit"]::before{background:#7eb8f7;}
-.thbtn[data-t="ember"]::before{background:#f0a96a;}
-.thbtn:hover{border-color:var(--border-h);color:var(--text);background:var(--accent-d);}
-.thbtn.on{border-color:var(--accent);color:var(--accent);background:var(--accent-d);}
-.statusbar{height:26px;flex-shrink:0;background:rgba(2,4,10,.92);border-top:1px solid rgba(168,159,216,.06);backdrop-filter:blur(10px);display:flex;align-items:center;padding:0 13px;gap:12px;font-size:.58rem;letter-spacing:.10em;text-transform:uppercase;color:var(--muted);}
-.sdot{width:4px;height:4px;border-radius:50%;background:var(--accent);flex-shrink:0;}
-.ssp{flex:1;}
-#toast{position:fixed;bottom:46px;left:50%;z-index:300;transform:translateX(-50%) translateY(8px);background:var(--panel);border:1px solid var(--border);backdrop-filter:blur(20px);padding:11px 22px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.0rem;color:var(--text);text-align:center;max-width:440px;opacity:0;pointer-events:none;transition:opacity .4s,transform .4s;white-space:nowrap;}
-#toast.up{opacity:1;transform:translateX(-50%) translateY(0);}
-#smodal{position:fixed;inset:0;z-index:200;background:rgba(2,4,10,.96);backdrop-filter:blur(20px);display:none;flex-direction:column;align-items:center;justify-content:center;padding:36px 24px;}
-#smodal.open{display:flex;}
-.sbox{max-width:480px;width:100%;border:1px solid var(--border);background:rgba(6,9,22,.96);padding:32px 34px;}
-.stitle{font-family:'Cinzel',serif;font-size:1.25rem;font-weight:400;letter-spacing:.10em;color:var(--text);margin-bottom:22px;}
-.srow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(168,159,216,.055);font-size:.70rem;letter-spacing:.06em;}
-.srow:last-of-type{border-bottom:none;}
-.srl{color:var(--muted);text-transform:uppercase;font-size:.60rem;letter-spacing:.14em;}
-.srv{color:var(--text);}
-.mlist{margin-top:16px;display:flex;flex-direction:column;gap:5px;max-height:160px;overflow-y:auto;}
-.mitem{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.88rem;color:var(--muted);padding:4px 0;border-bottom:1px solid rgba(168,159,216,.04);}
-.sclose{margin-top:20px;width:100%;font-family:'Josefin Sans',sans-serif;font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;padding:9px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .2s;}
-.sclose:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-d);}
-.qtext{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.82rem;line-height:1.7;color:var(--muted);}
-@media(max-width:640px){.sidebar{width:195px;}.logo-sub,.mbadge{display:none;}}
-@media(max-width:440px){.sidebar{display:none;}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Grove · Numa's Garden</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400;1,500&family=Cinzel:wght@400;500&family=Josefin+Sans:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #04060e;
+        }
+
+        :root {
+            --bg: #04060e;
+            --panel: rgba(5, 8, 22, 0.93);
+            --border: rgba(168, 159, 216, 0.14);
+            --border-h: rgba(168, 159, 216, 0.32);
+            --accent: #a89fd8;
+            --accent-d: rgba(168, 159, 216, 0.16);
+            --text: #cdd5ed;
+            --muted: #58697f;
+            --gold: #c9a84c;
+            --gold-d: rgba(201, 168, 76, 0.14);
+        }
+
+        body.moonlit {
+            --accent: #7eb8f7;
+            --accent-d: rgba(126, 184, 247, 0.15);
+            --border: rgba(126, 184, 247, 0.13);
+            --border-h: rgba(126, 184, 247, 0.30);
+        }
+
+        body.ember {
+            --accent: #f0a96a;
+            --accent-d: rgba(240, 169, 106, 0.14);
+            --border: rgba(240, 169, 106, 0.13);
+            --border-h: rgba(240, 169, 106, 0.30);
+        }
+
+        body {
+            font-family: 'Josefin Sans', sans-serif;
+            color: var(--text);
+        }
+
+        .bgcvs {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        #stars-cvs {
+            z-index: 1;
+        }
+
+        #forest-svg {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            overflow: visible;
+            pointer-events: none;
+        }
+
+        #ff-cvs {
+            z-index: 4;
+        }
+
+        .sw1,
+        .sw2,
+        .sw3,
+        .sw4,
+        .swb {
+            transform-box: fill-box;
+            transform-origin: 50% 100%;
+        }
+
+        .sw1 {
+            animation: sw1 9s ease-in-out infinite alternate;
+        }
+
+        .sw2 {
+            animation: sw2 12s ease-in-out infinite alternate;
+        }
+
+        .sw3 {
+            animation: sw3 7s ease-in-out infinite alternate;
+        }
+
+        .sw4 {
+            animation: sw4 15s ease-in-out infinite alternate;
+        }
+
+        .swb {
+            animation: sw1 19s ease-in-out infinite alternate;
+        }
+
+        @keyframes sw1 {
+            from {
+                transform: rotate(-.55deg)
+            }
+
+            to {
+                transform: rotate(.65deg)
+            }
+        }
+
+        @keyframes sw2 {
+            from {
+                transform: rotate(.30deg)
+            }
+
+            to {
+                transform: rotate(-.70deg)
+            }
+        }
+
+        @keyframes sw3 {
+            from {
+                transform: rotate(-.45deg)
+            }
+
+            to {
+                transform: rotate(.50deg)
+            }
+        }
+
+        @keyframes sw4 {
+            from {
+                transform: rotate(.25deg)
+            }
+
+            to {
+                transform: rotate(-.55deg)
+            }
+        }
+
+        .psa {
+            animation: psa 7s ease-in-out infinite alternate;
+            transform-box: fill-box;
+            transform-origin: 50% 100%;
+        }
+
+        .psb {
+            animation: psb 9.5s ease-in-out infinite alternate-reverse;
+            transform-box: fill-box;
+            transform-origin: 50% 100%;
+        }
+
+        .psc {
+            animation: psc 11.5s ease-in-out infinite alternate;
+            transform-box: fill-box;
+            transform-origin: 50% 100%;
+        }
+
+        @keyframes psa {
+            from {
+                transform: rotate(-1.5deg)
+            }
+
+            to {
+                transform: rotate(1.5deg)
+            }
+        }
+
+        @keyframes psb {
+            from {
+                transform: rotate(1.4deg)
+            }
+
+            to {
+                transform: rotate(-1.8deg)
+            }
+        }
+
+        @keyframes psc {
+            from {
+                transform: rotate(-1.2deg)
+            }
+
+            to {
+                transform: rotate(1.4deg)
+            }
+        }
+
+        .fog-wrap {
+            position: fixed;
+            inset: 0;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .fog {
+            position: absolute;
+            bottom: 0;
+            left: -60%;
+            width: 220%;
+            border-radius: 50%;
+        }
+
+        .fog-a {
+            height: 260px;
+            filter: blur(36px);
+            animation: fda 26s ease-in-out infinite alternate;
+            bottom: -30px;
+        }
+
+        .fog-b {
+            height: 190px;
+            filter: blur(55px);
+            animation: fdb 40s ease-in-out infinite alternate;
+            bottom: -10px;
+        }
+
+        .fog-c {
+            height: 340px;
+            filter: blur(68px);
+            animation: fdc 55s ease-in-out infinite alternate;
+            bottom: -55px;
+        }
+
+        .fog-d {
+            height: 115px;
+            filter: blur(24px);
+            animation: fdd 19s ease-in-out infinite alternate;
+            bottom: 55px;
+        }
+
+        @keyframes fda {
+            from {
+                transform: translateX(0) scaleY(1)
+            }
+
+            to {
+                transform: translateX(9%) scaleY(1.18)
+            }
+        }
+
+        @keyframes fdb {
+            from {
+                transform: translateX(-6%) scaleY(.9)
+            }
+
+            to {
+                transform: translateX(11%) scaleY(1.12)
+            }
+        }
+
+        @keyframes fdc {
+            from {
+                transform: translateX(6%) scaleY(1)
+            }
+
+            to {
+                transform: translateX(-9%) scaleY(1.22)
+            }
+        }
+
+        @keyframes fdd {
+            from {
+                transform: translateX(-3%)
+            }
+
+            to {
+                transform: translateX(7%)
+            }
+        }
+
+        .fog-a {
+            background: radial-gradient(ellipse 60% 100% at 50% 100%, rgba(120, 145, 210, .11) 0%, rgba(100, 130, 190, .055) 40%, transparent 70%);
+        }
+
+        .fog-b {
+            background: radial-gradient(ellipse 70% 100% at 40% 100%, rgba(145, 165, 215, .07) 0%, transparent 65%);
+        }
+
+        .fog-c {
+            background: radial-gradient(ellipse 45% 100% at 25% 100%, rgba(110, 135, 200, .06) 0%, transparent 60%), radial-gradient(ellipse 45% 100% at 75% 100%, rgba(110, 135, 200, .06) 0%, transparent 60%);
+        }
+
+        .fog-d {
+            background: radial-gradient(ellipse 80% 100% at 60% 100%, rgba(160, 175, 220, .05) 0%, transparent 70%);
+        }
+
+        /* App shell */
+        #app {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+        }
+
+        header {
+            height: 50px;
+            flex-shrink: 0;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            gap: 10px;
+        }
+
+        .logo {
+            font-family: 'Cinzel', serif;
+            font-size: .95rem;
+            font-weight: 400;
+            color: var(--text);
+            letter-spacing: .10em;
+            flex-shrink: 0;
+        }
+
+        .logo em {
+            color: var(--accent);
+            font-style: normal;
+        }
+
+        .logo-sub {
+            font-size: .58rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--muted);
+            flex-shrink: 0;
+        }
+
+        .hsp {
+            flex: 1;
+        }
+
+        .coins-badge {
+            font-size: .64rem;
+            letter-spacing: .10em;
+            color: var(--gold);
+            border: 1px solid rgba(201, 168, 76, .28);
+            background: rgba(201, 168, 76, .10);
+            padding: 4px 11px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        .coins-badge::before {
+            content: '✦';
+            font-size: .55rem;
+        }
+
+        .mbadge {
+            font-size: .60rem;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--accent);
+            border: 1px solid var(--border);
+            background: var(--accent-d);
+            padding: 4px 11px;
+            flex-shrink: 0;
+        }
+
+        .hbtn {
+            font-family: 'Josefin Sans', sans-serif;
+            font-size: .62rem;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            padding: 5px 11px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            transition: all .22s;
+            flex-shrink: 0;
+        }
+
+        .hbtn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-d);
+        }
+
+        .hbtn.gold {
+            border-color: rgba(201, 168, 76, .3);
+            color: var(--gold);
+        }
+
+        .hbtn.gold:hover {
+            border-color: var(--gold);
+            background: var(--gold-d);
+        }
+
+        /* Main layout */
+        .main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        #garden-area {
+            flex: 1;
+            position: relative;
+            overflow: visible;
+            min-width: 0;
+        }
+
+        #ground-cvs {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        #plants-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            overflow: visible;
+        }
+
+        #pcvs {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9;
+        }
+
+        .pname {
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: .07em;
+            text-anchor: middle;
+            cursor: pointer;
+        }
+
+        .pname:hover {
+            opacity: .65;
+        }
+
+        .plvl {
+            font-family: 'Josefin Sans', sans-serif;
+            font-size: 9px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            fill: #485a6a;
+            text-anchor: middle;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 238px;
+            flex-shrink: 0;
+            background: var(--panel);
+            border-left: 1px solid var(--border);
+            backdrop-filter: blur(24px);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .sbsec {
+            padding: 11px 12px 9px;
+            border-bottom: 1px solid rgba(168, 159, 216, .05);
+        }
+
+        .sbsec:last-child {
+            border-bottom: none;
+        }
+
+        .sblbl {
+            display: block;
+            font-size: .57rem;
+            letter-spacing: .24em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        /* Care buttons */
+        .abtn {
+            width: 100%;
+            margin-bottom: 5px;
+            padding: 0;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: border-color .2s, color .2s;
+            display: flex;
+            flex-direction: column;
+            font-family: inherit;
+        }
+
+        .abtn:hover:not(:disabled) {
+            border-color: var(--border-h);
+            color: var(--text);
+        }
+
+        .abtn:disabled {
+            cursor: not-allowed;
+            opacity: .55;
+        }
+
+        .abtn:last-child {
+            margin-bottom: 0;
+        }
+
+        .ainn {
+            padding: 7px 11px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            font-size: .64rem;
+            letter-spacing: .10em;
+            text-transform: uppercase;
+        }
+
+        .axp {
+            font-size: .58rem;
+            color: var(--accent);
+        }
+
+        .cdb {
+            height: 2px;
+            background: rgba(168, 159, 216, .08);
+        }
+
+        .cdf {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width .12s linear;
+        }
+
+        /* Plant health bars */
+        .health-panel {
+            padding: 8px 12px 10px;
+        }
+
+        .hp-row {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 5px;
+        }
+
+        .hp-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .hp-icon {
+            font-size: .75rem;
+            width: 16px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .hp-bar {
+            flex: 1;
+            height: 3px;
+            background: rgba(168, 159, 216, .10);
+            border-radius: 1.5px;
+            overflow: hidden;
+        }
+
+        .hp-fill {
+            height: 100%;
+            border-radius: 1.5px;
+            transition: width .8s ease;
+        }
+
+        .hp-val {
+            font-size: .58rem;
+            color: var(--muted);
+            width: 28px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        /* Plant list in sidebar */
+        .prow {
+            border: 1px solid var(--border);
+            padding: 8px 10px;
+            cursor: pointer;
+            transition: border-color .2s;
+            margin-bottom: 4px;
+            position: relative;
+        }
+
+        .prow:hover {
+            border-color: var(--border-h);
+        }
+
+        .prow:last-child {
+            margin-bottom: 0;
+        }
+
+        .prowtop {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .prowname {
+            font-size: .68rem;
+            letter-spacing: .05em;
+            color: var(--text);
+        }
+
+        .prowstage {
+            font-size: .57rem;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+
+        .pxpbar {
+            height: 2px;
+            background: rgba(168, 159, 216, .10);
+            margin-bottom: 3px;
+        }
+
+        .pxpfill {
+            height: 100%;
+            transition: width .6s ease;
+        }
+
+        .pxptxt {
+            font-size: .57rem;
+            color: var(--muted);
+        }
+
+        .prow-income {
+            position: absolute;
+            top: 8px;
+            right: 32px;
+            font-size: .55rem;
+            color: var(--gold);
+            letter-spacing: .06em;
+        }
+
+        .prow-rename {
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            font-size: .65rem;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 2px 4px;
+            transition: color .2s;
+        }
+
+        .prow-rename:hover {
+            color: var(--accent);
+        }
+
+        /* Theme buttons */
+        .thrw {
+            display: flex;
+            gap: 5px;
+        }
+
+        .thbtn {
+            flex: 1;
+            padding: 6px 0;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: transparent;
+            font-family: 'Josefin Sans', sans-serif;
+            font-size: .58rem;
+            letter-spacing: .10em;
+            text-transform: uppercase;
+            color: var(--muted);
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .thbtn::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .thbtn[data-t="mist"]::before {
+            background: #a89fd8;
+        }
+
+        .thbtn[data-t="moonlit"]::before {
+            background: #7eb8f7;
+        }
+
+        .thbtn[data-t="ember"]::before {
+            background: #f0a96a;
+        }
+
+        .thbtn:hover {
+            border-color: var(--border-h);
+            color: var(--text);
+            background: var(--accent-d);
+        }
+
+        .thbtn.on {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-d);
+        }
+
+        /* Status bar */
+        .statusbar {
+            height: 24px;
+            flex-shrink: 0;
+            background: rgba(2, 4, 10, .92);
+            border-top: 1px solid rgba(168, 159, 216, .06);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 11px;
+            font-size: .57rem;
+            letter-spacing: .10em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .sdot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .ssp {
+            flex: 1;
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 42px;
+            left: 50%;
+            z-index: 500;
+            transform: translateX(-50%) translateY(10px);
+            background: var(--panel);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            padding: 10px 20px;
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 1.0rem;
+            color: var(--text);
+            text-align: center;
+            max-width: 460px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .4s, transform .4s;
+            white-space: nowrap;
+        }
+
+        #toast.up {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Modal base */
+        .modal {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            background: rgba(2, 4, 10, .96);
+            backdrop-filter: blur(20px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .mbox {
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid var(--border);
+            background: rgba(5, 8, 20, .98);
+            padding: 28px 30px;
+            max-height: 85vh;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+
+        .mbox::-webkit-scrollbar {
+            display: none;
+        }
+
+        .mtitle {
+            font-family: 'Cinzel', serif;
+            font-size: 1.15rem;
+            font-weight: 400;
+            letter-spacing: .10em;
+            color: var(--text);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mclose {
+            font-size: .60rem;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            padding: 4px 10px;
+            transition: all .2s;
+        }
+
+        .mclose:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Stats rows */
+        .srow {
+            display: flex;
+            justify-content: space-between;
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(168, 159, 216, .05);
+            font-size: .68rem;
+            letter-spacing: .05em;
+        }
+
+        .srow:last-of-type {
+            border-bottom: none;
+        }
+
+        .srl {
+            color: var(--muted);
+            text-transform: uppercase;
+            font-size: .58rem;
+            letter-spacing: .14em;
+        }
+
+        .srv {
+            color: var(--text);
+        }
+
+        .mitem-log {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: .86rem;
+            color: var(--muted);
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(168, 159, 216, .04);
+        }
+
+        /* Event modal */
+        #event-modal .mbox {
+            max-width: 440px;
+        }
+
+        .ev-desc {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 1.05rem;
+            line-height: 1.75;
+            color: var(--text);
+            margin-bottom: 20px;
+            padding: 14px 16px;
+            border-left: 2px solid var(--accent);
+        }
+
+        .ev-choices {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .ev-btn {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            font-family: 'Josefin Sans', sans-serif;
+            font-size: .64rem;
+            letter-spacing: .10em;
+            text-transform: uppercase;
+            text-align: left;
+            transition: all .2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ev-btn:hover {
+            border-color: var(--border-h);
+            color: var(--text);
+            background: var(--accent-d);
+        }
+
+        .ev-cost {
+            font-size: .58rem;
+            color: var(--gold);
+        }
+
+        /* Marketplace */
+        #market-modal .mbox {
+            max-width: 520px;
+        }
+
+        .mkt-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .mkt-item {
+            border: 1px solid var(--border);
+            padding: 12px 13px;
+            cursor: pointer;
+            transition: all .2s;
+            position: relative;
+        }
+
+        .mkt-item:hover {
+            border-color: var(--border-h);
+            background: rgba(168, 159, 216, .04);
+        }
+
+        .mkt-item.can-afford:hover {
+            border-color: var(--gold);
+            background: var(--gold-d);
+        }
+
+        .mkt-item.cant-afford {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+
+        .mkt-icon {
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+        }
+
+        .mkt-name {
+            font-size: .68rem;
+            letter-spacing: .06em;
+            color: var(--text);
+            margin-bottom: 3px;
+        }
+
+        .mkt-desc {
+            font-size: .58rem;
+            color: var(--muted);
+            line-height: 1.5;
+            margin-bottom: 7px;
+        }
+
+        .mkt-price {
+            font-size: .64rem;
+            color: var(--gold);
+            letter-spacing: .08em;
+        }
+
+        .mkt-price::before {
+            content: '✦ ';
+        }
+
+        .mkt-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: .50rem;
+            letter-spacing: .10em;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border: 1px solid;
+            border-radius: 0;
+        }
+
+        .mkt-badge.new {
+            border-color: rgba(134, 239, 172, .4);
+            color: #86efac;
+        }
+
+        .mkt-badge.rare {
+            border-color: rgba(196, 181, 253, .4);
+            color: #c4b5fd;
+        }
+
+        /* Inventory */
+        .inv-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .inv-item {
+            border: 1px solid var(--border);
+            padding: 7px 10px;
+            font-size: .62rem;
+            letter-spacing: .06em;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .inv-item:hover {
+            border-color: var(--border-h);
+            color: var(--text);
+        }
+
+        .inv-item .count {
+            color: var(--accent);
+            font-size: .58rem;
+        }
+
+        /* Passive income ticker */
+        @keyframes coinpop {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+        }
+
+        .coin-pop {
+            position: fixed;
+            font-size: .65rem;
+            color: var(--gold);
+            pointer-events: none;
+            animation: coinpop 1.2s ease-out forwards;
+            z-index: 600;
+            font-family: 'Josefin Sans', sans-serif;
+            letter-spacing: .08em;
+        }
+
+        /* Health warning pulse */
+        @keyframes warn-pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .4
+            }
+        }
+
+        .warn {
+            animation: warn-pulse 1.8s ease-in-out infinite;
+        }
+
+        .qtext {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: .82rem;
+            line-height: 1.75;
+            color: var(--muted);
+        }
+
+        @media(max-width:680px) {
+            .sidebar {
+                width: 195px;
+            }
+
+            .logo-sub {
+                display: none;
+            }
+        }
+
+        @media(max-width:440px) {
+            .sidebar {
+                display: none;
+            }
+        }
+    </style>
 </head>
+
 <body>
-<canvas id="stars-cvs" class="bgcvs"></canvas>
-<canvas id="ff-cvs" class="bgcvs"></canvas>
-<svg id="forest-svg" width="100%" height="100%"></svg>
-<div class="fog-wrap">
-  <div class="fog fog-a"></div>
-  <div class="fog fog-b"></div>
-  <div class="fog fog-c"></div>
-  <div class="fog fog-d"></div>
-</div>
-<div id="app">
-  <header>
-    <div class="logo">The <em>Grove</em></div>
-    <div class="logo-sub">Numa's Garden</div>
-    <div class="hsp"></div>
-    <div class="mbadge">Mastery · 3</div>
-    <button class="hbtn" onclick="showStats()">Stats</button>
-    <button class="hbtn" onclick="doImport()">Import</button>
-    <button class="hbtn" onclick="doExport()">Export</button>
-  </header>
-  <div class="main">
-    <div id="garden-area">
-      <canvas id="ground-cvs"></canvas>
-      <svg id="plants-svg" width="100%" height="100%"></svg>
-      <canvas id="pcvs"></canvas>
+    <canvas id="stars-cvs" class="bgcvs"></canvas>
+    <svg id="forest-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    <canvas id="ff-cvs" class="bgcvs"></canvas>
+    <div class="fog-wrap">
+        <div class="fog fog-a"></div>
+        <div class="fog fog-b"></div>
+        <div class="fog fog-c"></div>
+        <div class="fog fog-d"></div>
     </div>
-    <div class="sidebar">
-      <div class="sbsec">
-        <div class="sblbl">Care</div>
-        <button class="abtn" id="btn-water" onclick="doAction('water')">
-          <div class="ainn"><span>💧 Water</span><span class="axp" id="axp-water">+20 XP</span></div>
-          <div class="cdb"><div class="cdf" id="cd-water"></div></div>
-        </button>
-        <button class="abtn" id="btn-talk" onclick="doAction('talk')">
-          <div class="ainn"><span>💬 Talk</span><span class="axp" id="axp-talk">+15 XP</span></div>
-          <div class="cdb"><div class="cdf" id="cd-talk"></div></div>
-        </button>
-        <button class="abtn" id="btn-pet" onclick="doAction('pet')">
-          <div class="ainn"><span>✦ Pet</span><span class="axp" id="axp-pet">+10 XP</span></div>
-          <div class="cdb"><div class="cdf" id="cd-pet"></div></div>
-        </button>
-        <button class="abtn" id="btn-sing" onclick="doAction('sing')">
-          <div class="ainn"><span>♪ Sing</span><span class="axp" id="axp-sing">+30 XP</span></div>
-          <div class="cdb"><div class="cdf" id="cd-sing"></div></div>
-        </button>
-      </div>
-      <div class="sbsec" style="flex:1">
-        <div class="sblbl">The Plants</div>
-        <div id="plant-list"></div>
-      </div>
-      <div class="sbsec">
-        <div class="sblbl">Atmosphere</div>
-        <div class="thrw">
-          <button class="thbtn on" data-t="mist" onclick="setTheme('mist')">Mist</button>
-          <button class="thbtn" data-t="moonlit" onclick="setTheme('moonlit')">Moon</button>
-          <button class="thbtn" data-t="ember" onclick="setTheme('ember')">Ember</button>
+    <div id="app">
+        <header>
+            <div class="logo">The <em>Grove</em></div>
+            <div class="logo-sub">Numa's Garden</div>
+            <div class="hsp"></div>
+            <div class="coins-badge" id="coins-badge">0</div>
+            <div class="mbadge" id="mbadge">Mastery · 3</div>
+            <button class="hbtn gold" onclick="openMarket()">Market</button>
+            <button class="hbtn" onclick="openStats()">Records</button>
+            <button class="hbtn" onclick="doImport()">Import</button>
+            <button class="hbtn" onclick="doExport()">Export</button>
+        </header>
+        <div class="main">
+            <div id="garden-area">
+                <canvas id="ground-cvs"></canvas>
+                <svg id="plants-svg" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <filter id="glow-soft" x="-60%" y="-60%" width="220%" height="220%">
+                            <feGaussianBlur stdDeviation="5" result="b" />
+                            <feMerge>
+                                <feMergeNode in="b" />
+                                <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                        </filter>
+                        <filter id="glow-fire" x="-80%" y="-80%" width="260%" height="260%">
+                            <feGaussianBlur stdDeviation="9" result="b" />
+                            <feColorMatrix in="b" type="saturate" values="2.5" result="c" />
+                            <feMerge>
+                                <feMergeNode in="c" />
+                                <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <g id="plants-layer"></g>
+                    <g id="labels-layer"></g>
+                </svg>
+                <canvas id="pcvs"></canvas>
+            </div>
+            <div class="sidebar">
+                <div class="sbsec">
+                    <span class="sblbl">Care</span>
+                    <button class="abtn" id="btn-water" onclick="doAction('water')">
+                        <div class="ainn"><span>💧 Water</span><span class="axp">+Hydration</span></div>
+                        <div class="cdb">
+                            <div class="cdf" id="cd-water"></div>
+                        </div>
+                    </button>
+                    <button class="abtn" id="btn-talk" onclick="doAction('talk')">
+                        <div class="ainn"><span>💬 Talk</span><span class="axp">+Happiness</span></div>
+                        <div class="cdb">
+                            <div class="cdf" id="cd-talk"></div>
+                        </div>
+                    </button>
+                    <button class="abtn" id="btn-pet" onclick="doAction('pet')">
+                        <div class="ainn"><span>✦ Pet</span><span class="axp">+Nourishment</span></div>
+                        <div class="cdb">
+                            <div class="cdf" id="cd-pet"></div>
+                        </div>
+                    </button>
+                    <button class="abtn" id="btn-sing" onclick="doAction('sing')">
+                        <div class="ainn"><span>♪ Sing</span><span class="axp">+All stats</span></div>
+                        <div class="cdb">
+                            <div class="cdf" id="cd-sing"></div>
+                        </div>
+                    </button>
+                </div>
+                <div class="sbsec">
+                    <span class="sblbl">Plant Health</span>
+                    <div class="health-panel" id="health-panel"></div>
+                </div>
+                <div class="sbsec">
+                    <span class="sblbl">The Plants</span>
+                    <div id="plant-list"></div>
+                </div>
+                <div class="sbsec">
+                    <span class="sblbl">Atmosphere</span>
+                    <div class="thrw">
+                        <button class="thbtn on" data-t="mist" onclick="setTheme('mist')">Mist</button>
+                        <button class="thbtn" data-t="moonlit" onclick="setTheme('moonlit')">Moon</button>
+                        <button class="thbtn" data-t="ember" onclick="setTheme('ember')">Ember</button>
+                    </div>
+                </div>
+                <div class="sbsec">
+                    <p class="qtext">The grove grows slowly,<br>as all things worth<br>tending do.</p>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="sbsec" style="border-bottom:none">
-        <p class="qtext" style="padding:4px 0">The grove grows slowly,<br>as all things worth<br>tending do.</p>
-      </div>
+        <div class="statusbar">
+            <div class="sdot"></div>
+            <span id="status-text">The grove is quiet tonight…</span>
+            <div class="ssp"></div>
+            <span id="income-rate" style="color:var(--gold)"></span>
+        </div>
     </div>
-  </div>
-  <div class="statusbar">
-    <div class="sdot"></div>
-    <span id="status-text">The grove is quiet tonight…</span>
-    <div class="ssp"></div>
-    <span style="color:var(--accent)">3 plants · 12 actions today</span>
-  </div>
-</div>
 
-<div id="toast"></div>
+    <div id="toast"></div>
 
-<div id="smodal">
-  <div class="sbox">
-    <div class="stitle">The Grove · Records</div>
-    <div class="srow"><div class="srl">Mastery Level</div><div class="srv" id="stat-mastery">3</div></div>
-    <div class="srow"><div class="srl">Total XP Earned</div><div class="srv" id="stat-xp">1,240</div></div>
-    <div class="srow"><div class="srl">Plants Tended</div><div class="srv" id="stat-plants">3 / 3</div></div>
-    <div class="srow"><div class="srl">Days Tended</div><div class="srv" id="stat-days">47</div></div>
-    <div class="mlist" id="memories-list"></div>
-    <button class="sclose" onclick="hideStats()">✕ Close</button>
-  </div>
-</div>
+    <!-- Stats Modal -->
+    <div id="stats-modal" class="modal">
+        <div class="mbox">
+            <div class="mtitle">The Grove · Records <span class="mclose" onclick="closeModal('stats-modal')">✕
+                    Close</span></div>
+            <div id="stats-rows"></div>
+            <div style="margin-top:14px;max-height:160px;overflow-y:auto;" id="log-list"></div>
+        </div>
+    </div>
 
-<script>
-/* ── SEEDED PRNG ── */
-function mkRand(seed){let s=seed>>>0;return function(){s+=0x6d2b79f5;let t=s;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
+    <!-- Event Modal -->
+    <div id="event-modal" class="modal">
+        <div class="mbox">
+            <div class="mtitle" id="ev-title">Grove Event <span class="mclose" onclick="dismissEvent()">✕ Dismiss</span>
+            </div>
+            <div class="ev-desc" id="ev-desc"></div>
+            <div class="ev-choices" id="ev-choices"></div>
+        </div>
+    </div>
 
-/* ── STARS ── */
-const sCvs=document.getElementById('stars-cvs'),sCtx=sCvs.getContext('2d');
-function buildStars(){const W=sCvs.width=window.innerWidth,H=sCvs.height=window.innerHeight;sCtx.clearRect(0,0,W,H);const r=mkRand(55),n=Math.floor(W*H/1600);for(let i=0;i<n;i++){sCtx.beginPath();sCtx.arc(r()*W,r()*H*.72,r()*.85+.15,0,6.283);sCtx.fillStyle=`hsla(${(200+r()*70)|0},65%,85%,${(r()*.45+.1).toFixed(2)})`;sCtx.fill();}}
+    <!-- Market Modal -->
+    <div id="market-modal" class="modal">
+        <div class="mbox">
+            <div class="mtitle">The Market <span class="mclose" onclick="closeModal('market-modal')">✕ Close</span>
+            </div>
+            <div class="sblbl" style="margin-bottom:8px">Inventory</div>
+            <div class="inv-grid" id="inv-grid"></div>
+            <div class="sblbl" style="margin-top:14px;margin-bottom:8px">Shop</div>
+            <div class="mkt-grid" id="mkt-grid"></div>
+        </div>
+    </div>
 
-/* ── TREES ── */
-const NS='http://www.w3.org/2000/svg',fsvg=document.getElementById('forest-svg');
-function branch(p,x,y,angle,len,depth,maxD,rand,cfg){if(len<1.2)return;const rad=angle*Math.PI/180,ex=x+len*Math.sin(rad),ey=y-len*Math.cos(rad),t=depth/maxD,sw=Math.max(.35,cfg.tw*Math.pow(1-t*.88,2.5));const ln=document.createElementNS(NS,'line');ln.setAttribute('x1',x.toFixed(1));ln.setAttribute('y1',y.toFixed(1));ln.setAttribute('x2',ex.toFixed(1));ln.setAttribute('y2',ey.toFixed(1));ln.setAttribute('stroke-width',sw.toFixed(2));p.appendChild(ln);if(depth>=maxD)return;const r1=rand(),nb=depth===0?1:depth<2?2:r1<.12?1:r1<.78?2:3,sp=cfg.sp*(1+depth*.12);if(nb===1){branch(p,ex,ey,angle+(rand()-.5)*sp*.35,len*cfg.lf,depth+1,maxD,rand,cfg);}else if(nb===2){const ls=sp*(.42+rand()*.42),rs=sp*(.42+rand()*.42),lean=(rand()-.5)*sp*.12;branch(p,ex,ey,angle-ls+lean,len*cfg.lf*(.8+rand()*.3),depth+1,maxD,rand,cfg);branch(p,ex,ey,angle+rs+lean,len*cfg.lf*(.8+rand()*.3),depth+1,maxD,rand,cfg);}else{const s=sp*(.58+rand()*.28);branch(p,ex,ey,angle-s,len*cfg.lf*(.78+rand()*.28),depth+1,maxD,rand,cfg);branch(p,ex,ey,angle+(rand()-.5)*s*.22,len*cfg.lf*(.68+rand()*.22),depth+1,maxD,rand,cfg);branch(p,ex,ey,angle+s,len*cfg.lf*(.78+rand()*.28),depth+1,maxD,rand,cfg);}}
-function addRoots(inner,rand,cfg){const nr=3+Math.floor(rand()*3);for(let i=0;i<nr;i++){const a=(rand()-.5)*80,l=cfg.th*.18+rand()*cfg.th*.12,rad=a*Math.PI/180,ln=document.createElementNS(NS,'line');ln.setAttribute('x1','0');ln.setAttribute('y1','0');ln.setAttribute('x2',(l*Math.sin(rad)).toFixed(1));ln.setAttribute('y2',(l*.45).toFixed(1));ln.setAttribute('stroke-width',(cfg.tw*.55).toFixed(2));inner.appendChild(ln);}}
-function makeTree(cfg){const rand=mkRand(cfg.seed),outer=document.createElementNS(NS,'g');outer.setAttribute('transform',`translate(${cfg.x.toFixed(1)},${cfg.y.toFixed(1)})`);const inner=document.createElementNS(NS,'g');inner.setAttribute('class',cfg.sc);inner.setAttribute('stroke',cfg.col);inner.setAttribute('stroke-linecap','round');inner.setAttribute('stroke-linejoin','round');inner.setAttribute('fill','none');addRoots(inner,mkRand(cfg.seed+9999),{tw:cfg.tw,th:cfg.th});branch(inner,0,0,0,cfg.th,0,cfg.maxD,rand,cfg);outer.appendChild(inner);fsvg.appendChild(outer);}
-function buildForest(){fsvg.innerHTML='';const W=window.innerWidth,H=window.innerHeight,b=H,bg='#06091a',fg='#030508';[{x:W*.29,y:b,th:H*.21,sp:24,lf:.73,maxD:7,tw:7,sc:'swb',seed:91,col:bg},{x:W*.44,y:b,th:H*.18,sp:22,lf:.74,maxD:7,tw:6,sc:'swb',seed:92,col:bg},{x:W*.58,y:b,th:H*.20,sp:26,lf:.72,maxD:7,tw:7,sc:'swb',seed:93,col:bg},{x:W*.69,y:b,th:H*.17,sp:23,lf:.73,maxD:6,tw:5,sc:'swb',seed:94,col:bg}].forEach(makeTree);[{x:W*-.03,y:b,th:H*.55,sp:27,lf:.69,maxD:11,tw:23,sc:'sw1',seed:1001,col:fg},{x:W*.10,y:b,th:H*.48,sp:36,lf:.65,maxD:10,tw:15,sc:'sw3',seed:2002,col:fg},{x:W*.20,y:b,th:H*.40,sp:31,lf:.71,maxD:10,tw:16,sc:'sw2',seed:3003,col:fg},{x:W*.31,y:b,th:H*.28,sp:29,lf:.72,maxD:9,tw:10,sc:'sw4',seed:4004,col:fg},{x:W*.67,y:b,th:H*.30,sp:27,lf:.72,maxD:9,tw:11,sc:'sw2',seed:5005,col:fg},{x:W*.78,y:b,th:H*.40,sp:30,lf:.70,maxD:10,tw:15,sc:'sw1',seed:6006,col:fg},{x:W*.89,y:b,th:H*.52,sp:25,lf:.68,maxD:11,tw:21,sc:'sw3',seed:7007,col:fg},{x:W*1.02,y:b,th:H*.44,sp:29,lf:.70,maxD:10,tw:17,sc:'sw4',seed:8008,col:fg}].forEach(makeTree);}
+    <!-- Rename Modal -->
+    <div id="rename-modal" class="modal">
+        <div class="mbox" style="max-width:340px">
+            <div class="mtitle">Rename Plant</div>
+            <input id="rename-input" type="text" maxlength="20"
+                style="width:100%;background:transparent;border:1px solid var(--border);color:var(--text);padding:10px 12px;font-family:Cinzel,serif;font-size:.9rem;letter-spacing:.08em;outline:none;margin-bottom:14px;"
+                placeholder="Enter a new name…">
+            <div style="display:flex;gap:8px;">
+                <button onclick="confirmRename()"
+                    style="flex:1;padding:9px;border:1px solid var(--accent);background:var(--accent-d);color:var(--accent);cursor:pointer;font-family:'Josefin Sans',sans-serif;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;">Confirm</button>
+                <button onclick="closeModal('rename-modal')"
+                    style="flex:1;padding:9px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'Josefin Sans',sans-serif;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;">Cancel</button>
+            </div>
+        </div>
+    </div>
 
-/* ── FIREFLIES ── */
-const ffCvs=document.getElementById('ff-cvs'),ffCtx=ffCvs.getContext('2d');let flies=[],ffRaf;
-class Firefly{constructor(){this.init(true);}init(rnd){const W=ffCvs.width,H=ffCvs.height;this.x=rnd?Math.random()*W:(this.tx??Math.random()*W);this.y=rnd?H*(.18+Math.random()*.78):H*(.25+Math.random()*.70);this.fg=Math.random()>.70;this.sz=this.fg?Math.random()*1.9+1.1:Math.random()*.9+.35;this.hue=52+Math.random()*48;this.sat=72+Math.random()*22;this.pSpd=Math.random()*.022+.010;this.pPh=Math.random()*Math.PI*2;this.spd=(Math.random()*.0025+.0008)*(this.fg?1:.65);this.newTarget();this.prog=Math.random();}newTarget(){const W=ffCvs.width,H=ffCvs.height;this.sx=this.tx??this.x;this.sy=this.ty??this.y;const d=50+Math.random()*130,a=Math.random()*Math.PI*2;this.tx=Math.max(15,Math.min(W-15,this.sx+Math.cos(a)*d));this.ty=Math.max(H*.12,Math.min(H*.92,this.sy+Math.sin(a)*d));const j=()=>(Math.random()-.5)*90;this.c1x=this.sx+j();this.c1y=this.sy+j();this.c2x=this.tx+j();this.c2y=this.ty+j();this.prog=0;}update(){this.prog+=this.spd;if(this.prog>=1)this.newTarget();const t=this.prog,m=1-t;this.x=m*m*m*this.sx+3*m*m*t*this.c1x+3*m*t*t*this.c2x+t*t*t*this.tx;this.y=m*m*m*this.sy+3*m*m*t*this.c1y+3*m*t*t*this.c2y+t*t*t*this.ty;this.pPh+=this.pSpd;const p=.5+.5*Math.sin(this.pPh);this.op=this.fg?(0.28+p*.72):(0.08+p*.42);this.cs=this.sz*(0.65+p*.60);}draw(){const{x,y,cs:s,op,fg}=this,h=this.hue|0,sat=this.sat|0;ffCtx.save();ffCtx.globalAlpha=op;const hr=s*(fg?18:10),g0=ffCtx.createRadialGradient(x,y,0,x,y,hr);g0.addColorStop(0,`hsla(${h},${sat}%,68%,.12)`);g0.addColorStop(.5,`hsla(${h},${sat-15}%,55%,.06)`);g0.addColorStop(1,'transparent');ffCtx.fillStyle=g0;ffCtx.beginPath();ffCtx.arc(x,y,hr,0,6.283);ffCtx.fill();const mr=s*(fg?6:3.5),g1=ffCtx.createRadialGradient(x,y,0,x,y,mr);g1.addColorStop(0,`hsla(${h},${sat}%,85%,.75)`);g1.addColorStop(.6,`hsla(${h},${sat}%,70%,.30)`);g1.addColorStop(1,'transparent');ffCtx.fillStyle=g1;ffCtx.beginPath();ffCtx.arc(x,y,mr,0,6.283);ffCtx.fill();ffCtx.fillStyle=`hsla(${h+8},${sat-10}%,96%,.95)`;ffCtx.beginPath();ffCtx.arc(x,y,s,0,6.283);ffCtx.fill();ffCtx.restore();}}
-function initFF(){ffCvs.width=window.innerWidth;ffCvs.height=window.innerHeight;flies=Array.from({length:Math.floor(ffCvs.width*ffCvs.height/6000)},()=>new Firefly());}
-function loopFF(){ffCtx.clearRect(0,0,ffCvs.width,ffCvs.height);flies.forEach(f=>{f.update();f.draw();});ffRaf=requestAnimationFrame(loopFF);}
-function initBg(){buildStars();buildForest();initFF();cancelAnimationFrame(ffRaf);loopFF();}
+    <script>
 
-/* ── GROUND CANVAS ── */
-const gCvs=document.getElementById('ground-cvs'),gCtx=gCvs.getContext('2d');
-function drawGround(){const W=gCvs.width=gCvs.parentElement.clientWidth,H=gCvs.height=gCvs.parentElement.clientHeight,gY=Math.floor(H*.74);gCtx.clearRect(0,0,W,H);const g=gCtx.createLinearGradient(0,gY-12,0,H);g.addColorStop(0,'rgba(4,6,14,0)');g.addColorStop(.08,'rgba(4,6,14,0.62)');g.addColorStop(1,'rgba(2,3,8,0.92)');gCtx.fillStyle=g;gCtx.fillRect(0,gY-12,W,H-gY+12);const lg=gCtx.createLinearGradient(0,0,W,0);lg.addColorStop(0,'transparent');lg.addColorStop(.28,'rgba(168,159,216,0.06)');lg.addColorStop(.5,'rgba(168,159,216,0.10)');lg.addColorStop(.72,'rgba(168,159,216,0.06)');lg.addColorStop(1,'transparent');gCtx.fillStyle=lg;gCtx.fillRect(0,gY-1,W,2);}
+        function mkRand(s) { s = s >>> 0; return () => { s += 0x6d2b79f5; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+        const sCvs = document.getElementById('stars-cvs'), sCtx = sCvs.getContext('2d');
+        function buildStars() { const W = sCvs.width = window.innerWidth, H = sCvs.height = window.innerHeight; sCtx.clearRect(0, 0, W, H); const r = mkRand(55), n = Math.floor(W * H / 1600); for (let i = 0; i < n; i++) { sCtx.beginPath(); sCtx.arc(r() * W, r() * H * .72, r() * .85 + .15, 0, 6.283); sCtx.fillStyle = `hsla(${(200 + r() * 70) | 0},65%,85%,${(r() * .45 + .1).toFixed(2)})`; sCtx.fill(); } }
+        const NS = 'http://www.w3.org/2000/svg', fsvg = document.getElementById('forest-svg');
+        function branch(p, x, y, angle, len, depth, maxD, rand, cfg) { if (len < 1.2) return; const rad = angle * Math.PI / 180, ex = x + len * Math.sin(rad), ey = y - len * Math.cos(rad), t = depth / maxD, sw = Math.max(.35, cfg.tw * Math.pow(1 - t * .88, 2.5)); const ln = document.createElementNS(NS, 'line'); ln.setAttribute('x1', x.toFixed(1)); ln.setAttribute('y1', y.toFixed(1)); ln.setAttribute('x2', ex.toFixed(1)); ln.setAttribute('y2', ey.toFixed(1)); ln.setAttribute('stroke-width', sw.toFixed(2)); p.appendChild(ln); if (depth >= maxD) return; const r1 = rand(), nb = depth === 0 ? 1 : depth < 2 ? 2 : r1 < .12 ? 1 : r1 < .78 ? 2 : 3, sp = cfg.sp * (1 + depth * .12); if (nb === 1) { branch(p, ex, ey, angle + (rand() - .5) * sp * .35, len * cfg.lf, depth + 1, maxD, rand, cfg); } else if (nb === 2) { const ls = sp * (.42 + rand() * .42), rs = sp * (.42 + rand() * .42), lean = (rand() - .5) * sp * .12; branch(p, ex, ey, angle - ls + lean, len * cfg.lf * (.8 + rand() * .3), depth + 1, maxD, rand, cfg); branch(p, ex, ey, angle + rs + lean, len * cfg.lf * (.8 + rand() * .3), depth + 1, maxD, rand, cfg); } else { const s = sp * (.58 + rand() * .28); branch(p, ex, ey, angle - s, len * cfg.lf * (.78 + rand() * .28), depth + 1, maxD, rand, cfg); branch(p, ex, ey, angle + (rand() - .5) * s * .22, len * cfg.lf * (.68 + rand() * .22), depth + 1, maxD, rand, cfg); branch(p, ex, ey, angle + s, len * cfg.lf * (.78 + rand() * .28), depth + 1, maxD, rand, cfg); } }
+        function addRoots(inner, rand, cfg) { const nr = 3 + Math.floor(rand() * 3); for (let i = 0; i < nr; i++) { const a = (rand() - .5) * 80, l = cfg.th * .18 + rand() * cfg.th * .12, rad = a * Math.PI / 180, ln = document.createElementNS(NS, 'line'); ln.setAttribute('x1', '0'); ln.setAttribute('y1', '0'); ln.setAttribute('x2', (l * Math.sin(rad)).toFixed(1)); ln.setAttribute('y2', (l * .45).toFixed(1)); ln.setAttribute('stroke-width', (cfg.tw * .55).toFixed(2)); inner.appendChild(ln); } }
+        function makeTree(cfg) { const rand = mkRand(cfg.seed), outer = document.createElementNS(NS, 'g'); outer.setAttribute('transform', `translate(${cfg.x.toFixed(1)},${cfg.y.toFixed(1)})`); const inner = document.createElementNS(NS, 'g'); inner.setAttribute('class', cfg.sc); inner.setAttribute('stroke', cfg.col); inner.setAttribute('stroke-linecap', 'round'); inner.setAttribute('stroke-linejoin', 'round'); inner.setAttribute('fill', 'none'); addRoots(inner, mkRand(cfg.seed + 9999), { tw: cfg.tw, th: cfg.th }); branch(inner, 0, 0, 0, cfg.th, 0, cfg.maxD, rand, cfg); outer.appendChild(inner); fsvg.appendChild(outer); }
+        function buildForest() { fsvg.innerHTML = ''; const W = window.innerWidth, H = window.innerHeight, b = H, bg = '#06091a', fg = '#030508';[{ x: W * .29, y: b, th: H * .21, sp: 24, lf: .73, maxD: 7, tw: 7, sc: 'swb', seed: 91, col: bg }, { x: W * .44, y: b, th: H * .18, sp: 22, lf: .74, maxD: 7, tw: 6, sc: 'swb', seed: 92, col: bg }, { x: W * .58, y: b, th: H * .20, sp: 26, lf: .72, maxD: 7, tw: 7, sc: 'swb', seed: 93, col: bg }, { x: W * .69, y: b, th: H * .17, sp: 23, lf: .73, maxD: 6, tw: 5, sc: 'swb', seed: 94, col: bg }].forEach(makeTree);[{ x: W * -.03, y: b, th: H * .55, sp: 27, lf: .69, maxD: 11, tw: 23, sc: 'sw1', seed: 1001, col: fg }, { x: W * .10, y: b, th: H * .48, sp: 36, lf: .65, maxD: 10, tw: 15, sc: 'sw3', seed: 2002, col: fg }, { x: W * .20, y: b, th: H * .40, sp: 31, lf: .71, maxD: 10, tw: 16, sc: 'sw2', seed: 3003, col: fg }, { x: W * .31, y: b, th: H * .28, sp: 29, lf: .72, maxD: 9, tw: 10, sc: 'sw4', seed: 4004, col: fg }, { x: W * .67, y: b, th: H * .30, sp: 27, lf: .72, maxD: 9, tw: 11, sc: 'sw2', seed: 5005, col: fg }, { x: W * .78, y: b, th: H * .40, sp: 30, lf: .70, maxD: 10, tw: 15, sc: 'sw1', seed: 6006, col: fg }, { x: W * .89, y: b, th: H * .52, sp: 25, lf: .68, maxD: 11, tw: 21, sc: 'sw3', seed: 7007, col: fg }, { x: W * 1.02, y: b, th: H * .44, sp: 29, lf: .70, maxD: 10, tw: 17, sc: 'sw4', seed: 8008, col: fg }].forEach(makeTree); }
+        const ffCvs = document.getElementById('ff-cvs'), ffCtx = ffCvs.getContext('2d'); let flies = [], ffRaf;
+        class Firefly { constructor() { this.init(true); } init(rnd) { const W = ffCvs.width, H = ffCvs.height; this.x = rnd ? Math.random() * W : (this.tx ?? Math.random() * W); this.y = rnd ? H * (.18 + Math.random() * .78) : H * (.25 + Math.random() * .70); this.fg = Math.random() > .70; this.sz = this.fg ? Math.random() * 1.9 + 1.1 : Math.random() * .9 + .35; this.hue = 52 + Math.random() * 48; this.sat = 72 + Math.random() * 22; this.pSpd = Math.random() * .022 + .010; this.pPh = Math.random() * Math.PI * 2; this.spd = (Math.random() * .0025 + .0008) * (this.fg ? 1 : .65); this.newTarget(); this.prog = Math.random(); } newTarget() { const W = ffCvs.width, H = ffCvs.height; this.sx = this.tx ?? this.x; this.sy = this.ty ?? this.y; const d = 50 + Math.random() * 130, a = Math.random() * Math.PI * 2; this.tx = Math.max(15, Math.min(W - 15, this.sx + Math.cos(a) * d)); this.ty = Math.max(H * .12, Math.min(H * .92, this.sy + Math.sin(a) * d)); const j = () => (Math.random() - .5) * 90; this.c1x = this.sx + j(); this.c1y = this.sy + j(); this.c2x = this.tx + j(); this.c2y = this.ty + j(); this.prog = 0; } update() { this.prog += this.spd; if (this.prog >= 1) this.newTarget(); const t = this.prog, m = 1 - t; this.x = m * m * m * this.sx + 3 * m * m * t * this.c1x + 3 * m * t * t * this.c2x + t * t * t * this.tx; this.y = m * m * m * this.sy + 3 * m * m * t * this.c1y + 3 * m * t * t * this.c2y + t * t * t * this.ty; this.pPh += this.pSpd; const p = .5 + .5 * Math.sin(this.pPh); this.op = this.fg ? (0.28 + p * .72) : (0.08 + p * .42); this.cs = this.sz * (0.65 + p * .60); } draw() { const { x, y, cs: s, op, fg } = this, h = this.hue | 0, sat = this.sat | 0; ffCtx.save(); ffCtx.globalAlpha = op; const hr = s * (fg ? 18 : 10), g0 = ffCtx.createRadialGradient(x, y, 0, x, y, hr); g0.addColorStop(0, `hsla(${h},${sat}%,68%,.12)`); g0.addColorStop(.5, `hsla(${h},${sat - 15}%,55%,.06)`); g0.addColorStop(1, 'transparent'); ffCtx.fillStyle = g0; ffCtx.beginPath(); ffCtx.arc(x, y, hr, 0, 6.283); ffCtx.fill(); const mr = s * (fg ? 6 : 3.5), g1 = ffCtx.createRadialGradient(x, y, 0, x, y, mr); g1.addColorStop(0, `hsla(${h},${sat}%,85%,.75)`); g1.addColorStop(.6, `hsla(${h},${sat}%,70%,.30)`); g1.addColorStop(1, 'transparent'); ffCtx.fillStyle = g1; ffCtx.beginPath(); ffCtx.arc(x, y, mr, 0, 6.283); ffCtx.fill(); ffCtx.fillStyle = `hsla(${h + 8},${sat - 10}%,96%,.95)`; ffCtx.beginPath(); ffCtx.arc(x, y, s, 0, 6.283); ffCtx.fill(); ffCtx.restore(); } }
+        function initFF() { ffCvs.width = window.innerWidth; ffCvs.height = window.innerHeight; flies = Array.from({ length: Math.floor(ffCvs.width * ffCvs.height / 6000) }, () => new Firefly()); }
+        function loopFF() { ffCtx.clearRect(0, 0, ffCvs.width, ffCvs.height); flies.forEach(f => { f.update(); f.draw(); }); ffRaf = requestAnimationFrame(loopFF); }
+        function initBg() { buildStars(); buildForest(); initFF(); cancelAnimationFrame(ffRaf); loopFF(); }
+        const gCvs = document.getElementById('ground-cvs'), gCtx = gCvs.getContext('2d');
+        function drawGround() { const W = gCvs.width = gCvs.parentElement.clientWidth, H = gCvs.height = gCvs.parentElement.clientHeight, gY = Math.floor(H * .74); gCtx.clearRect(0, 0, W, H); const g = gCtx.createLinearGradient(0, gY - 12, 0, H); g.addColorStop(0, 'rgba(4,6,14,0)'); g.addColorStop(.08, 'rgba(4,6,14,0.62)'); g.addColorStop(1, 'rgba(2,3,8,0.92)'); gCtx.fillStyle = g; gCtx.fillRect(0, gY - 12, W, H - gY + 12); const lg = gCtx.createLinearGradient(0, 0, W, 0); lg.addColorStop(0, 'transparent'); lg.addColorStop(.28, 'rgba(168,159,216,0.06)'); lg.addColorStop(.5, 'rgba(168,159,216,0.10)'); lg.addColorStop(.72, 'rgba(168,159,216,0.06)'); lg.addColorStop(1, 'transparent'); gCtx.fillStyle = lg; gCtx.fillRect(0, gY - 1, W, 2); }
 
-/* ══════════════════════════════════ SVG PLANT GENERATORS 3×5 stages ══════════════════════════════════ */
-function moonflowerSVG(stage){ let s='';const lA='#2a4f22',lB='#314f28',lC='#3a5c32',mR=[16,20,24,28,32][stage-1]; s+=`<ellipse cx="0" cy="3" rx="${mR}" ry="${Math.round(mR*.38)}" fill="#0a1520" opacity=".9"/>`; if(stage===1){ s+=`<path d="M0,0 Q0,-14 0,-28" stroke="#4a7040" stroke-width="2" fill="none" stroke-linecap="round"/>`; s+=`<path d="M0,-14 C-10,-9 -12,-3 -7,0 C-3,-1 0,-14 0,-14Z" fill="${lA}"/>`; s+=`<path d="M0,-14 C10,-9 12,-3 7,0 C3,-1 0,-14 0,-14Z" fill="${lA}"/>`; }else if(stage===2){ s+=`<path d="M0,0 C-5,-22 5,-44 0,-62" stroke="#4a7040" stroke-width="2.8" fill="none" stroke-linecap="round"/>`; s+=`<path d="M-1,-24 C-23,-15 -28,-4 -19,1 C-9,-3 -1,-24 -1,-24Z" fill="${lA}"/>`; s+=`<path d="M-1,-24 C-19,-16 -20,-8 -19,1" stroke="#3a6632" stroke-width=".8" fill="none" opacity=".7"/>`; s+=`<path d="M1,-40 C23,-31 28,-20 19,-14 C9,-17 1,-40 1,-40Z" fill="${lA}"/>`; s+=`<path d="M1,-40 C19,-32 20,-23 19,-14" stroke="#3a6632" stroke-width=".8" fill="none" opacity=".7"/>`; }else if(stage===3){ s+=`<path d="M0,0 C-8,-32 8,-65 0,-97" stroke="#4a7040" stroke-width="3.2" fill="none" stroke-linecap="round"/>`; s+=`<path d="M-1,-22 C-25,-13 -31,0 -21,4 C-11,0 -1,-22 -1,-22Z" fill="${lA}"/>`; s+=`<path d="M1,-38 C25,-29 31,-16 21,-10 C11,-13 1,-38 1,-38Z" fill="${lA}"/>`; s+=`<path d="M-1,-57 C-23,-48 -27,-36 -19,-32 C-9,-35 -1,-57 -1,-57Z" fill="${lB}"/>`; s+=`<path d="M1,-72 C23,-63 27,-51 19,-47 C9,-50 1,-72 1,-72Z" fill="${lB}"/>`; s+=`<g transform="translate(0,-97)">`; for(let r=0;r<360;r+=72)s+=`<path d="M0,0 C-4,-5 -5,-14 0,-20 C5,-14 4,-5 0,0Z" fill="${lB}" transform="rotate(${r})"/>`; s+=`<path d="M0,0 C-8,-9 -8,-22 0,-30 C8,-22 8,-9 0,0Z" fill="#7c3aed"/>`; s+=`<path d="M0,0 C-3,-9 -3,-20 0,-26" stroke="#6d28d9" stroke-width=".8" fill="none"/>`; s+=`</g>`; }else if(stage===4){ s+=`<path d="M0,0 C-12,-46 12,-92 0,-138" stroke="#4a7040" stroke-width="3.8" fill="none" stroke-linecap="round"/>`; s+=`<path d="M-1,-25 C-27,-15 -33,-2 -23,4 C-12,-1 -1,-25 -1,-25Z" fill="${lA}"/>`; s+=`<path d="M1,-44 C27,-34 33,-21 23,-15 C12,-18 1,-44 1,-44Z" fill="${lA}"/>`; s+=`<path d="M-1,-65 C-25,-55 -29,-42 -21,-38 C-10,-41 -1,-65 -1,-65Z" fill="${lB}"/>`; s+=`<path d="M1,-86 C25,-76 29,-63 21,-59 C10,-62 1,-86 1,-86Z" fill="${lB}"/>`; s+=`<path d="M-1,-104 C-22,-95 -25,-83 -18,-79 C-9,-82 -1,-104 -1,-104Z" fill="${lC}"/>`; s+=`<path d="M1,-118 C22,-109 25,-97 18,-93 C9,-96 1,-118 1,-118Z" fill="${lC}"/>`; s+=`<g transform="translate(0,-138)">`; for(let r=0;r<360;r+=60)s+=`<path d="M0,0 C-11,-22 -10,-44 0,-54 C10,-44 11,-22 0,0Z" fill="#a78bfa" transform="rotate(${r})" opacity=".91" stroke="#c4b5fd" stroke-width=".5"/>`; for(let r=30;r<360;r+=60)s+=`<path d="M0,0 C-5,-11 -5,-23 0,-29 C5,-23 5,-11 0,0Z" fill="#c4b5fd" transform="rotate(${r})" opacity=".58"/>`; s+=`<circle cx="0" cy="0" r="11" fill="#fef9e8"/><circle cx="0" cy="0" r="5.5" fill="#fde68a"/>`; for(let r=0;r<360;r+=60){const rd=r*Math.PI/180;s+=`<circle cx="${(Math.sin(rd)*8).toFixed(1)}" cy="${(-Math.cos(rd)*8).toFixed(1)}" r="2" fill="#f59e0b" opacity=".9"/>`;} s+=`</g>`; }else{ s+=`<path d="M0,0 C-14,-55 14,-110 0,-172" stroke="#4a7040" stroke-width="4.2" fill="none" stroke-linecap="round"/>`; s+=`<path d="M0,-108 C10,-122 18,-140 15,-155" stroke="#4a7040" stroke-width="2.4" fill="none" stroke-linecap="round"/>`; s+=`<path d="M-1,-26 C-28,-16 -35,-2 -24,4 C-13,-1 -1,-26 -1,-26Z" fill="${lA}"/>`; s+=`<path d="M1,-46 C28,-36 35,-22 24,-16 C13,-19 1,-46 1,-46Z" fill="${lA}"/>`; s+=`<path d="M-1,-68 C-27,-58 -31,-44 -23,-40 C-12,-43 -1,-68 -1,-68Z" fill="${lB}"/>`; s+=`<path d="M1,-90 C27,-80 31,-66 23,-62 C12,-65 1,-90 1,-90Z" fill="${lB}"/>`; s+=`<path d="M-1,-110 C-24,-101 -27,-88 -20,-84 C-10,-87 -1,-110 -1,-110Z" fill="${lC}"/>`; s+=`<path d="M1,-124 C24,-115 27,-102 20,-98 C10,-101 1,-124 1,-124Z" fill="${lC}"/>`; s+=`<path d="M16,-140 C26,-134 29,-127 22,-124 C15,-126 16,-140 16,-140Z" fill="${lC}" opacity=".85"/>`; s+=`<path d="M13,-148 C4,-142 2,-135 8,-132 C13,-134 13,-148 13,-148Z" fill="${lC}" opacity=".85"/>`; s+=`<g transform="translate(15,-155)">`; for(let r=0;r<360;r+=72)s+=`<path d="M0,0 C-7,-15 -7,-30 0,-37 C7,-30 7,-15 0,0Z" fill="#b8a0f0" transform="rotate(${r})" opacity=".88"/>`; s+=`<circle cx="0" cy="0" r="8" fill="#fef9e8"/><circle cx="0" cy="0" r="4" fill="#fde68a"/>`; s+=`</g>`; s+=`<g transform="translate(0,-172)" filter="url(#glow-soft)">`; for(let r=0;r<360;r+=45)s+=`<path d="M0,0 C-13,-27 -12,-56 0,-68 C12,-56 13,-27 0,0Z" fill="#9d7ee8" transform="rotate(${r})" opacity=".90" stroke="#b89df4" stroke-width=".4"/>`; for(let r=22.5;r<360;r+=45)s+=`<path d="M0,0 C-6,-15 -6,-32 0,-40 C6,-32 6,-15 0,0Z" fill="#ddd6fe" transform="rotate(${r})" opacity=".60"/>`; s+=`<circle cx="0" cy="0" r="13" fill="#fefce8"/><circle cx="0" cy="0" r="6.5" fill="#fde68a"/>`; for(let r=0;r<360;r+=45){const rd=r*Math.PI/180;s+=`<circle cx="${(Math.sin(rd)*10).toFixed(1)}" cy="${(-Math.cos(rd)*10).toFixed(1)}" r="2.2" fill="#f59e0b" opacity=".9"/>`;} s+=`<circle cx="0" cy="-74" r="2.5" fill="#e0d7ff"><animate attributeName="opacity" values=".7;.1;.7" dur="2.5s" repeatCount="indefinite"/></circle>`; s+=`<circle cx="20" cy="-62" r="1.8" fill="#c4b5fd"><animate attributeName="opacity" values=".5;0;.5" dur="3.2s" repeatCount="indefinite"/></circle>`; s+=`<circle cx="-22" cy="-58" r="1.8" fill="#c4b5fd"><animate attributeName="opacity" values=".4;.8;.4" dur="2.0s" repeatCount="indefinite"/></circle>`; s+=`</g>`; } return s; }
-function starbloomSVG(stage){ let s='';const mR=[14,18,22,26,30][stage-1]; s+=`<ellipse cx="0" cy="3" rx="${mR}" ry="${Math.round(mR*.40)}" fill="#0a1520" opacity=".9"/>`; if(stage===1){ s+=`<polygon points="0,-8 -4,0 4,0" fill="#0e7490" opacity=".9"/>`; s+=`<polygon points="-7,-5 -9,0 -5,0" fill="#0891b2" opacity=".8"/>`; s+=`<polygon points="7,-5 9,0 5,0" fill="#0891b2" opacity=".8"/>`; }else if(stage===2){ s+=`<polyline points="0,0 -2,-20 1,-38 0,-58" stroke="#0891b2" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`; s+=`<polygon points="-1,-22 -22,-18 -26,-28 -8,-34" fill="#1a3d5c" opacity=".9"/>`; s+=`<polygon points="1,-36 22,-32 26,-42 8,-48" fill="#1a3d5c" opacity=".9"/>`; s+=`<line x1="-14" y1="-22" x2="-18" y2="-26" stroke="#38bdf8" stroke-width=".8" opacity=".6"/>`; s+=`<line x1="14" y1="-36" x2="18" y2="-40" stroke="#38bdf8" stroke-width=".8" opacity=".6"/>`; }else if(stage===3){ s+=`<polyline points="0,0 -3,-25 2,-52 0,-94" stroke="#0891b2" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`; s+=`<polygon points="-1,-24 -24,-18 -28,-30 -10,-36" fill="#1a3d5c" opacity=".9"/>`; s+=`<polygon points="1,-40 24,-34 28,-46 10,-52" fill="#1a3d5c" opacity=".9"/>`; s+=`<polygon points="-1,-56 -20,-50 -23,-62 -7,-66" fill="#1e4d6e" opacity=".9"/>`; s+=`<polygon points="1,-68 20,-62 23,-74 7,-78" fill="#1e4d6e" opacity=".9"/>`; s+=`<g transform="translate(0,-94)">`; for(let r=0;r<360;r+=60)s+=`<polygon points="0,0 -5,-10 0,-18 5,-10" fill="#0e7490" transform="rotate(${r})" opacity=".9"/>`; s+=`<polygon points="0,-6 5,-3 5,3 0,6 -5,3 -5,-3" fill="#0891b2"/>`; s+=`</g>`; }else if(stage===4){ s+=`<polyline points="0,0 -4,-34 3,-68 0,-136" stroke="#0891b2" stroke-width="3.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`; s+=`<line x1="-2" y1="-22" x2="3" y2="-26" stroke="#38bdf8" stroke-width=".8" opacity=".4"/>`; s+=`<line x1="1" y1="-56" x2="-3" y2="-61" stroke="#38bdf8" stroke-width=".8" opacity=".4"/>`; s+=`<polygon points="-1,-25 -26,-18 -30,-30 -11,-37" fill="#1a3d5c" opacity=".9"/>`; s+=`<polygon points="1,-44 26,-37 30,-49 11,-56" fill="#1a3d5c" opacity=".9"/>`; s+=`<polygon points="-1,-65 -24,-58 -27,-70 -9,-76" fill="#1e4d6e" opacity=".9"/>`; s+=`<polygon points="1,-82 24,-75 27,-87 9,-93" fill="#1e4d6e" opacity=".9"/>`; s+=`<polygon points="-1,-98 -20,-92 -22,-103 -6,-108" fill="#235f80" opacity=".9"/>`; s+=`<polygon points="1,-112 20,-106 22,-117 6,-122" fill="#235f80" opacity=".9"/>`; s+=`<g transform="translate(0,-136)">`; for(let r=0;r<360;r+=60)s+=`<polygon points="0,0 -8,-18 0,-52 8,-18" fill="#38bdf8" transform="rotate(${r})" opacity=".88"/>`; for(let r=30;r<360;r+=60)s+=`<polygon points="0,0 -6,-14 0,-30 6,-14" fill="#7dd3fc" transform="rotate(${r})" opacity=".65"/>`; s+=`<polygon points="0,-16 14,-8 14,8 0,16 -14,8 -14,-8" fill="#e0f2fe"/>`; s+=`<polygon points="0,-9 8,-4.5 8,4.5 0,9 -8,4.5 -8,-4.5" fill="#bae6fd"/>`; s+=`<circle cx="0" cy="0" r="5" fill="#f0f9ff"/>`; s+=`</g>`; }else{ s+=`<polyline points="0,0 -5,-42 4,-84 0,-172" stroke="#0891b2" stroke-width="4.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`; s+=`<polyline points="0,-84 -18,-98 -22,-116" stroke="#0891b2" stroke-width="2.2" fill="none" stroke-linecap="round"/>`; s+=`<polyline points="0,-100 20,-112 22,-130" stroke="#0891b2" stroke-width="2.2" fill="none" stroke-linecap="round"/>`; s+=`<polygon points="-1,-28 -28,-20 -32,-33 -12,-40" fill="#1a3d5c" opacity=".9"/>`; s+=`<polygon points="1,-48 28,-40 32,-53 12,-60" fill="#1a3d5c" opacity=".9"/>`; s+=`<polygon points="-1,-70 -26,-62 -29,-74 -11,-80" fill="#1e4d6e" opacity=".9"/>`; s+=`<polygon points="1,-88 26,-80 29,-92 11,-98" fill="#1e4d6e" opacity=".9"/>`; s+=`<polygon points="-20,-100 -32,-96 -34,-106 -24,-110" fill="#235f80" opacity=".9"/>`; s+=`<polygon points="20,-114 32,-110 34,-120 24,-124" fill="#235f80" opacity=".9"/>`; s+=`<g transform="translate(0,-172)" filter="url(#glow-soft)">`; for(let r=0;r<360;r+=45)s+=`<polygon points="0,0 -9,-20 0,-58 9,-20" fill="#0ea5e9" transform="rotate(${r})" opacity=".88"/>`; for(let r=22.5;r<360;r+=45)s+=`<polygon points="0,0 -6,-14 0,-34 6,-14" fill="#38bdf8" transform="rotate(${r})" opacity=".70"/>`; for(let r=0;r<360;r+=60)s+=`<polygon points="0,0 -7,-14 0,-30 7,-14" fill="#fde68a" transform="rotate(${r})" opacity=".9"/>`; s+=`<circle cx="0" cy="0" r="12" fill="#fefce8"/><circle cx="0" cy="0" r="7" fill="#fef08a"/><circle cx="0" cy="0" r="3.5" fill="#fff"/>`; s+=`<polygon points="0,-64 -3,-61 0,-58 3,-61" fill="#bae6fd"><animate attributeName="opacity" values=".8;.1;.8" dur="1.8s" repeatCount="indefinite"/></polygon>`; s+=`<polygon points="22,-48 19,-45 22,-42 25,-45" fill="#7dd3fc"><animate attributeName="opacity" values=".6;0;.6" dur="2.4s" repeatCount="indefinite"/></polygon>`; s+=`<polygon points="-24,-44 -27,-41 -24,-38 -21,-41" fill="#7dd3fc"><animate attributeName="opacity" values=".5;.9;.5" dur="3s" repeatCount="indefinite"/></polygon>`; s+=`</g>`; } return s; }
-function emberleafSVG(stage){ let s='';const mR=[14,18,22,27,32][stage-1]; s+=`<ellipse cx="0" cy="3" rx="${mR}" ry="${Math.round(mR*.38)}" fill="#0a1520" opacity=".9"/>`; if(stage===1){ s+=`<ellipse cx="0" cy="0" rx="12" ry="7" fill="#4a1c0e" opacity=".95"/>`; s+=`<ellipse cx="0" cy="-1" rx="8" ry="5" fill="#7c2d12" opacity=".9"/>`; s+=`<ellipse cx="0" cy="-2" rx="5" ry="3" fill="#c2410c" opacity=".85"/>`; s+=`<ellipse cx="0" cy="-2" rx="2.5" ry="1.5" fill="#f97316" opacity=".8"/>`; s+=`<path d="M-2,-7 C-4,-14 -2,-18 0,-20 C2,-18 4,-14 2,-7" fill="#ea580c" opacity=".7"><animate attributeName="opacity" values=".7;.3;.7" dur="1.2s" repeatCount="indefinite"/></path>`; s+=`<path d="M1,-6 C2,-11 1,-14 0,-16 C-1,-14 -2,-11 0,-6" fill="#f97316" opacity=".5"><animate attributeName="opacity" values=".5;.1;.5" dur=".9s" repeatCount="indefinite"/></path>`; }else if(stage===2){ s+=`<path d="M0,0 C-3,-18 3,-36 0,-50" stroke="#4a1c0e" stroke-width="3" fill="none" stroke-linecap="round"/>`; s+=`<path d="M-1,-18 C-18,-12 -24,-4 -20,1 C-12,-2 -6,-8 -1,-18Z" fill="#7c2d12"/>`; s+=`<ellipse cx="-14" cy="-10" rx="4" ry="2.5" fill="#ea580c" opacity=".7" transform="rotate(-20,-14,-10)"/>`; s+=`<path d="M1,-32 C18,-26 24,-18 20,-13 C12,-14 6,-20 1,-32Z" fill="#7c2d12"/>`; s+=`<ellipse cx="14" cy="-22" rx="4" ry="2.5" fill="#ea580c" opacity=".7" transform="rotate(20,14,-22)"/>`; s+=`<path d="M0,-50 C-4,-55 -3,-60 0,-64 C3,-60 4,-55 0,-50Z" fill="#ea580c" opacity=".8"><animate attributeName="opacity" values=".8;.4;.8" dur="1.1s" repeatCount="indefinite"/></path>`; }else if(stage===3){ s+=`<path d="M0,0 C-5,-28 5,-57 0,-87" stroke="#4a1c0e" stroke-width="3.5" fill="none" stroke-linecap="round"/>`; s+=`<path d="M0,-44 C-12,-50 -18,-58 -16,-68" stroke="#5c2a14" stroke-width="2" fill="none" stroke-linecap="round"/>`; s+=`<path d="M0,-60 C12,-66 18,-74 16,-84" stroke="#5c2a14" stroke-width="2" fill="none" stroke-linecap="round"/>`; s+=`<path d="M-1,-22 C-22,-14 -28,-4 -21,2 C-11,-2 -4,-10 -1,-22Z" fill="#7c2d12"/>`; s+=`<path d="M1,-38 C22,-30 28,-20 21,-14 C11,-16 4,-24 1,-38Z" fill="#7c2d12"/>`; s+=`<path d="M-14,-55 C-28,-52 -34,-45 -28,-42 C-22,-44 -18,-50 -14,-55Z" fill="#991b1b"/>`; s+=`<path d="M14,-70 C28,-67 34,-60 28,-57 C22,-59 18,-65 14,-70Z" fill="#991b1b"/>`; s+=`<g transform="translate(0,-87)">`; s+=`<path d="M0,0 C-6,-10 -5,-20 0,-28 C5,-20 6,-10 0,0Z" fill="#991b1b" opacity=".9"/>`; s+=`<path d="M0,0 C-4,-8 -3,-17 0,-23 C3,-17 4,-8 0,0Z" fill="#ea580c" opacity=".85"/>`; s+=`<path d="M0,-2 C-2,-8 -1,-15 0,-19" stroke="#f97316" stroke-width=".8" fill="none"/>`; s+=`</g>`; }else if(stage===4){ s+=`<path d="M0,0 C-8,-42 8,-85 0,-130" stroke="#4a1c0e" stroke-width="4" fill="none" stroke-linecap="round"/>`; s+=`<path d="M0,-50 C-16,-58 -24,-70 -20,-84" stroke="#5c2a14" stroke-width="2.4" fill="none" stroke-linecap="round"/>`; s+=`<path d="M0,-70 C16,-78 24,-90 20,-104" stroke="#5c2a14" stroke-width="2.4" fill="none" stroke-linecap="round"/>`; s+=`<path d="M0,-92 C-12,-98 -16,-110 -12,-120" stroke="#5c2a14" stroke-width="1.8" fill="none" stroke-linecap="round"/>`; s+=`<path d="M-1,-28 C-26,-18 -32,-5 -23,2 C-12,-2 -4,-13 -1,-28Z" fill="#7c2d12"/>`; s+=`<path d="M1,-48 C26,-38 32,-25 23,-18 C12,-20 4,-33 1,-48Z" fill="#7c2d12"/>`; s+=`<path d="M-18,-62 C-32,-59 -38,-52 -32,-49 C-26,-51 -22,-57 -18,-62Z" fill="#991b1b"/>`; s+=`<path d="M18,-80 C32,-77 38,-70 32,-67 C26,-69 22,-75 18,-80Z" fill="#991b1b"/>`; s+=`<path d="M-10,-102 C-22,-100 -26,-94 -21,-92 C-16,-93 -14,-99 -10,-102Z" fill="#b91c1c" opacity=".9"/>`; s+=`<g transform="translate(0,-130)">`; for(let r=0;r<360;r+=72)s+=`<path d="M0,0 C-9,-16 -8,-34 0,-44 C8,-34 9,-16 0,0Z" fill="#991b1b" transform="rotate(${r})" opacity=".9"/>`; for(let r=36;r<360;r+=72)s+=`<path d="M0,0 C-7,-12 -6,-26 0,-34 C6,-26 7,-12 0,0Z" fill="#ea580c" transform="rotate(${r})" opacity=".9"/>`; for(let r=0;r<360;r+=72)s+=`<path d="M0,0 C-4,-8 -4,-18 0,-24 C4,-18 4,-8 0,0Z" fill="#f59e0b" transform="rotate(${r})" opacity=".9"/>`; s+=`<circle cx="0" cy="0" r="8" fill="#fef08a"/><circle cx="0" cy="0" r="4" fill="#fff"/>`; s+=`<circle cx="-5" cy="-48" r="2" fill="#f97316"><animate attributeName="opacity" values=".9;0;.9" dur="1.5s" repeatCount="indefinite"/><animate attributeName="cy" values="-48;-62;-48" dur="1.5s" repeatCount="indefinite"/></circle>`; s+=`<circle cx="7" cy="-44" r="1.5" fill="#fb923c"><animate attributeName="opacity" values=".7;0;.7" dur="1.1s" repeatCount="indefinite"/><animate attributeName="cy" values="-44;-58;-44" dur="1.1s" repeatCount="indefinite"/></circle>`; s+=`</g>`; }else{ s+=`<path d="M0,0 C-10,-50 10,-100 0,-165" stroke="#3f1508" stroke-width="4.5" fill="none" stroke-linecap="round"/>`; s+=`<path d="M0,-55 C-20,-65 -30,-80 -26,-96" stroke="#5c2a14" stroke-width="2.8" fill="none" stroke-linecap="round"/>`; s+=`<path d="M0,-78 C20,-88 30,-103 26,-119" stroke="#5c2a14" stroke-width="2.8" fill="none" stroke-linecap="round"/>`; s+=`<path d="M0,-102 C-14,-110 -18,-124 -14,-136" stroke="#5c2a14" stroke-width="2" fill="none" stroke-linecap="round"/>`; s+=`<path d="M0,-118 C14,-126 18,-140 14,-152" stroke="#5c2a14" stroke-width="2" fill="none" stroke-linecap="round"/>`; s+=`<path d="M-1,-30 C-28,-20 -35,-5 -25,2 C-14,-2 -4,-14 -1,-30Z" fill="#7c2d12"/>`; s+=`<path d="M1,-52 C28,-42 35,-27 25,-20 C14,-22 4,-36 1,-52Z" fill="#7c2d12"/>`; s+=`<path d="M-24,-70 C-38,-67 -44,-60 -38,-57 C-32,-59 -28,-65 -24,-70Z" fill="#991b1b"/>`; s+=`<path d="M24,-90 C38,-87 44,-80 38,-77 C32,-79 28,-85 24,-90Z" fill="#991b1b"/>`; s+=`<path d="M-12,-118 C-24,-116 -28,-110 -23,-108 C-18,-109 -15,-115 -12,-118Z" fill="#b91c1c"/>`; s+=`<path d="M12,-134 C24,-132 28,-126 23,-124 C18,-125 15,-131 12,-134Z" fill="#b91c1c"/>`; s+=`<g transform="translate(0,-165)" filter="url(#glow-fire)">`; for(let r=0;r<360;r+=45)s+=`<path d="M0,0 C-11,-20 -10,-42 0,-54 C10,-42 11,-20 0,0Z" fill="#991b1b" transform="rotate(${r})" opacity=".9"/>`; for(let r=22.5;r<360;r+=45)s+=`<path d="M0,0 C-9,-16 -8,-34 0,-44 C8,-34 9,-16 0,0Z" fill="#ea580c" transform="rotate(${r})" opacity=".9"/>`; for(let r=0;r<360;r+=45)s+=`<path d="M0,0 C-6,-11 -5,-24 0,-32 C5,-24 6,-11 0,0Z" fill="#f59e0b" transform="rotate(${r})" opacity=".9"/>`; for(let r=22.5;r<360;r+=45)s+=`<path d="M0,0 C-3,-7 -2,-15 0,-20 C2,-15 3,-7 0,0Z" fill="#fef08a" transform="rotate(${r})" opacity=".9"/>`; s+=`<circle cx="0" cy="0" r="12" fill="#fefce8"/><circle cx="0" cy="0" r="6" fill="#fff"/>`; for(let i=0;i<6;i++){const x=(-14+i*6).toFixed(0),sy=(-58-i*4).toFixed(0),ey=(-84-i*4).toFixed(0),dur=(1.2+i*.25).toFixed(2),del=(i*.18).toFixed(2),sz=(1.5+(i%3)*.5).toFixed(1);s+=`<circle cx="${x}" cy="${sy}" r="${sz}" fill="${i%2===0?'#f97316':'#fbbf24'}"><animate attributeName="opacity" values=".9;0;.9" dur="${dur}s" begin="${del}s" repeatCount="indefinite"/><animate attributeName="cy" values="${sy};${ey};${sy}" dur="${dur}s" begin="${del}s" repeatCount="indefinite"/></circle>`;} s+=`</g>`; } return s; }
 
-/* ══════════════════════════════════ GAME LOGIC ══════════════════════════════════ */
-const pSvg = document.getElementById('plants-svg');
-const pList = document.getElementById('plant-list');
-const pcvs = document.getElementById('pcvs');
-const pctx = pcvs.getContext('2d');
+        /* ══════════════════════════════════ SVG PLANT GENERATORS ══════════════════════════════════ */
+        function moonflowerSVG(stage, health) { let s = ''; const lA = '#4ade80', lB = '#86efac', lC = '#bbf7d0', mR = [16, 20, 24, 28, 32][stage - 1]; const wilt = health < 40; const tint = wilt ? 'filter:saturate(0.3) brightness(0.7)' : ''; s += `<ellipse cx="0" cy="3" rx="${mR}" ry="${Math.round(mR * .38)}" fill="#0a1520" opacity=".9"/>`; if (stage === 1) { s += `<path d="M0,0 Q0,-14 0,-28" stroke="${wilt ? '#3a4030' : '#4a7040'}" stroke-width="2" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-14 C-10,-9 -12,-3 -7,0 C-3,-1 0,-14 0,-14Z" fill="${wilt ? '#2a3020' : lA}"/>`; s += `<path d="M0,-14 C10,-9 12,-3 7,0 C3,-1 0,-14 0,-14Z" fill="${wilt ? '#2a3020' : lA}"/>`; } else if (stage === 2) { s += `<path d="M0,0 C-5,-22 5,-44 0,-62" stroke="${wilt ? '#3a4030' : '#4a7040'}" stroke-width="2.8" fill="none" stroke-linecap="round"/>`; s += `<path d="M-1,-24 C-23,-15 -28,-4 -19,1 C-9,-3 -1,-24 -1,-24Z" fill="${wilt ? '#2a3520' : lA}"/>`; s += `<path d="M-1,-24 C-19,-16 -20,-8 -19,1" stroke="#3a6632" stroke-width=".8" fill="none" opacity=".7"/>`; s += `<path d="M1,-40 C23,-31 28,-20 19,-14 C9,-17 1,-40 1,-40Z" fill="${wilt ? '#2a3520' : lA}"/>`; s += `<path d="M1,-40 C19,-32 20,-23 19,-14" stroke="#3a6632" stroke-width=".8" fill="none" opacity=".7"/>`; } else if (stage === 3) { s += `<path d="M0,0 C-8,-32 8,-65 0,-97" stroke="${wilt ? '#3a4030' : '#4a7040'}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`; s += `<path d="M-1,-22 C-25,-13 -31,0 -21,4 C-11,0 -1,-22 -1,-22Z" fill="${wilt ? '#2a3520' : lA}"/>`; s += `<path d="M1,-38 C25,-29 31,-16 21,-10 C11,-13 1,-38 1,-38Z" fill="${wilt ? '#2a3520' : lA}"/>`; s += `<path d="M-1,-57 C-23,-48 -27,-36 -19,-32 C-9,-35 -1,-57 -1,-57Z" fill="${wilt ? '#2a3020' : lB}"/>`; s += `<path d="M1,-72 C23,-63 27,-51 19,-47 C9,-50 1,-72 1,-72Z" fill="${wilt ? '#2a3020' : lB}"/>`; s += `<g transform="translate(0,-97)">`; for (let r = 0; r < 360; r += 72)s += `<path d="M0,0 C-4,-5 -5,-14 0,-20 C5,-14 4,-5 0,0Z" fill="${wilt ? '#3a3040' : lB}" transform="rotate(${r})"/>`; s += `<path d="M0,0 C-8,-9 -8,-22 0,-30 C8,-22 8,-9 0,0Z" fill="${wilt ? '#4a3860' : '#7c3aed'}"/>`; s += `<path d="M0,0 C-3,-9 -3,-20 0,-26" stroke="${wilt ? '#3a2850' : '#6d28d9'}" stroke-width=".8" fill="none"/>`; s += `</g>`; } else if (stage === 4) { s += `<path d="M0,0 C-12,-46 12,-92 0,-138" stroke="${wilt ? '#3a4030' : '#4a7040'}" stroke-width="3.8" fill="none" stroke-linecap="round"/>`; s += `<path d="M-1,-25 C-27,-15 -33,-2 -23,4 C-12,-1 -1,-25 -1,-25Z" fill="${wilt ? '#2a3520' : lA}"/>`; s += `<path d="M1,-44 C27,-34 33,-21 23,-15 C12,-18 1,-44 1,-44Z" fill="${wilt ? '#2a3520' : lA}"/>`; s += `<path d="M-1,-65 C-25,-55 -29,-42 -21,-38 C-10,-41 -1,-65 -1,-65Z" fill="${wilt ? '#2a3020' : lB}"/>`; s += `<path d="M1,-86 C25,-76 29,-63 21,-59 C10,-62 1,-86 1,-86Z" fill="${wilt ? '#2a3020' : lB}"/>`; s += `<path d="M-1,-104 C-22,-95 -25,-83 -18,-79 C-9,-82 -1,-104 -1,-104Z" fill="${wilt ? '#252820' : lC}"/>`; s += `<path d="M1,-118 C22,-109 25,-97 18,-93 C9,-96 1,-118 1,-118Z" fill="${wilt ? '#252820' : lC}"/>`; s += `<g transform="translate(0,-138)">`; for (let r = 0; r < 360; r += 60)s += `<path d="M0,0 C-11,-22 -10,-44 0,-54 C10,-44 11,-22 0,0Z" fill="${wilt ? '#4a3868' : '#a78bfa'}" transform="rotate(${r})" opacity=".91" stroke="${wilt ? '#3a2850' : '#c4b5fd'}" stroke-width=".5"/>`; for (let r = 30; r < 360; r += 60)s += `<path d="M0,0 C-5,-11 -5,-23 0,-29 C5,-23 5,-11 0,0Z" fill="${wilt ? '#3a2858' : '#c4b5fd'}" transform="rotate(${r})" opacity=".58"/>`; s += `<circle cx="0" cy="0" r="11" fill="${wilt ? '#2a2530' : '#fef9e8'}"/><circle cx="0" cy="0" r="5.5" fill="${wilt ? '#3a3040' : '#fde68a'}"/>`; if (!wilt) { for (let r = 0; r < 360; r += 60) { const rd = r * Math.PI / 180; s += `<circle cx="${(Math.sin(rd) * 8).toFixed(1)}" cy="${(-Math.cos(rd) * 8).toFixed(1)}" r="2" fill="#f59e0b" opacity=".9"/>`; } } s += `</g>`; } else { s += `<path d="M0,0 C-14,-55 14,-110 0,-172" stroke="${wilt ? '#3a4030' : '#4a7040'}" stroke-width="4.2" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-108 C10,-122 18,-140 15,-155" stroke="${wilt ? '#3a4030' : '#4a7040'}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`; s += `<path d="M-1,-26 C-28,-16 -35,-2 -24,4 C-13,-1 -1,-26 -1,-26Z" fill="${wilt ? '#2a3520' : lA}"/>`; s += `<path d="M1,-46 C28,-36 35,-22 24,-16 C13,-19 1,-46 1,-46Z" fill="${wilt ? '#2a3520' : lA}"/>`; s += `<path d="M-1,-68 C-27,-58 -31,-44 -23,-40 C-12,-43 -1,-68 -1,-68Z" fill="${wilt ? '#2a3020' : lB}"/>`; s += `<path d="M1,-90 C27,-80 31,-66 23,-62 C12,-65 1,-90 1,-90Z" fill="${wilt ? '#2a3020' : lB}"/>`; s += `<path d="M-1,-110 C-24,-101 -27,-88 -20,-84 C-10,-87 -1,-110 -1,-110Z" fill="${wilt ? '#252820' : lC}"/>`; s += `<path d="M1,-124 C24,-115 27,-102 20,-98 C10,-101 1,-124 1,-124Z" fill="${wilt ? '#252820' : lC}"/>`; s += `<path d="M16,-140 C26,-134 29,-127 22,-124 C15,-126 16,-140 16,-140Z" fill="${wilt ? '#252820' : lC}" opacity=".85"/>`; s += `<path d="M13,-148 C4,-142 2,-135 8,-132 C13,-134 13,-148 13,-148Z" fill="${wilt ? '#252820' : lC}" opacity=".85"/>`; s += `<g transform="translate(15,-155)">`; for (let r = 0; r < 360; r += 72)s += `<path d="M0,0 C-7,-15 -7,-30 0,-37 C7,-30 7,-15 0,0Z" fill="${wilt ? '#4a3868' : '#b8a0f0'}" transform="rotate(${r})" opacity=".88"/>`; s += `<circle cx="0" cy="0" r="8" fill="${wilt ? '#2a2530' : '#fef9e8'}"/><circle cx="0" cy="0" r="4" fill="${wilt ? '#3a3040' : '#fde68a'}"/>`; s += `</g>`; s += `<g transform="translate(0,-172)" filter="url(#glow-soft)">`; for (let r = 0; r < 360; r += 45)s += `<path d="M0,0 C-13,-27 -12,-56 0,-68 C12,-56 13,-27 0,0Z" fill="${wilt ? '#4a3868' : '#9d7ee8'}" transform="rotate(${r})" opacity=".90" stroke="${wilt ? '#3a2858' : '#b89df4'}" stroke-width=".4"/>`; for (let r = 22.5; r < 360; r += 45)s += `<path d="M0,0 C-6,-15 -6,-32 0,-40 C6,-32 6,-15 0,0Z" fill="${wilt ? '#3a2858' : '#ddd6fe'}" transform="rotate(${r})" opacity=".60"/>`; s += `<circle cx="0" cy="0" r="13" fill="${wilt ? '#1e1e28' : '#fefce8'}"/><circle cx="0" cy="0" r="6.5" fill="${wilt ? '#2a2535' : '#fde68a'}"/>`; if (!wilt) { for (let r = 0; r < 360; r += 45) { const rd = r * Math.PI / 180; s += `<circle cx="${(Math.sin(rd) * 10).toFixed(1)}" cy="${(-Math.cos(rd) * 10).toFixed(1)}" r="2.2" fill="#f59e0b" opacity=".9">`; } s += `<circle cx="0" cy="-74" r="2.5" fill="#e0d7ff"><animate attributeName="opacity" values=".7;.1;.7" dur="2.5s" repeatCount="indefinite"/></circle>`; s += `<circle cx="20" cy="-62" r="1.8" fill="#c4b5fd"><animate attributeName="opacity" values=".5;0;.5" dur="3.2s" repeatCount="indefinite"/></circle>`; s += `<circle cx="-22" cy="-58" r="1.8" fill="#c4b5fd"><animate attributeName="opacity" values=".4;.8;.4" dur="2.0s" repeatCount="indefinite"/></circle>`; } s += `</g>`; } return s; }
 
-let plants = [
-  {id:1, type:'moonflower', stage:2, xp:45, name:'Moonflower'},
-  {id:2, type:'starbloom', stage:3, xp:120, name:'Starbloom'},
-  {id:3, type:'emberleaf', stage:1, xp:30, name:'Emberleaf'}
-];
+        function starbloomSVG(stage, health) { let s = ''; const mR = [14, 18, 22, 26, 30][stage - 1]; const wilt = health < 40; s += `<ellipse cx="0" cy="3" rx="${mR}" ry="${Math.round(mR * .40)}" fill="#0a1520" opacity=".9"/>`; if (stage === 1) { s += `<polygon points="0,-8 -4,0 4,0" fill="${wilt ? '#1a3a48' : '#67e8f9'}" opacity=".9"/>`; s += `<polygon points="-7,-5 -9,0 -5,0" fill="${wilt ? '#163240' : '#22d3ee'}" opacity=".8"/>`; s += `<polygon points="7,-5 9,0 5,0" fill="${wilt ? '#163240' : '#22d3ee'}" opacity=".8"/>`; } else if (stage === 2) { s += `<polyline points="0,0 -2,-20 1,-38 0,-58" stroke="${wilt ? '#163240' : '#22d3ee'}" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`; s += `<polygon points="-1,-22 -22,-18 -26,-28 -8,-34" fill="${wilt ? '#0e2030' : '#0ea5e9'}" opacity=".9"/>`; s += `<polygon points="1,-36 22,-32 26,-42 8,-48" fill="${wilt ? '#0e2030' : '#0ea5e9'}" opacity=".9"/>`; s += `<line x1="-14" y1="-22" x2="-18" y2="-26" stroke="${wilt ? '#1a3a48' : '#38bdf8'}" stroke-width=".8" opacity=".6"/>`; s += `<line x1="14" y1="-36" x2="18" y2="-40" stroke="${wilt ? '#1a3a48' : '#38bdf8'}" stroke-width=".8" opacity=".6"/>`; } else if (stage === 3) { s += `<polyline points="0,0 -3,-25 2,-52 0,-94" stroke="${wilt ? '#163240' : '#22d3ee'}" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`; s += `<polygon points="-1,-24 -24,-18 -28,-30 -10,-36" fill="${wilt ? '#0e2030' : '#0ea5e9'}" opacity=".9"/>`; s += `<polygon points="1,-40 24,-34 28,-46 10,-52" fill="${wilt ? '#0e2030' : '#0ea5e9'}" opacity=".9"/>`; s += `<polygon points="-1,-56 -20,-50 -23,-62 -7,-66" fill="${wilt ? '#0c1e2c' : '#38bdf8'}" opacity=".9"/>`; s += `<polygon points="1,-68 20,-62 23,-74 7,-78" fill="${wilt ? '#0c1e2c' : '#38bdf8'}" opacity=".9"/>`; s += `<g transform="translate(0,-94)">`; for (let r = 0; r < 360; r += 60)s += `<polygon points="0,0 -5,-10 0,-18 5,-10" fill="${wilt ? '#1a3a48' : '#67e8f9'}" transform="rotate(${r})" opacity=".9"/>`; s += `<polygon points="0,-6 5,-3 5,3 0,6 -5,3 -5,-3" fill="${wilt ? '#163240' : '#22d3ee'}"/>`; s += `</g>`; } else if (stage === 4) { s += `<polyline points="0,0 -4,-34 3,-68 0,-136" stroke="${wilt ? '#163240' : '#22d3ee'}" stroke-width="3.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`; s += `<line x1="-2" y1="-22" x2="3" y2="-26" stroke="${wilt ? '#1a3a48' : '#38bdf8'}" stroke-width=".8" opacity=".4"/>`; s += `<line x1="1" y1="-56" x2="-3" y2="-61" stroke="${wilt ? '#1a3a48' : '#38bdf8'}" stroke-width=".8" opacity=".4"/>`; s += `<polygon points="-1,-25 -26,-18 -30,-30 -11,-37" fill="${wilt ? '#0e2030' : '#0ea5e9'}" opacity=".9"/>`; s += `<polygon points="1,-44 26,-37 30,-49 11,-56" fill="${wilt ? '#0e2030' : '#0ea5e9'}" opacity=".9"/>`; s += `<polygon points="-1,-65 -24,-58 -27,-70 -9,-76" fill="${wilt ? '#0c1e2c' : '#38bdf8'}" opacity=".9"/>`; s += `<polygon points="1,-82 24,-75 27,-87 9,-93" fill="${wilt ? '#0c1e2c' : '#38bdf8'}" opacity=".9"/>`; s += `<polygon points="-1,-98 -20,-92 -22,-103 -6,-108" fill="${wilt ? '#0a1c28' : '#7dd3fc'}" opacity=".9"/>`; s += `<polygon points="1,-112 20,-106 22,-117 6,-122" fill="${wilt ? '#0a1c28' : '#7dd3fc'}" opacity=".9"/>`; s += `<g transform="translate(0,-136)">`; for (let r = 0; r < 360; r += 60)s += `<polygon points="0,0 -8,-18 0,-52 8,-18" fill="${wilt ? '#1a3a48' : '#38bdf8'}" transform="rotate(${r})" opacity=".88"/>`; for (let r = 30; r < 360; r += 60)s += `<polygon points="0,0 -6,-14 0,-30 6,-14" fill="${wilt ? '#142c3c' : '#7dd3fc'}" transform="rotate(${r})" opacity=".65"/>`; s += `<polygon points="0,-16 14,-8 14,8 0,16 -14,8 -14,-8" fill="${wilt ? '#1a2e3c' : '#e0f2fe'}"/>`; s += `<polygon points="0,-9 8,-4.5 8,4.5 0,9 -8,4.5 -8,-4.5" fill="${wilt ? '#142a38' : '#bae6fd'}"/>`; s += `<circle cx="0" cy="0" r="5" fill="${wilt ? '#1a2a38' : '#f0f9ff'}"/>`; s += `</g>`; } else { s += `<polyline points="0,0 -5,-42 4,-84 0,-172" stroke="${wilt ? '#163240' : '#22d3ee'}" stroke-width="4.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`; s += `<polyline points="0,-84 -18,-98 -22,-116" stroke="${wilt ? '#163240' : '#22d3ee'}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`; s += `<polyline points="0,-100 20,-112 22,-130" stroke="${wilt ? '#163240' : '#22d3ee'}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`; s += `<polygon points="-1,-28 -28,-20 -32,-33 -12,-40" fill="${wilt ? '#0e2030' : '#0ea5e9'}" opacity=".9"/>`; s += `<polygon points="1,-48 28,-40 32,-53 12,-60" fill="${wilt ? '#0e2030' : '#0ea5e9'}" opacity=".9"/>`; s += `<polygon points="-1,-70 -26,-62 -29,-74 -11,-80" fill="${wilt ? '#0c1e2c' : '#38bdf8'}" opacity=".9"/>`; s += `<polygon points="1,-88 26,-80 29,-92 11,-98" fill="${wilt ? '#0c1e2c' : '#38bdf8'}" opacity=".9"/>`; s += `<polygon points="-20,-100 -32,-96 -34,-106 -24,-110" fill="${wilt ? '#0a1c28' : '#7dd3fc'}" opacity=".9"/>`; s += `<polygon points="20,-114 32,-110 34,-120 24,-124" fill="${wilt ? '#0a1c28' : '#7dd3fc'}" opacity=".9"/>`; s += `<g transform="translate(0,-172)" filter="url(#glow-soft)">`; for (let r = 0; r < 360; r += 45)s += `<polygon points="0,0 -9,-20 0,-58 9,-20" fill="${wilt ? '#1a3a48' : '#0ea5e9'}" transform="rotate(${r})" opacity=".88"/>`; for (let r = 22.5; r < 360; r += 45)s += `<polygon points="0,0 -6,-14 0,-34 6,-14" fill="${wilt ? '#142c3c' : '#38bdf8'}" transform="rotate(${r})" opacity=".70"/>`; if (!wilt) { for (let r = 0; r < 360; r += 60)s += `<polygon points="0,0 -7,-14 0,-30 7,-14" fill="#fde68a" transform="rotate(${r})" opacity=".9"/>`; } s += `<circle cx="0" cy="0" r="12" fill="${wilt ? '#1a2030' : '#fefce8'}"/><circle cx="0" cy="0" r="7" fill="${wilt ? '#181c28' : '#fef08a'}"/><circle cx="0" cy="0" r="3.5" fill="${wilt ? '#1c2030' : '#fff'}"/>`; if (!wilt) { s += `<polygon points="0,-64 -3,-61 0,-58 3,-61" fill="#bae6fd"><animate attributeName="opacity" values=".8;.1;.8" dur="1.8s" repeatCount="indefinite"/></polygon>`; s += `<polygon points="22,-48 19,-45 22,-42 25,-45" fill="#7dd3fc"><animate attributeName="opacity" values=".6;0;.6" dur="2.4s" repeatCount="indefinite"/></polygon>`; s += `<polygon points="-24,-44 -27,-41 -24,-38 -21,-41" fill="#7dd3fc"><animate attributeName="opacity" values=".5;.9;.5" dur="3s" repeatCount="indefinite"/></polygon>`; } s += `</g>`; } return s; }
 
-let cooldowns = {water:0, talk:0, pet:0, sing:0};
-let memories = [];
-let cdInterval = null;
+        function emberleafSVG(stage, health) { let s = ''; const mR = [14, 18, 22, 27, 32][stage - 1]; const wilt = health < 40; s += `<ellipse cx="0" cy="3" rx="${mR}" ry="${Math.round(mR * .38)}" fill="#0a1520" opacity=".9"/>`; if (stage === 1) { s += `<ellipse cx="0" cy="0" rx="12" ry="7" fill="${wilt ? '#2a1408' : '#f97316'}" opacity=".95"/>`; s += `<ellipse cx="0" cy="-1" rx="8" ry="5" fill="${wilt ? '#3a1c0a' : '#fb923c'}" opacity=".9"/>`; s += `<ellipse cx="0" cy="-2" rx="5" ry="3" fill="${wilt ? '#5a280e' : '#c2410c'}" opacity=".85"/>`; s += `<ellipse cx="0" cy="-2" rx="2.5" ry="1.5" fill="${wilt ? '#7a3410' : '#f97316'}" opacity=".8"/>`; if (!wilt) { s += `<path d="M-2,-7 C-4,-14 -2,-18 0,-20 C2,-18 4,-14 2,-7" fill="#ea580c" opacity=".7"><animate attributeName="opacity" values=".7;.3;.7" dur="1.2s" repeatCount="indefinite"/></path>`; s += `<path d="M1,-6 C2,-11 1,-14 0,-16 C-1,-14 -2,-11 0,-6" fill="#f97316" opacity=".5"><animate attributeName="opacity" values=".5;.1;.5" dur=".9s" repeatCount="indefinite"/></path>`; } } else if (stage === 2) { s += `<path d="M0,0 C-3,-18 3,-36 0,-50" stroke="${wilt ? '#2a1408' : '#f97316'}" stroke-width="3" fill="none" stroke-linecap="round"/>`; s += `<path d="M-1,-18 C-18,-12 -24,-4 -20,1 C-12,-2 -6,-8 -1,-18Z" fill="${wilt ? '#3a1c0a' : '#fb923c'}"/>`; s += `<ellipse cx="-14" cy="-10" rx="4" ry="2.5" fill="${wilt ? '#5a240c' : '#ea580c'}" opacity=".7" transform="rotate(-20,-14,-10)"/>`; s += `<path d="M1,-32 C18,-26 24,-18 20,-13 C12,-14 6,-20 1,-32Z" fill="${wilt ? '#3a1c0a' : '#fb923c'}"/>`; s += `<ellipse cx="14" cy="-22" rx="4" ry="2.5" fill="${wilt ? '#5a240c' : '#ea580c'}" opacity=".7" transform="rotate(20,14,-22)"/>`; if (!wilt) s += `<path d="M0,-50 C-4,-55 -3,-60 0,-64 C3,-60 4,-55 0,-50Z" fill="#ea580c" opacity=".8"><animate attributeName="opacity" values=".8;.4;.8" dur="1.1s" repeatCount="indefinite"/></path>`; } else if (stage === 3) { s += `<path d="M0,0 C-5,-28 5,-57 0,-87" stroke="${wilt ? '#2a1408' : '#f97316'}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-44 C-12,-50 -18,-58 -16,-68" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="2" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-60 C12,-66 18,-74 16,-84" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="2" fill="none" stroke-linecap="round"/>`; s += `<path d="M-1,-22 C-22,-14 -28,-4 -21,2 C-11,-2 -4,-10 -1,-22Z" fill="${wilt ? '#3a1c0a' : '#fb923c'}"/>`; s += `<path d="M1,-38 C22,-30 28,-20 21,-14 C11,-16 4,-24 1,-38Z" fill="${wilt ? '#3a1c0a' : '#fb923c'}"/>`; s += `<path d="M-14,-55 C-28,-52 -34,-45 -28,-42 C-22,-44 -18,-50 -14,-55Z" fill="${wilt ? '#3a1010' : '#ef4444'}"/>`; s += `<path d="M14,-70 C28,-67 34,-60 28,-57 C22,-59 18,-65 14,-70Z" fill="${wilt ? '#3a1010' : '#ef4444'}"/>`; s += `<g transform="translate(0,-87)"><path d="M0,0 C-6,-10 -5,-20 0,-28 C5,-20 6,-10 0,0Z" fill="${wilt ? '#3a1010' : '#ef4444'}" opacity=".9"/>`; s += `<path d="M0,0 C-4,-8 -3,-17 0,-23 C3,-17 4,-8 0,0Z" fill="${wilt ? '#5a1c10' : '#ea580c'}" opacity="${wilt ? '.6' : '.85'}"/>`; if (!wilt) s += `<path d="M0,-2 C-2,-8 -1,-15 0,-19" stroke="#f97316" stroke-width=".8" fill="none"/>`; s += `</g>`; } else if (stage === 4) { s += `<path d="M0,0 C-8,-42 8,-85 0,-130" stroke="${wilt ? '#2a1408' : '#f97316'}" stroke-width="4" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-50 C-16,-58 -24,-70 -20,-84" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-70 C16,-78 24,-90 20,-104" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-92 C-12,-98 -16,-110 -12,-120" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`; s += `<path d="M-1,-28 C-26,-18 -32,-5 -23,2 C-12,-2 -4,-13 -1,-28Z" fill="${wilt ? '#3a1c0a' : '#fb923c'}"/>`; s += `<path d="M1,-48 C26,-38 32,-25 23,-18 C12,-20 4,-33 1,-48Z" fill="${wilt ? '#3a1c0a' : '#fb923c'}"/>`; s += `<path d="M-18,-62 C-32,-59 -38,-52 -32,-49 C-26,-51 -22,-57 -18,-62Z" fill="${wilt ? '#3a1010' : '#ef4444'}"/>`; s += `<path d="M18,-80 C32,-77 38,-70 32,-67 C26,-69 22,-75 18,-80Z" fill="${wilt ? '#3a1010' : '#ef4444'}"/>`; s += `<path d="M-10,-102 C-22,-100 -26,-94 -21,-92 C-16,-93 -14,-99 -10,-102Z" fill="${wilt ? '#421212' : '#f87171'}" opacity=".9"/>`; s += `<g transform="translate(0,-130)">`; for (let r = 0; r < 360; r += 72)s += `<path d="M0,0 C-9,-16 -8,-34 0,-44 C8,-34 9,-16 0,0Z" fill="${wilt ? '#3a1010' : '#ef4444'}" transform="rotate(${r})" opacity=".9"/>`; for (let r = 36; r < 360; r += 72)s += `<path d="M0,0 C-7,-12 -6,-26 0,-34 C6,-26 7,-12 0,0Z" fill="${wilt ? '#5a1c10' : '#ea580c'}" transform="rotate(${r})" opacity="${wilt ? '.5' : '.9'}"/>`; if (!wilt) { for (let r = 0; r < 360; r += 72)s += `<path d="M0,0 C-4,-8 -4,-18 0,-24 C4,-18 4,-8 0,0Z" fill="#f59e0b" transform="rotate(${r})" opacity=".9"/>`; } s += `<circle cx="0" cy="0" r="8" fill="${wilt ? '#1e1810' : '#fef08a'}"/><circle cx="0" cy="0" r="4" fill="${wilt ? '#2a2018' : '#fff'}"/>`; if (!wilt) { s += `<circle cx="-5" cy="-48" r="2" fill="#f97316"><animate attributeName="opacity" values=".9;0;.9" dur="1.5s" repeatCount="indefinite"/><animate attributeName="cy" values="-48;-62;-48" dur="1.5s" repeatCount="indefinite"/></circle>`; s += `<circle cx="7" cy="-44" r="1.5" fill="#fb923c"><animate attributeName="opacity" values=".7;0;.7" dur="1.1s" repeatCount="indefinite"/><animate attributeName="cy" values="-44;-58;-44" dur="1.1s" repeatCount="indefinite"/></circle>`; } s += `</g>`; } else { s += `<path d="M0,0 C-10,-50 10,-100 0,-165" stroke="${wilt ? '#2a1408' : '#c2410c'}" stroke-width="4.5" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-55 C-20,-65 -30,-80 -26,-96" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="2.8" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-78 C20,-88 30,-103 26,-119" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="2.8" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-102 C-14,-110 -18,-124 -14,-136" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="2" fill="none" stroke-linecap="round"/>`; s += `<path d="M0,-118 C14,-126 18,-140 14,-152" stroke="${wilt ? '#2e1a0a' : '#ea580c'}" stroke-width="2" fill="none" stroke-linecap="round"/>`; s += `<path d="M-1,-30 C-28,-20 -35,-5 -25,2 C-14,-2 -4,-14 -1,-30Z" fill="${wilt ? '#3a1c0a' : '#fb923c'}"/>`; s += `<path d="M1,-52 C28,-42 35,-27 25,-20 C14,-22 4,-36 1,-52Z" fill="${wilt ? '#3a1c0a' : '#fb923c'}"/>`; s += `<path d="M-24,-70 C-38,-67 -44,-60 -38,-57 C-32,-59 -28,-65 -24,-70Z" fill="${wilt ? '#3a1010' : '#ef4444'}"/>`; s += `<path d="M24,-90 C38,-87 44,-80 38,-77 C32,-79 28,-85 24,-90Z" fill="${wilt ? '#3a1010' : '#ef4444'}"/>`; s += `<path d="M-12,-118 C-24,-116 -28,-110 -23,-108 C-18,-109 -15,-115 -12,-118Z" fill="${wilt ? '#421212' : '#f87171'}"/>`; s += `<path d="M12,-134 C24,-132 28,-126 23,-124 C18,-125 15,-131 12,-134Z" fill="${wilt ? '#421212' : '#f87171'}"/>`; s += `<g transform="translate(0,-165)" filter="url(#glow-fire)">`; for (let r = 0; r < 360; r += 45)s += `<path d="M0,0 C-11,-20 -10,-42 0,-54 C10,-42 11,-20 0,0Z" fill="${wilt ? '#3a1010' : '#ef4444'}" transform="rotate(${r})" opacity=".9"/>`; for (let r = 22.5; r < 360; r += 45)s += `<path d="M0,0 C-9,-16 -8,-34 0,-44 C8,-34 9,-16 0,0Z" fill="${wilt ? '#5a1c10' : '#ea580c'}" transform="rotate(${r})" opacity="${wilt ? '.4' : '.9'}"/>`; if (!wilt) { for (let r = 0; r < 360; r += 45)s += `<path d="M0,0 C-6,-11 -5,-24 0,-32 C5,-24 6,-11 0,0Z" fill="#f59e0b" transform="rotate(${r})" opacity=".9"/>`; for (let r = 22.5; r < 360; r += 45)s += `<path d="M0,0 C-3,-7 -2,-15 0,-20 C2,-15 3,-7 0,0Z" fill="#fef08a" transform="rotate(${r})" opacity=".9"/>`; } s += `<circle cx="0" cy="0" r="12" fill="${wilt ? '#1e1410' : '#fefce8'}"/><circle cx="0" cy="0" r="6" fill="${wilt ? '#241a14' : '#fff'}"/>`; if (!wilt) { for (let i = 0; i < 6; i++) { const x = (-14 + i * 6).toFixed(0), sy = (-58 - i * 4).toFixed(0), ey = (-84 - i * 4).toFixed(0), dur = (1.2 + i * .25).toFixed(2), del = (i * .18).toFixed(2), sz = (1.5 + (i % 3) * .5).toFixed(1); s += `<circle cx="${x}" cy="${sy}" r="${sz}" fill="${i % 2 === 0 ? '#f97316' : '#fbbf24'}"><animate attributeName="opacity" values=".9;0;.9" dur="${dur}s" begin="${del}s" repeatCount="indefinite"/><animate attributeName="cy" values="${sy};${ey};${sy}" dur="${dur}s" begin="${del}s" repeatCount="indefinite"/></circle>`; } } s += `</g>`; } return s; }
 
-const PLANT_META = {
-  moonflower: {emoji:'🌙', color:'#a78bfa', xpPerStage:[0,80,160,280,450]},
-  starbloom: {emoji:'✧', color:'#38bdf8', xpPerStage:[0,70,150,270,420]},
-  emberleaf: {emoji:'🔥', color:'#f97316', xpPerStage:[0,90,170,290,480]}
-};
+        /* ══════════════════════════════════════════════════════════
+           GROVE GAME ENGINE v2
+           - Plant health system (hydration, nourishment, happiness)
+           - Passive income + economy
+           - Marketplace with upgrades & consumables
+           - Random events
+           - Slower progression (XP req 2-3x higher)
+           - Rename, inventory, milestones
+        ══════════════════════════════════════════════════════════ */
 
-function getXpNeeded(type, stage) {
-  const meta = PLANT_META[type];
-  return meta.xpPerStage[Math.min(stage, 5)] || 500;
-}
+        /* ── CONSTANTS ── */
+        const PLANT_META = {
+            moonflower: { emoji: '🌙', color: '#a78bfa', incomeBase: 1.2 },
+            starbloom: { emoji: '✧', color: '#38bdf8', incomeBase: 1.0 },
+            emberleaf: { emoji: '🔥', color: '#f97316', incomeBase: 1.4 },
+        };
 
-function getTotalXp(p) {
-  const meta = PLANT_META[p.type];
-  let total = 0;
-  for(let s=1; s<p.stage; s++) total += meta.xpPerStage[s];
-  return total + p.xp;
-}
+        // XP needed per stage (1→2, 2→3, 3→4, 4→5) — deliberately slow
+        const XP_PER_STAGE = [0, 200, 480, 900, 1600, Infinity];
 
-function saveGame() {
-  const data = {
-    plants: plants.map(p => ({...p})),
-    memories: memories.slice(-12),
-    theme: document.body.classList.contains('moonlit') ? 'moonlit' : document.body.classList.contains('ember') ? 'ember' : 'mist',
-    lastSaved: Date.now()
-  };
-  localStorage.setItem('numa_grove_save', JSON.stringify(data));
-}
+        // Health decays per minute (base), care actions restore
+        const DECAY = { hydration: 0.8, nourishment: 0.4, happiness: 0.3 };
+        const CARE_EFFECTS = {
+            water: { hydration: 28, nourishment: 4, happiness: 5, cd: 14000 },
+            talk: { hydration: 4, nourishment: 5, happiness: 22, cd: 10000 },
+            pet: { hydration: 5, nourishment: 18, happiness: 8, cd: 7000 },
+            sing: { hydration: 12, nourishment: 12, happiness: 16, cd: 32000 },
+        };
 
-function loadGame() {
-  const saved = localStorage.getItem('numa_grove_save');
-  if(!saved) return false;
-  try {
-    const data = JSON.parse(saved);
-    if(data.plants) plants = data.plants;
-    if(data.memories) memories = data.memories;
-    if(data.theme) setTheme(data.theme, true);
-    return true;
-  } catch(e){ return false; }
-}
+        // XP per action depends on average health
+        function actionXP(action, avgHealth) {
+            const base = { water: 8, talk: 6, pet: 5, sing: 18 };
+            const mult = 0.4 + (avgHealth / 100) * 0.8; // 0.4–1.2x
+            return Math.round(base[action] * mult);
+        }
 
-function updateStatus() {
-  const el = document.getElementById('status-text');
-  const msgs = [
-    'The grove is quiet tonight…',
-    'A gentle breeze moves the leaves.',
-    'Fireflies dance between the trees.',
-    'The plants seem content.',
-    'Moonlight filters through the canopy.',
-    'The soil feels alive underfoot.'
-  ];
-  el.textContent = msgs[Math.floor(Math.random()*msgs.length)];
-}
+        // Passive income per minute per plant (base × stage × health modifier)
+        function incomeRate(plant) {
+            const h = plantAvgHealth(plant);
+            const hm = Math.max(0, h / 100);
+            return PLANT_META[plant.type].incomeBase * plant.stage * hm * 0.5;
+        }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('up');
-  setTimeout(() => t.classList.remove('up'), 2600);
-}
+        function plantAvgHealth(plant) {
+            return (plant.health.hydration + plant.health.nourishment + plant.health.happiness) / 3;
+        }
 
-function triggerParticles(x, y, color = '#a89fd8') {
-  const W = pcvs.width = pcvs.parentElement.clientWidth;
-  const H = pcvs.height = pcvs.parentElement.clientHeight;
-  pctx.clearRect(0,0,W,H);
-  
-  const parts = [];
-  for(let i=0; i<18; i++) {
-    parts.push({
-      x: x + (Math.random()-0.5)*40,
-      y: y - 20 + (Math.random()-0.5)*30,
-      vx: (Math.random()-0.5)*2.2,
-      vy: -1.8 - Math.random()*1.8,
-      life: 28 + Math.random()*18,
-      size: 2.5 + Math.random()*2.2,
-      col: color
-    });
-  }
-  
-  let raf;
-  function anim() {
-    pctx.clearRect(0,0,W,H);
-    let alive = false;
-    parts.forEach((pt, idx) => {
-      if(pt.life <= 0) return;
-      alive = true;
-      pt.x += pt.vx;
-      pt.y += pt.vy;
-      pt.vy += 0.08;
-      pt.life -= 1;
-      const alpha = Math.max(0, pt.life / 40);
-      pctx.save();
-      pctx.globalAlpha = alpha * 0.9;
-      pctx.fillStyle = pt.col;
-      pctx.beginPath();
-      pctx.arc(pt.x, pt.y, pt.size * (pt.life/30 + 0.3), 0, Math.PI*2);
-      pctx.fill();
-      pctx.restore();
-    });
-    if(alive) raf = requestAnimationFrame(anim);
-    else pctx.clearRect(0,0,W,H);
-  }
-  anim();
-  setTimeout(() => { if(raf) cancelAnimationFrame(raf); pctx.clearRect(0,0,W,H); }, 1400);
-}
+        /* ── STATE ── */
+        let G = {
+            plants: [
+                {
+                    id: 1, type: 'moonflower', stage: 1, xp: 0, name: 'Moonflower',
+                    health: { hydration: 80, nourishment: 75, happiness: 70 }, totalXp: 0
+                },
+                {
+                    id: 2, type: 'starbloom', stage: 1, xp: 0, name: 'Starbloom',
+                    health: { hydration: 80, nourishment: 75, happiness: 70 }, totalXp: 0
+                },
+                {
+                    id: 3, type: 'emberleaf', stage: 1, xp: 0, name: 'Emberleaf',
+                    health: { hydration: 80, nourishment: 75, happiness: 70 }, totalXp: 0
+                },
+            ],
+            coins: 12,
+            cd: { water: 0, talk: 0, pet: 0, sing: 0 },
+            lastTick: Date.now(),
+            theme: 'mist',
+            milestones: [],
+            log: [],
+            inventory: {},   // itemId → count
+            upgrades: {},    // upgradeId → level
+            totalCare: 0,
+            nextEventAt: Date.now() + 120000,
+            renamingId: null,
+        };
 
-function renderPlants() {
-  pSvg.innerHTML = '';
-  const rect = pSvg.getBoundingClientRect();
-  const W = rect.width || 900;
-  const H = rect.height || 620;
-  
-  const positions = [
-    {x: W * 0.23, y: H * 0.81},
-    {x: W * 0.51, y: H * 0.84},
-    {x: W * 0.78, y: H * 0.79}
-  ];
-  
-  plants.forEach((p, i) => {
-    const g = document.createElementNS(NS, 'g');
-    g.setAttribute('transform', `translate(${positions[i].x}, ${positions[i].y})`);
-    
-    // plant shadow
-    const shadow = document.createElementNS(NS, 'ellipse');
-    shadow.setAttribute('cx', '0');
-    shadow.setAttribute('cy', '18');
-    shadow.setAttribute('rx', '22');
-    shadow.setAttribute('ry', '6');
-    shadow.setAttribute('fill', 'rgba(2,4,12,0.35)');
-    g.appendChild(shadow);
-    
-    // plant svg content
-    let svgContent = '';
-    if(p.type === 'moonflower') svgContent = moonflowerSVG(p.stage);
-    else if(p.type === 'starbloom') svgContent = starbloomSVG(p.stage);
-    else svgContent = emberleafSVG(p.stage);
-    
-    const plantGroup = document.createElementNS(NS, 'g');
-    plantGroup.innerHTML = svgContent;
-    g.appendChild(plantGroup);
-    
-    // name label
-    const nameTxt = document.createElementNS(NS, 'text');
-    nameTxt.setAttribute('class', 'pname');
-    nameTxt.setAttribute('y', '-52');
-    nameTxt.setAttribute('fill', PLANT_META[p.type].color);
-    nameTxt.textContent = p.name;
-    nameTxt.onclick = () => {
-      showToast(`${p.name} whispers its thanks.`);
-      triggerParticles(positions[i].x, positions[i].y - 30, PLANT_META[p.type].color);
-    };
-    g.appendChild(nameTxt);
-    
-    // level badge
-    const lvlTxt = document.createElementNS(NS, 'text');
-    lvlTxt.setAttribute('class', 'plvl');
-    lvlTxt.setAttribute('y', '-36');
-    lvlTxt.textContent = `STAGE ${p.stage}`;
-    g.appendChild(lvlTxt);
-    
-    pSvg.appendChild(g);
-  });
-}
+        /* ── SHOP ITEMS ── */
+        const SHOP_ITEMS = [
+            { id: 'moonwater', name: 'Moonwater', icon: '💧', desc: 'Instantly +50 hydration to all plants.', price: 8, type: 'consumable', badge: 'new' },
+            { id: 'soulsoil', name: 'Soulsoil', icon: '🌱', desc: 'Instantly +50 nourishment to all plants.', price: 10, type: 'consumable' },
+            { id: 'songcrystal', name: 'Song Crystal', icon: '🔮', desc: 'Instantly +50 happiness to all plants.', price: 10, type: 'consumable', badge: 'rare' },
+            { id: 'sunvial', name: 'Sun Vial', icon: '☀️', desc: 'Halves all care cooldowns for 5 minutes.', price: 20, type: 'consumable', badge: 'rare' },
+            { id: 'wiltward', name: 'Wilt Ward', icon: '🛡️', desc: 'Stops health decay for 10 minutes.', price: 18, type: 'consumable' },
+            { id: 'richsoil', name: 'Rich Soil', icon: '🌿', desc: 'Upgrade: +25% XP from all care. (Max 3)', price: 35, type: 'upgrade', maxLevel: 3 },
+            { id: 'resonance', name: 'Resonance Bell', icon: '🔔', desc: 'Upgrade: +30% passive income. (Max 3)', price: 40, type: 'upgrade', maxLevel: 3 },
+            { id: 'deeproots', name: 'Deep Roots', icon: '🌲', desc: 'Upgrade: Reduce health decay -20%. (Max 3)', price: 45, type: 'upgrade', maxLevel: 3 },
+            { id: 'nightbloom', name: 'Nightbloom Dust', icon: '✨', desc: 'Rare: Double XP for next 3 care actions.', price: 55, type: 'consumable', badge: 'rare' },
+        ];
 
-function updatePlantList() {
-  pList.innerHTML = '';
-  plants.forEach(p => {
-    const meta = PLANT_META[p.type];
-    const needed = getXpNeeded(p.type, p.stage);
-    const pct = Math.min(100, Math.floor((p.xp / needed) * 100));
-    
-    const row = document.createElement('div');
-    row.className = 'prow';
-    row.innerHTML = `
+        /* ── RANDOM EVENTS ── */
+        const EVENTS = [
+            {
+                id: 'moonshower',
+                title: 'Moon Shower',
+                desc: 'Silver rain falls on the grove. The plants stir in their sleep.',
+                choices: [
+                    { label: 'Let them drink freely', effect: () => healAll('hydration', 35), reward: 'All plants +35 Hydration' },
+                    { label: 'Collect it in a vial', effect: () => giveCoins(8), reward: '+8 coins' },
+                ]
+            },
+            {
+                id: 'wanderer',
+                title: 'A Wandering Seed',
+                desc: 'A glowing seed drifts into the grove on the wind. It hums faintly.',
+                choices: [
+                    { label: 'Plant it beside the others', effect: () => healAll('happiness', 30), reward: 'All plants +30 Happiness' },
+                    { label: 'Trade it at the market', effect: () => giveCoins(14), reward: '+14 coins' },
+                ]
+            },
+            {
+                id: 'blight',
+                title: 'Pale Mist',
+                desc: 'A cold mist settles over the grove. The leaves tremble and lose colour.',
+                choices: [
+                    { label: 'Burn wilt ward herbs', effect: () => burnWiltWard(), reward: 'Lose 1 Wilt Ward — prevent decay' },
+                    { label: 'Let it pass', effect: () => applyBlight(), reward: 'All plants −15 to all stats' },
+                ]
+            },
+            {
+                id: 'harvest',
+                title: 'The Flowering Hour',
+                desc: 'The grove reaches a rare alignment. Your plants pulse with quiet energy.',
+                choices: [
+                    { label: 'Harvest the bloom essence', effect: () => giveCoins(22), reward: '+22 coins' },
+                    { label: 'Return the energy to roots', effect: () => xpBonusAll(60), reward: 'All plants +60 XP' },
+                ]
+            },
+            {
+                id: 'spirit',
+                title: 'Forest Spirit',
+                desc: 'A small spirit settles on your oldest plant. It carries a gift.',
+                choices: [
+                    { label: 'Accept the gift', effect: () => giveCoins(30), reward: '+30 coins' },
+                    { label: 'Ask it to stay', effect: () => healAll('happiness', 45), reward: 'All plants +45 Happiness' },
+                ]
+            },
+        ];
+
+        /* ── PARTICLES ── */
+        const pCvs = document.getElementById('pcvs');
+        const pCtx = pCvs.getContext('2d');
+        let particles = [], floats = [];
+
+        function spawnParticles(type, x, y, n) {
+            const C = {
+                water: ['#38bdf8', '#7dd3fc', '#bae6fd'],
+                talk: ['#f9a8d4', '#fda4af', '#fbcfe8'],
+                pet: ['#fde047', '#fbbf24', '#fef08a'],
+                sing: ['#a5f3fc', '#67e8f9', '#cffafe'],
+                bloom: ['#c4b5fd', '#fde68a', '#86efac', '#fda4af', '#38bdf8'],
+                coin: ['#c9a84c', '#fde68a', '#f5d062'],
+            };
+            const cols = C[type] || C.bloom;
+            for (let i = 0; i < (n || 14); i++) {
+                const a = Math.random() * Math.PI * 2;
+                const sp = type === 'bloom' ? 1.5 + Math.random() * 4 : 0.8 + Math.random() * 2.4;
+                particles.push({
+                    x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - (type === 'bloom' ? 2.5 : 1),
+                    life: 1, sz: Math.random() * 3 + 1.2, col: cols[Math.floor(Math.random() * cols.length)]
+                });
+            }
+        }
+        function spawnFloat(txt, x, y, col, big) {
+            floats.push({ txt, x, y, col: col || '#c4b5fd', life: 1, big: big || false });
+        }
+        function animParticles() {
+            const W = pCvs.width, H = pCvs.height;
+            pCtx.clearRect(0, 0, W, H);
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx; p.y += p.vy; p.vy += 0.055; p.life -= 0.018;
+                if (p.life <= 0) { particles.splice(i, 1); continue; }
+                pCtx.globalAlpha = p.life; pCtx.fillStyle = p.col;
+                pCtx.beginPath(); pCtx.arc(p.x, p.y, p.sz, 0, 6.283); pCtx.fill();
+            }
+            for (let i = floats.length - 1; i >= 0; i--) {
+                const f = floats[i];
+                f.y -= 0.9; f.life -= 0.013;
+                if (f.life <= 0) { floats.splice(i, 1); continue; }
+                pCtx.globalAlpha = f.life;
+                pCtx.font = `${f.big ? 'bold 15px' : '500 11px'} Josefin Sans,sans-serif`;
+                pCtx.fillStyle = f.col; pCtx.textAlign = 'center';
+                pCtx.strokeStyle = 'rgba(2,4,10,.9)'; pCtx.lineWidth = 2.5;
+                pCtx.strokeText(f.txt, f.x, f.y); pCtx.fillText(f.txt, f.x, f.y);
+            }
+            pCtx.globalAlpha = 1;
+            requestAnimationFrame(animParticles);
+        }
+
+        /* ── PLANT POSITIONS ── */
+        function plantPos(idx) {
+            const ga = document.getElementById('garden-area');
+            const W = ga.clientWidth, H = ga.clientHeight;
+            return { x: W * [0.23, 0.51, 0.78][idx], y: H * 0.81 };
+        }
+
+        /* ── RENDER PLANTS ── */
+        const pSvg = document.getElementById('plants-svg');
+        const GENS = { moonflower: moonflowerSVG, starbloom: starbloomSVG, emberleaf: emberleafSVG };
+        const STAGE_COLS = ['', '#6b7280', '#22d3ee', '#a78bfa', '#c084fc', '#e9d5ff'];
+        const STAGE_LBL = ['', 'Seedling', 'Sprout', 'Sapling', 'Bloom', 'Ancient'];
+
+        function renderPlants() {
+            const ga = document.getElementById('garden-area');
+            const W = ga.clientWidth, H = ga.clientHeight;
+            if (!W || !H) return;
+            const svg = document.getElementById('plants-svg');
+
+            // Rebuild entire SVG innerHTML so defs + plant groups parse correctly as SVG
+            const DEFS = `<defs>
+    <filter id="glow-soft" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-fire" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="9" result="b"/>
+      <feColorMatrix in="b" type="saturate" values="2.5" result="c"/>
+      <feMerge><feMergeNode in="c"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>`;
+
+            // Scale per stage so seedlings are still clearly visible
+            const PLANT_SCALE = [0, 2.2, 1.7, 1.3, 1.1, 1.0];
+            // Glow color per plant type
+            const GLOW_COL = { moonflower: 'rgba(167,139,250,0.18)', starbloom: 'rgba(56,189,248,0.18)', emberleaf: 'rgba(249,115,22,0.18)' };
+
+            let plants = '', labels = '';
+            G.plants.forEach((p, i) => {
+                const pos = plantPos(i);
+                const avgH = plantAvgHealth(p);
+                const col = STAGE_COLS[p.stage];
+                const swCls = ['psa', 'psb', 'psc'][i];
+                const sc = PLANT_SCALE[p.stage];
+                const glowR = [0, 38, 52, 68, 85, 105][p.stage];
+                const glowCol = GLOW_COL[p.type];
+
+                // Outer group: position only
+                plants += `<g transform="translate(${pos.x.toFixed(1)},${pos.y.toFixed(1)})">`;
+                // Soft glow halo so plant reads against dark bg
+                plants += `<ellipse cx="0" cy="${-(glowR * 0.45).toFixed(0)}" rx="${glowR}" ry="${(glowR * 0.7).toFixed(0)}" fill="${glowCol}" filter="url(#glow-soft)"/>`;
+                
+                // Animated group: sway animation and scale
+                plants += `<g class="${swCls}" transform="scale(${sc})">`;
+                plants += GENS[p.type](p.stage, avgH);
+                plants += `</g>`; // End animated group
+                
+                if (avgH < 20) plants += `<ellipse cx="0" cy="-20" rx="18" ry="4" fill="rgba(180,50,50,0.10)"/>`;
+                plants += `</g>`; // End outer group
+
+                const lx = pos.x, ly = pos.y + 30;
+                const fc = avgH < 30 ? '#f87171' : col;
+                labels += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" class="pname" fill="${fc}" onclick="openRename(${p.id})">${p.name}</text>`;
+                labels += `<text x="${lx.toFixed(1)}" y="${(ly + 14).toFixed(1)}" class="plvl">${STAGE_LBL[p.stage]}</text>`;
+                if (p.stage < 5) {
+                    const bw = 58, pct = Math.min(1, p.xp / XP_PER_STAGE[p.stage]), bx = lx - bw / 2, by = ly + 19;
+                    labels += `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw}" height="3" rx="1.5" fill="rgba(168,159,216,.10)"/>`;
+                    labels += `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${(bw * pct).toFixed(1)}" height="3" rx="1.5" fill="${fc}"/>`;
+                }
+            });
+            svg.innerHTML = DEFS + `<g>${plants}</g><g>${labels}</g>`;
+        }
+
+
+        function renderHealth() {
+            const panel = document.getElementById('health-panel');
+            let h = '';
+            G.plants.forEach(p => {
+                const hyd = Math.round(p.health.hydration);
+                const nou = Math.round(p.health.nourishment);
+                const hap = Math.round(p.health.happiness);
+                const col = PLANT_META[p.type].color;
+                const warn = v => v < 30 ? '#f87171' : v < 55 ? '#fbbf24' : col;
+                h += `<div style="margin-bottom:9px">`;
+                h += `<div style="font-size:.58rem;letter-spacing:.10em;text-transform:uppercase;color:${col};margin-bottom:5px">${p.name}</div>`;
+                h += `<div class="hp-row"><span class="hp-icon">💧</span><div class="hp-bar"><div class="hp-fill" style="width:${hyd}%;background:${warn(hyd)}"></div></div><span class="hp-val" style="color:${warn(hyd)}">${hyd}</span></div>`;
+                h += `<div class="hp-row"><span class="hp-icon">🌱</span><div class="hp-bar"><div class="hp-fill" style="width:${nou}%;background:${warn(nou)}"></div></div><span class="hp-val" style="color:${warn(nou)}">${nou}</span></div>`;
+                h += `<div class="hp-row"><span class="hp-icon">✦</span><div class="hp-bar"><div class="hp-fill" style="width:${hap}%;background:${warn(hap)}"></div></div><span class="hp-val" style="color:${warn(hap)}">${hap}</span></div>`;
+                h += `</div>`;
+            });
+            panel.innerHTML = h;
+        }
+
+        /* ── SIDEBAR PLANT LIST ── */
+        function renderPlantList() {
+            const list = document.getElementById('plant-list');
+            let h = '';
+            G.plants.forEach(p => {
+                const needed = XP_PER_STAGE[p.stage];
+                const pct = p.stage >= 5 ? 100 : Math.min(100, Math.round(p.xp / needed * 100));
+                const col = PLANT_META[p.type].color;
+                const rate = incomeRate(p).toFixed(1);
+                h += `<div class="prow" onclick="clickPlant(${p.id})">
       <div class="prowtop">
-        <div>
-          <span class="prowname">${meta.emoji} ${p.name}</span>
-          <span class="prowstage" style="color:${meta.color}">STAGE ${p.stage}</span>
-        </div>
-        <div class="pxptxt">${p.xp} / ${needed} XP</div>
+        <span class="prowname">${PLANT_META[p.type].emoji} ${p.name}</span>
+        <span class="prow-rename" onclick="event.stopPropagation();openRename(${p.id})" title="Rename">✎</span>
       </div>
-      <div class="pxpbar"><div class="pxpfill" style="width:${pct}%;background:${meta.color}"></div></div>
-    `;
-    row.onclick = () => {
-      showToast(`${p.name} pulses with quiet energy.`);
-      triggerParticles(200 + Math.random()*300, 380, meta.color);
-    };
-    pList.appendChild(row);
-  });
-}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span class="prowstage" style="color:${col}">${STAGE_LBL[p.stage]}</span>
+        <span style="font-size:.55rem;color:var(--gold);letter-spacing:.06em">✦${rate}/min</span>
+      </div>
+      <div class="pxpbar"><div class="pxpfill" style="width:${pct}%;background:${col}"></div></div>
+      <div class="pxptxt">${p.stage < 5 ? p.xp + ' / ' + needed + ' XP' : 'MAX'}</div>
+    </div>`;
+            });
+            list.innerHTML = h;
+        }
 
-function updateCooldownUI() {
-  const now = Date.now();
-  const types = ['water','talk','pet','sing'];
-  const times = {water:8000, talk:12000, pet:6500, sing:16000};
-  
-  types.forEach(t => {
-    const bar = document.getElementById(`cd-${t}`);
-    const btn = document.getElementById(`btn-${t}`);
-    if(!bar || !btn) return;
-    
-    if(now >= cooldowns[t]) {
-      bar.style.width = '0%';
-      btn.disabled = false;
-    } else {
-      const total = times[t];
-      const remaining = Math.max(0, cooldowns[t] - now);
-      const pct = (remaining / total) * 100;
-      bar.style.width = pct + '%';
-      btn.disabled = true;
-    }
-  });
-}
+        /* ── COINS / BADGE ── */
+        function updateBadge() {
+            document.getElementById('coins-badge').textContent = Math.floor(G.coins);
+            const tot = G.plants.reduce((s, p) => s + p.stage, 0);
+            document.getElementById('mbadge').textContent = `Mastery · ${tot}`;
+            const totalRate = G.plants.reduce((s, p) => s + incomeRate(p), 0);
+            document.getElementById('income-rate').textContent = `✦ ${totalRate.toFixed(1)}/min`;
+        }
 
-function startCooldownLoop() {
-  if(cdInterval) clearInterval(cdInterval);
-  cdInterval = setInterval(() => {
-    updateCooldownUI();
-  }, 120);
-}
+        /* ── CARE ACTIONS ── */
+        let nightbloomLeft = 0, wiltWardUntil = 0, cooldownHalf = 0;
 
-function doAction(type) {
-  const now = Date.now();
-  if(now < cooldowns[type]) return;
-  
-  const times = {water:8000, talk:12000, pet:6500, sing:16000};
-  const gains = {water:20, talk:15, pet:10, sing:30};
-  
-  cooldowns[type] = now + times[type];
-  updateCooldownUI();
-  
-  const gain = gains[type];
-  let anyGrew = false;
-  
-  plants.forEach(p => {
-    p.xp += gain;
-    const needed = getXpNeeded(p.type, p.stage);
-    
-    if(p.xp >= needed && p.stage < 5) {
-      p.xp -= needed;
-      p.stage++;
-      anyGrew = true;
-      
-      const msg = `${p.name} has grown to Stage ${p.stage}!`;
-      showToast(msg);
-      memories.push(`${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})} — ${msg}`);
-      
-      // special effects per type
-      if(p.type === 'emberleaf') {
-        setTimeout(() => triggerParticles(620, 410, '#f97316'), 180);
-      } else if(p.type === 'starbloom') {
-        setTimeout(() => triggerParticles(460, 395, '#38bdf8'), 120);
-      }
-    }
-  });
-  
-  renderPlants();
-  updatePlantList();
-  
-  if(anyGrew) {
-    // update mastery badge if needed
-    const sumStages = plants.reduce((a,p)=>a+p.stage,0);
-    const newMastery = Math.max(3, Math.floor((sumStages - 3) / 2) + 3);
-    document.querySelector('.mbadge').textContent = `Mastery · ${newMastery}`;
-    
-    // bonus particle burst in center
-    setTimeout(() => {
-      const centerX = pSvg.getBoundingClientRect().width * 0.5;
-      triggerParticles(centerX, 280, '#a89fd8');
-    }, 300);
-  }
-  
-  // random ambient toast sometimes
-  if(Math.random() < 0.18) {
-    setTimeout(() => showToast('The grove responds to your care.'), 900);
-  }
-  
-  saveGame();
-}
+        function doAction(action) {
+            const now = Date.now();
+            const cdKey = action;
+            const cdTime = cooldownHalf > now
+                ? CARE_EFFECTS[action].cd * 0.5
+                : CARE_EFFECTS[action].cd;
+            if (now < G.cd[cdKey]) return;
+            G.cd[cdKey] = now + cdTime;
+            G.totalCare++;
 
-function setTheme(theme, silent = false) {
-  document.body.classList.remove('moonlit', 'ember');
-  
-  if(theme === 'moonlit') document.body.classList.add('moonlit');
-  else if(theme === 'ember') document.body.classList.add('ember');
-  
-  document.querySelectorAll('.thbtn').forEach(b => {
-    b.classList.toggle('on', b.dataset.t === theme);
-  });
-  
-  if(!silent) {
-    const msgs = {
-      mist: 'The mist settles gently over the grove.',
-      moonlit: 'Moonlight bathes the garden in silver.',
-      ember: 'A warm glow kindles in the embers.'
-    };
-    showToast(msgs[theme] || 'Atmosphere shifted.');
-  }
-  
-  localStorage.setItem('numa_grove_theme', theme);
-}
+            const fx = CARE_EFFECTS[action];
+            const xpMult = 1 + (G.upgrades.richsoil || 0) * 0.25;
+            let anyBloomed = false;
 
-function showStats() {
-  const modal = document.getElementById('smodal');
-  const totalXp = plants.reduce((sum, p) => sum + getTotalXp(p), 0);
-  const sumStages = plants.reduce((a,p)=>a + p.stage, 0);
-  const mastery = Math.max(3, Math.floor((sumStages - 3) / 2) + 3);
-  
-  document.getElementById('stat-mastery').textContent = mastery;
-  document.getElementById('stat-xp').textContent = totalXp.toLocaleString();
-  document.getElementById('stat-plants').textContent = `${plants.length} / 3`;
-  document.getElementById('stat-days').textContent = Math.floor((Date.now() - 1740000000000) / 86400000) + 12; // fake days
-  
-  const memList = document.getElementById('memories-list');
-  memList.innerHTML = '';
-  
-  if(memories.length === 0) {
-    const empty = document.createElement('div');
-    empty.className = 'mitem';
-    empty.textContent = 'No records yet. Tend the plants to begin the story.';
-    memList.appendChild(empty);
-  } else {
-    memories.slice(-8).reverse().forEach(m => {
-      const item = document.createElement('div');
-      item.className = 'mitem';
-      item.textContent = m;
-      memList.appendChild(item);
-    });
-  }
-  
-  modal.style.display = 'flex';
-  modal.classList.add('open');
-}
+            G.plants.forEach((p, i) => {
+                // Apply health
+                p.health.hydration = Math.min(100, p.health.hydration + fx.hydration);
+                p.health.nourishment = Math.min(100, p.health.nourishment + fx.nourishment);
+                p.health.happiness = Math.min(100, p.health.happiness + fx.happiness);
 
-function hideStats() {
-  const modal = document.getElementById('smodal');
-  modal.classList.remove('open');
-  setTimeout(() => { modal.style.display = 'none'; }, 180);
-}
+                // XP
+                const avgH = plantAvgHealth(p);
+                const xp = Math.round(actionXP(action, avgH) * xpMult * (nightbloomLeft > 0 ? 2 : 1));
+                if (p.stage < 5) {
+                    p.xp += xp; p.totalXp = (p.totalXp || 0) + xp;
+                }
+                const pos = plantPos(i);
+                spawnParticles(action, pos.x, pos.y - 40, 10);
+                spawnFloat(`+${xp}xp`, pos.x, pos.y - 80, PLANT_META[p.type].color);
+                if (checkLevelUp(p, pos)) anyBloomed = true;
+            });
 
-function doExport() {
-  const data = {
-    plants: plants.map(p => ({id:p.id, type:p.type, stage:p.stage, xp:p.xp, name:p.name})),
-    memories: memories,
-    theme: document.body.classList.contains('moonlit') ? 'moonlit' : document.body.classList.contains('ember') ? 'ember' : 'mist',
-    exportedAt: new Date().toISOString()
-  };
-  const json = JSON.stringify(data, null, 2);
-  navigator.clipboard.writeText(json).then(() => {
-    showToast('Garden data copied to clipboard!');
-  }).catch(() => {
-    // fallback
-    const ta = document.createElement('textarea');
-    ta.value = json;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    showToast('Garden data copied!');
-  });
-}
+            if (nightbloomLeft > 0) nightbloomLeft--;
 
-function doImport() {
-  const input = prompt('Paste your exported garden JSON here:');
-  if(!input || input.trim() === '') return;
-  
-  try {
-    const data = JSON.parse(input.trim());
-    
-    if(data.plants && Array.isArray(data.plants)) {
-      plants = data.plants.map(p => ({
-        id: p.id || Date.now(),
-        type: p.type || 'moonflower',
-        stage: Math.max(1, Math.min(5, p.stage || 1)),
-        xp: Math.max(0, p.xp || 0),
-        name: p.name || PLANT_META[p.type || 'moonflower'].emoji + ' ' + (p.type || 'Moonflower')
-      }));
-    }
-    
-    if(data.memories && Array.isArray(data.memories)) {
-      memories = data.memories.slice(-15);
-    }
-    
-    if(data.theme) {
-      setTheme(data.theme, true);
-    }
-    
-    renderPlants();
-    updatePlantList();
-    updateCooldownUI();
-    showToast('Garden successfully restored!');
-    saveGame();
-    
-  } catch(e) {
-    showToast('Invalid garden data. Please check the JSON.');
-  }
-}
+            const msgs = {
+                water: 'The soil drinks deeply.',
+                talk: 'A soft glow answers you.',
+                pet: 'The leaves tremble at your touch.',
+                sing: 'The grove stirs — something wakes.',
+            };
+            setStatus(msgs[action]);
+            renderPlants(); renderHealth(); renderPlantList(); updateBadge();
+            checkMilestones();
+            save();
+        }
 
-function initPlantList() {
-  // already handled in updatePlantList
-}
+        function checkLevelUp(p, pos) {
+            if (p.stage >= 5) return false;
+            let bloomed = false;
+            while (p.stage < 5 && p.xp >= XP_PER_STAGE[p.stage]) {
+                p.xp -= XP_PER_STAGE[p.stage];
+                p.stage++;
+                bloomed = true;
+                if (p.stage === 5) p.xp = 0;
+                spawnParticles('bloom', pos.x, pos.y, 55);
+                spawnFloat(`✦ ${p.name} — ${STAGE_LBL[p.stage]}!`, pos.x, pos.y - 55, '#fde68a', true);
+                toast(`${p.name} has reached ${STAGE_LBL[p.stage]}!`);
+                addLog(`${p.name} bloomed into ${STAGE_LBL[p.stage]}.`);
+            }
+            return bloomed;
+        }
 
-function initGame() {
-  // load save if exists
-  const loaded = loadGame();
-  
-  // initial render
-  renderPlants();
-  updatePlantList();
-  
-  // start cooldown updater
-  startCooldownLoop();
-  updateCooldownUI();
-  
-  // random status updates
-  setInterval(updateStatus, 38000);
-  
-  // initial ambient particle
-  setTimeout(() => {
-    const w = pSvg.getBoundingClientRect().width;
-    triggerParticles(w * 0.3, 310, '#a89fd8');
-  }, 1400);
-  
-  // keyboard shortcuts
-  document.addEventListener('keydown', e => {
-    if(e.key === '?') { e.preventDefault(); showStats(); }
-    if(e.key.toLowerCase() === 'w') { e.preventDefault(); doAction('water'); }
-    if(e.key.toLowerCase() === 't') { e.preventDefault(); doAction('talk'); }
-    if(e.key.toLowerCase() === 'p') { e.preventDefault(); doAction('pet'); }
-    if(e.key.toLowerCase() === 's') { e.preventDefault(); doAction('sing'); }
-  });
-  
-  // resize handler
-  let resizeTO;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTO);
-    resizeTO = setTimeout(() => {
-      initBg();
-      drawGround();
-      renderPlants();
-    }, 180);
-  });
-  
-  // initial bg and ground
-  initBg();
-  drawGround();
-  
-  // welcome toast
-  if(!loaded) {
-    setTimeout(() => {
-      showToast('Welcome to Numa\'s Garden. Tend with care.');
-    }, 800);
-  } else {
-    setTimeout(() => {
-      showToast('Welcome back to the grove.');
-    }, 600);
-  }
-  
-  // Easter egg: click header logo for special effect
-  const logo = document.querySelector('.logo');
-  if(logo) {
-    logo.style.cursor = 'pointer';
-    logo.onclick = () => {
-      const w = pSvg.getBoundingClientRect().width;
-      triggerParticles(w * 0.5, 180, '#a89fd8');
-      showToast('The ancient grove remembers you.');
-      plants.forEach((p,i) => {
-        setTimeout(() => {
-          p.xp = Math.min(p.xp + 8, getXpNeeded(p.type, p.stage) - 1);
-          renderPlants();
-          updatePlantList();
-        }, i * 180);
-      });
-    };
-  }
-  
-  // final touch: make sure mastery badge reflects current
-  const sumStages = plants.reduce((a,p)=>a+p.stage,0);
-  const currentMastery = Math.max(3, Math.floor((sumStages - 3) / 2) + 3);
-  document.querySelector('.mbadge').textContent = `Mastery · ${currentMastery}`;
-  
-  console.log('%c[Numa\'s Garden] Grove initialized successfully.', 'color:#58697f');
-}
+        /* ── COOLDOWN UI ── */
+        function tickCooldowns() {
+            const now = Date.now();
+            Object.keys(CARE_EFFECTS).forEach(a => {
+                const btn = document.getElementById('btn-' + a);
+                const bar = document.getElementById('cd-' + a);
+                if (!btn || !bar) return;
+                const rem = G.cd[a] - now;
+                btn.disabled = rem > 0;
+                bar.style.width = rem > 0 ? ((rem / CARE_EFFECTS[a].cd) * 100) + '%' : '0%';
+            });
+        }
 
-// Boot everything
-initGame();
-</script>
+        /* ── PASSIVE TICK ── */
+        function gameTick() {
+            const now = Date.now();
+            const elapsed = (now - G.lastTick) / 60000; // minutes
+            G.lastTick = now;
+
+            const decayMult = wiltWardUntil > now ? 0 : (1 - (G.upgrades.deeproots || 0) * 0.2);
+            const incMult = 1 + (G.upgrades.resonance || 0) * 0.3;
+
+            G.plants.forEach(p => {
+                // decay health
+                p.health.hydration = Math.max(0, p.health.hydration - DECAY.hydration * elapsed * decayMult);
+                p.health.nourishment = Math.max(0, p.health.nourishment - DECAY.nourishment * elapsed * decayMult);
+                p.health.happiness = Math.max(0, p.health.happiness - DECAY.happiness * elapsed * decayMult);
+                // passive XP (very slow — health dependent)
+                if (p.stage < 5) {
+                    const avgH = plantAvgHealth(p);
+                    const passXp = avgH / 100 * 0.6 * elapsed * p.stage; // ~0.6xp/min max at stage 1 full health
+                    p.xp += passXp; p.totalXp = (p.totalXp || 0) + passXp;
+                    const pos = plantPos(G.plants.indexOf(p));
+                    checkLevelUp(p, pos);
+                }
+                // passive income
+                G.coins += incomeRate(p) * elapsed * incMult;
+            });
+
+            // Event check
+            if (now >= G.nextEventAt) {
+                G.nextEventAt = now + (90000 + Math.random() * 180000);
+                triggerEvent();
+            }
+
+            renderPlants(); renderHealth(); renderPlantList(); updateBadge();
+            save();
+        }
+
+        /* ── EVENTS ── */
+        function triggerEvent() {
+            const ev = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+            document.getElementById('ev-title').textContent = ev.title;
+            document.getElementById('ev-desc').textContent = ev.desc;
+            const ch = document.getElementById('ev-choices');
+            ch.innerHTML = '';
+            ev.choices.forEach(c => {
+                const btn = document.createElement('button');
+                btn.className = 'ev-btn';
+                btn.innerHTML = `<span>${c.label}</span><span class="ev-cost">${c.reward}</span>`;
+                btn.onclick = () => { c.effect(); dismissEvent(); toast(c.reward); renderPlants(); renderHealth(); renderPlantList(); updateBadge(); save(); };
+                ch.appendChild(btn);
+            });
+            document.getElementById('event-modal').classList.add('open');
+            addLog(`Event: ${ev.title}`);
+        }
+        function dismissEvent() { document.getElementById('event-modal').classList.remove('open'); }
+
+        /* Event effects */
+        function healAll(stat, amount) {
+            G.plants.forEach(p => p.health[stat] = Math.min(100, p.health[stat] + amount));
+        }
+        function giveCoins(n) {
+            G.coins += n;
+            // coin pop visual
+            const ga = document.getElementById('garden-area');
+            const el = document.createElement('div');
+            el.className = 'coin-pop';
+            el.textContent = `+${n} ✦`;
+            el.style.left = (ga.clientWidth * 0.5 - 20) + 'px';
+            el.style.top = (ga.clientHeight * 0.4) + 'px';
+            ga.appendChild(el);
+            setTimeout(() => el.remove(), 1300);
+        }
+        function xpBonusAll(xp) {
+            G.plants.forEach((p, i) => {
+                if (p.stage < 5) { p.xp += xp; p.totalXp = (p.totalXp || 0) + xp; checkLevelUp(p, plantPos(i)); }
+            });
+        }
+        function applyBlight() {
+            G.plants.forEach(p => {
+                p.health.hydration = Math.max(0, p.health.hydration - 15);
+                p.health.nourishment = Math.max(0, p.health.nourishment - 15);
+                p.health.happiness = Math.max(0, p.health.happiness - 15);
+            });
+        }
+        function burnWiltWard() {
+            if ((G.inventory.wiltward || 0) > 0) {
+                G.inventory.wiltward--;
+                wiltWardUntil = Date.now() + 600000;
+                toast('Wilt Ward active for 10 minutes!');
+            } else {
+                applyBlight();
+                toast('No Wilt Ward — blight took hold.');
+            }
+        }
+
+        /* ── MARKETPLACE ── */
+        function openMarket() {
+            renderMarket();
+            document.getElementById('market-modal').classList.add('open');
+        }
+        function renderMarket() {
+            // Inventory
+            const inv = document.getElementById('inv-grid');
+            const invItems = SHOP_ITEMS.filter(i => (G.inventory[i.id] || 0) > 0);
+            if (!invItems.length) {
+                inv.innerHTML = '<div style="font-size:.62rem;color:var(--muted);letter-spacing:.06em">No items yet.</div>';
+            } else {
+                inv.innerHTML = invItems.map(i => `
+      <div class="inv-item" onclick="useItem('${i.id}')" title="Click to use">
+        <span>${i.icon}</span>
+        <span>${i.name}</span>
+        <span class="count">×${G.inventory[i.id]}</span>
+      </div>`).join('');
+            }
+            // Shop
+            const grid = document.getElementById('mkt-grid');
+            grid.innerHTML = SHOP_ITEMS.map(item => {
+                const upgLvl = G.upgrades[item.id] || 0;
+                const maxed = item.type === 'upgrade' && upgLvl >= (item.maxLevel || 3);
+                const canAfford = !maxed && G.coins >= item.price;
+                const cls = maxed ? 'mkt-item cant-afford' : canAfford ? 'mkt-item can-afford' : 'mkt-item cant-afford';
+                const badge = item.badge ? `<div class="mkt-badge ${item.badge}">${item.badge}</div>` : '';
+                const lvlInfo = item.type === 'upgrade' ? ` (Lv${upgLvl}/${item.maxLevel})` : '';
+                return `<div class="${cls}" onclick="buyItem('${item.id}')">
+      ${badge}
+      <div class="mkt-icon">${item.icon}</div>
+      <div class="mkt-name">${item.name}${lvlInfo}</div>
+      <div class="mkt-desc">${item.desc}</div>
+      <div class="mkt-price">${maxed ? 'MAXED' : item.price + ' coins'}</div>
+    </div>`;
+            }).join('');
+        }
+        function buyItem(id) {
+            const item = SHOP_ITEMS.find(i => i.id === id);
+            if (!item || G.coins < item.price) { toast('Not enough coins.'); return; }
+            const upgLvl = G.upgrades[id] || 0;
+            if (item.type === 'upgrade' && upgLvl >= (item.maxLevel || 3)) { toast('Already maxed.'); return; }
+            G.coins -= item.price;
+            if (item.type === 'upgrade') {
+                G.upgrades[id] = upgLvl + 1;
+                toast(`${item.name} upgraded to level ${G.upgrades[id]}!`);
+                addLog(`Purchased upgrade: ${item.name} Lv${G.upgrades[id]}`);
+            } else {
+                G.inventory[id] = (G.inventory[id] || 0) + 1;
+                toast(`${item.name} added to inventory.`);
+            }
+            updateBadge(); renderMarket(); save();
+        }
+        function useItem(id) {
+            if (!(G.inventory[id] > 0)) return;
+            const now = Date.now();
+            switch (id) {
+                case 'moonwater': healAll('hydration', 50); toast('All plants +50 Hydration!'); break;
+                case 'soulsoil': healAll('nourishment', 50); toast('All plants +50 Nourishment!'); break;
+                case 'songcrystal': healAll('happiness', 50); toast('All plants +50 Happiness!'); break;
+                case 'sunvial': cooldownHalf = now + 300000; toast('Cooldowns halved for 5 minutes!'); break;
+                case 'wiltward': wiltWardUntil = now + 600000; toast('Wilt Ward active for 10 minutes!'); break;
+                case 'nightbloom': nightbloomLeft = 3; toast('Next 3 care actions give double XP!'); break;
+                default: toast('Item has no effect.'); return;
+            }
+            G.inventory[id]--;
+            spawnParticles('bloom', document.getElementById('garden-area').clientWidth / 2,
+                document.getElementById('garden-area').clientHeight / 2, 30);
+            renderPlants(); renderHealth(); renderPlantList(); renderMarket(); updateBadge(); save();
+        }
+
+        /* ── RENAME ── */
+        function openRename(plantId) {
+            G.renamingId = plantId;
+            const p = G.plants.find(x => x.id === plantId);
+            document.getElementById('rename-input').value = p ? p.name : '';
+            document.getElementById('rename-modal').classList.add('open');
+            setTimeout(() => document.getElementById('rename-input').focus(), 80);
+        }
+        function confirmRename() {
+            const val = document.getElementById('rename-input').value.trim().slice(0, 20);
+            if (!val) return;
+            const p = G.plants.find(x => x.id === G.renamingId);
+            if (p) { p.name = val; toast(`Renamed to "${val}".`); renderPlants(); renderHealth(); renderPlantList(); save(); }
+            closeModal('rename-modal');
+        }
+        document.getElementById('rename-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') confirmRename();
+            if (e.key === 'Escape') closeModal('rename-modal');
+        });
+
+        /* ── PLANT CLICK ── */
+        function clickPlant(id) {
+            const p = G.plants.find(x => x.id === id);
+            if (!p) return;
+            const i = G.plants.indexOf(p);
+            const pos = plantPos(i);
+            spawnParticles('bloom', pos.x, pos.y - 30, 18);
+            toast(`${p.name} whispers quietly.`);
+        }
+
+        /* ── MILESTONES ── */
+        const MILE = [
+            { id: 'first_care', test: () => G.totalCare >= 1, label: 'First care given' },
+            { id: 'all_s2', test: () => G.plants.every(p => p.stage >= 2), label: 'All plants reach Sprout' },
+            { id: 'all_s3', test: () => G.plants.every(p => p.stage >= 3), label: 'All plants reach Sapling' },
+            { id: 'all_s4', test: () => G.plants.every(p => p.stage >= 4), label: 'All plants in Bloom' },
+            { id: 'all_s5', test: () => G.plants.every(p => p.stage >= 5), label: 'The grove is complete' },
+            { id: 'care50', test: () => G.totalCare >= 50, label: '50 acts of care' },
+            { id: 'care200', test: () => G.totalCare >= 200, label: '200 acts — devoted keeper' },
+            { id: 'rich', test: () => G.coins >= 100, label: 'Accumulated 100 coins' },
+            { id: 'shopper', test: () => Object.keys(G.upgrades).length >= 1, label: 'First upgrade purchased' },
+            { id: 'event', test: () => G.log.some(l => l.startsWith('Event:')), label: 'Witnessed a grove event' },
+        ];
+        function checkMilestones() {
+            MILE.forEach(m => {
+                if (!G.milestones.includes(m.id) && m.test()) {
+                    G.milestones.push(m.id);
+                    toast(`✦ Milestone: ${m.label}`);
+                    addLog(`Milestone unlocked: ${m.label}`);
+                    spawnParticles('bloom',
+                        document.getElementById('garden-area').clientWidth / 2,
+                        document.getElementById('garden-area').clientHeight * 0.5, 40);
+                }
+            });
+        }
+
+        /* ── LOG ── */
+        function addLog(msg) {
+            const d = new Date();
+            const ts = `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+            G.log.unshift(`[${ts}] ${msg}`);
+            if (G.log.length > 30) G.log.pop();
+        }
+
+        /* ── STATS MODAL ── */
+        function openStats() {
+            const tot = G.plants.reduce((s, p) => s + p.stage, 0);
+            const totXp = G.plants.reduce((s, p) => s + (p.totalXp || 0), 0);
+            const avgH = G.plants.reduce((s, p) => s + plantAvgHealth(p), 0) / 3;
+            document.getElementById('stats-rows').innerHTML = [
+                ['Mastery Level', tot + ' / 15'],
+                ['Total XP', Math.round(totXp).toLocaleString()],
+                ['Coins', Math.floor(G.coins)],
+                ['Care Actions', G.totalCare],
+                ['Grove Health', Math.round(avgH) + '%'],
+                ['Milestones', G.milestones.length + ' / ' + MILE.length],
+                ['Upgrades', Object.values(G.upgrades).reduce((s, v) => s + v, 0)],
+            ].map(([l, v]) => `<div class="srow"><span class="srl">${l}</span><span class="srv">${v}</span></div>`).join('');
+            document.getElementById('log-list').innerHTML = G.log.slice(0, 12)
+                .map(l => `<div class="mitem-log">${l}</div>`).join('') || '<div class="mitem-log">No records yet.</div>';
+            document.getElementById('stats-modal').classList.add('open');
+        }
+
+        /* ── THEME ── */
+        const FOGS = {
+            mist: { a: 'radial-gradient(ellipse 60% 100% at 50% 100%,rgba(120,145,210,.11) 0%,rgba(100,130,190,.055) 40%,transparent 70%)', b: 'radial-gradient(ellipse 70% 100% at 40% 100%,rgba(145,165,215,.07) 0%,transparent 65%)', c: 'radial-gradient(ellipse 45% 100% at 25% 100%,rgba(110,135,200,.06) 0%,transparent 60%),radial-gradient(ellipse 45% 100% at 75% 100%,rgba(110,135,200,.06) 0%,transparent 60%)' },
+            moonlit: { a: 'radial-gradient(ellipse 60% 100% at 50% 100%,rgba(80,130,240,.13) 0%,rgba(70,120,220,.06) 40%,transparent 70%)', b: 'radial-gradient(ellipse 70% 100% at 40% 100%,rgba(100,155,255,.08) 0%,transparent 65%)', c: 'radial-gradient(ellipse 80% 100% at 55% 100%,rgba(80,140,250,.055) 0%,transparent 70%)' },
+            ember: { a: 'radial-gradient(ellipse 60% 100% at 50% 100%,rgba(220,100,40,.10) 0%,rgba(200,80,30,.05) 40%,transparent 70%)', b: 'radial-gradient(ellipse 70% 100% at 40% 100%,rgba(240,130,50,.07) 0%,transparent 65%)', c: 'radial-gradient(ellipse 80% 100% at 60% 100%,rgba(210,90,30,.055) 0%,transparent 70%)' },
+        };
+        function setTheme(t) {
+            G.theme = t;
+            document.body.classList.remove('mist', 'moonlit', 'ember');
+            if (t !== 'mist') document.body.classList.add(t);
+            const f = FOGS[t];
+            document.querySelector('.fog-a').style.background = f.a;
+            document.querySelector('.fog-b').style.background = f.b;
+            document.querySelector('.fog-c').style.background = f.c;
+            document.querySelectorAll('.thbtn').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+            save();
+        }
+
+        /* ── MODAL HELPER ── */
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        /* ── TOAST / STATUS ── */
+        let toastTimer;
+        function toast(msg) {
+            const el = document.getElementById('toast');
+            el.textContent = msg; el.classList.add('up');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.remove('up'), 3500);
+        }
+        let stTimer;
+        function setStatus(msg) {
+            document.getElementById('status-text').textContent = msg;
+            clearTimeout(stTimer);
+            stTimer = setTimeout(() => document.getElementById('status-text').textContent = 'The grove is quiet tonight…', 4000);
+        }
+
+        /* ── SAVE / LOAD ── */
+        function save() {
+            try {
+                localStorage.setItem('grove_v5', JSON.stringify({
+                    plants: G.plants, coins: G.coins, cd: G.cd, lastTick: G.lastTick,
+                    theme: G.theme, milestones: G.milestones, log: G.log.slice(0, 25),
+                    inventory: G.inventory, upgrades: G.upgrades, totalCare: G.totalCare,
+                    nextEventAt: G.nextEventAt,
+                }));
+            } catch (e) { }
+        }
+        function loadSave() {
+            try {
+                const raw = localStorage.getItem('grove_v5'); if (!raw) return false;
+                const d = JSON.parse(raw);
+                if (d.plants) d.plants.forEach((sp, i) => { if (G.plants[i]) Object.assign(G.plants[i], sp); });
+                if (d.coins != null) G.coins = d.coins;
+                if (d.cd) Object.assign(G.cd, d.cd);
+                if (d.lastTick) G.lastTick = d.lastTick;
+                if (d.theme) G.theme = d.theme;
+                if (d.milestones) G.milestones = d.milestones;
+                if (d.log) G.log = d.log;
+                if (d.inventory) G.inventory = d.inventory;
+                if (d.upgrades) G.upgrades = d.upgrades;
+                if (d.totalCare) G.totalCare = d.totalCare;
+                if (d.nextEventAt) G.nextEventAt = d.nextEventAt;
+                return true;
+            } catch (e) { return false; }
+        }
+
+        /* ── PASSIVE ON RETURN ── */
+        function applyOfflineTick() {
+            const now = Date.now();
+            const elapsed = Math.min((now - G.lastTick) / 60000, 480); // cap at 8 hours
+            if (elapsed < 0.5) return;
+            const decayMult = 1 - (G.upgrades.deeproots || 0) * 0.2;
+            const incMult = 1 + (G.upgrades.resonance || 0) * 0.3;
+            G.plants.forEach(p => {
+                p.health.hydration = Math.max(0, p.health.hydration - DECAY.hydration * elapsed * decayMult);
+                p.health.nourishment = Math.max(0, p.health.nourishment - DECAY.nourishment * elapsed * decayMult);
+                p.health.happiness = Math.max(0, p.health.happiness - DECAY.happiness * elapsed * decayMult);
+                if (p.stage < 5) {
+                    const avgH = plantAvgHealth(p);
+                    const passXp = avgH / 100 * 0.6 * elapsed * p.stage;
+                    p.xp += passXp; p.totalXp = (p.totalXp || 0) + passXp;
+                }
+                G.coins += incomeRate(p) * elapsed * incMult;
+            });
+            G.lastTick = now;
+            if (elapsed > 5) toast(`Welcome back. ${Math.floor(elapsed)} minutes passed.`);
+        }
+
+        /* ── EXPORT / IMPORT ── */
+        function doExport() {
+            const blob = new Blob([JSON.stringify({
+                plants: G.plants, coins: G.coins, milestones: G.milestones,
+                log: G.log, inventory: G.inventory, upgrades: G.upgrades,
+                totalCare: G.totalCare, theme: G.theme, exportedAt: new Date().toISOString()
+            }, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = 'grove_backup.json'; a.click();
+            toast('Garden exported.');
+        }
+        function doImport() {
+            const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json';
+            inp.onchange = e => {
+                const f = e.target.files[0]; if (!f) return;
+                const r = new FileReader();
+                r.onload = ev => {
+                    try {
+                        const d = JSON.parse(ev.target.result);
+                        if (d.plants) d.plants.forEach((sp, i) => { if (G.plants[i]) Object.assign(G.plants[i], sp); });
+                        if (d.coins != null) G.coins = d.coins;
+                        if (d.milestones) G.milestones = d.milestones;
+                        if (d.log) G.log = d.log;
+                        if (d.inventory) G.inventory = d.inventory;
+                        if (d.upgrades) G.upgrades = d.upgrades;
+                        if (d.totalCare) G.totalCare = d.totalCare;
+                        if (d.theme) setTheme(d.theme);
+                        save(); renderPlants(); renderHealth(); renderPlantList(); updateBadge();
+                        toast('Garden imported successfully.');
+                    } catch (err) { toast('Could not read that file.'); }
+                };
+                r.readAsText(f);
+            };
+            inp.click();
+        }
+
+        /* ── KEYBOARD SHORTCUTS ── */
+        document.addEventListener('keydown', e => {
+            const tag = e.target.tagName.toLowerCase();
+            if (tag === 'input') return;
+            if (e.key === 'w') doAction('water');
+            if (e.key === 't') doAction('talk');
+            if (e.key === 'p') doAction('pet');
+            if (e.key === 's') doAction('sing');
+            if (e.key === 'm') openMarket();
+            if (e.key === 'Escape') ['stats-modal', 'market-modal', 'event-modal', 'rename-modal'].forEach(closeModal);
+        });
+
+        /* ── RESIZE ── */
+        let resizeTO;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTO);
+            resizeTO = setTimeout(() => {
+                const ga = document.getElementById('garden-area');
+                pCvs.width = ga.clientWidth; pCvs.height = ga.clientHeight;
+                drawGround(); renderPlants(); initBg();
+            }, 160);
+        });
+
+        /* ── INIT ── */
+        function init() {
+            const loaded = loadSave();
+            applyOfflineTick();
+            const ga = document.getElementById('garden-area');
+            pCvs.width = ga.clientWidth; pCvs.height = ga.clientHeight;
+            drawGround(); initBg(); setTheme(G.theme);
+            renderPlants(); renderHealth(); renderPlantList(); updateBadge();
+            checkMilestones();
+            setInterval(tickCooldowns, 80);
+            setInterval(gameTick, 15000);
+            animParticles();
+            setTimeout(() => toast(loaded ? 'Welcome back to the grove.' : 'Welcome. Tend with care.'), 700);
+        }
+        init();
+
+    </script>
 </body>
+
 </html>
