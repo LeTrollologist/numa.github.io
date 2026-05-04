@@ -1,177 +1,212 @@
 /**
  * mobile-optimizer.js
- * Advanced Mobile & Battery Optimization Engine v2.1
- * - Stargazer Safe + Battery Aware + Boost Mode
+ * Advanced Mobile & Battery Optimization Engine v3.0
+ * Optimized for: Stargazer, Pong, Sketch, Grove, and Planner.
  */
 (function() {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
     if (!isMobile) return;
 
-    console.log("📱 Mobile Optimizer v2.1 Initialized");
+    console.log("📱 Mobile Optimizer v3.0 Initialized");
 
     // ==========================================
-    // GLOBAL STATE
+    // 1. POWER MANAGER (Battery & Charging)
     // ==========================================
-    let batteryLevel = 1;           // 0.0 to 1.0
-    let stargazerBoost = false;     // When true, reduce optimizations
+    const PowerManager = {
+        level: 1,
+        isCharging: false,
+        isLowPower: false,
 
-    // ==========================================
-    // 1. BATTERY MONITORING
-    // ==========================================
-    if (navigator.getBattery) {
-        navigator.getBattery().then(function(battery) {
-            batteryLevel = battery.level;
-            battery.addEventListener('levelchange', function() {
-                batteryLevel = battery.level;
-            });
-        });
-    }
-
-    // ==========================================
-    // 2. STARGazer BOOST DETECTION
-    // ==========================================
-    function updateStargazerBoost() {
-        const stargazerPage = document.getElementById('page-stargazer');
-        stargazerBoost = stargazerPage && stargazerPage.classList.contains('active');
-    }
-
-    // Check boost status when page changes
-    const observer = new MutationObserver(updateStargazerBoost);
-    observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class'] });
-
-    // Also check on touch/click (user is actively using it)
-    document.addEventListener('touchstart', function() {
-        if (document.getElementById('page-stargazer')?.classList.contains('active')) {
-            stargazerBoost = true;
-            setTimeout(() => { stargazerBoost = false; }, 8000); // Boost lasts 8 seconds after interaction
-        }
-    }, { passive: true });
-
-    // ==========================================
-    // 3. DYNAMIC CANVAS SUB-SAMPLING
-    // ==========================================
-    const origWidthDescr = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, 'width');
-    const origHeightDescr = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, 'height');
-
-    function applySubSampling(canvas, val, descriptor, property) {
-        if (canvas.id === 'stars' && !stargazerBoost) {
-            canvas.style[property] = val + 'px';
-            descriptor.set.call(canvas, Math.floor(val * 0.72));
-        } else {
-            descriptor.set.call(canvas, val);
-        }
-    }
-
-    Object.defineProperty(HTMLCanvasElement.prototype, 'width', {
-        set(val) { applySubSampling(this, val, origWidthDescr, 'width'); },
-        get() { return origWidthDescr.get.call(this); }
-    });
-
-    Object.defineProperty(HTMLCanvasElement.prototype, 'height', {
-        set(val) { applySubSampling(this, val, origHeightDescr, 'height'); },
-        get() { return origHeightDescr.get.call(this); }
-    });
-
-    // ==========================================
-    // 4. BLIND RENDER ASSASSIN (Stargazer Safe)
-    // ==========================================
-    const originalFill = CanvasRenderingContext2D.prototype.fill;
-    const originalClearRect = CanvasRenderingContext2D.prototype.clearRect;
-
-    function isCanvasCovered(ctx) {
-        if (ctx.canvas.id === 'stars') {
-            if (document.body.classList.contains('studyMode') ||
-                document.getElementById('page-dreamland').classList.contains('active')) {
-                return true;
+        async init() {
+            if (navigator.getBattery) {
+                const battery = await navigator.getBattery();
+                this.update(battery);
+                battery.addEventListener('levelchange', () => this.update(battery));
+                battery.addEventListener('chargingchange', () => this.update(battery));
             }
+        },
+
+        update(battery) {
+            this.level = battery.level;
+            this.isCharging = battery.charging;
+            this.isLowPower = this.level < 0.2 && !this.isCharging;
+            document.documentElement.setAttribute('data-battery-low', this.isLowPower);
         }
-        return false;
-    }
-
-    CanvasRenderingContext2D.prototype.fill = function(...args) {
-        if (isCanvasCovered(this)) return;
-        return originalFill.apply(this, args);
-    };
-
-    CanvasRenderingContext2D.prototype.clearRect = function(...args) {
-        if (isCanvasCovered(this)) return;
-        return originalClearRect.apply(this, args);
     };
 
     // ==========================================
-    // 5. BATTERY + BOOST AWARE FRAME DROPPER
+    // 2. BOOST MANAGER (Context Awareness)
     // ==========================================
-    const originalRAF = window.requestAnimationFrame;
-    let frameCounter = 0;
+    const BoostManager = {
+        activeContexts: new Set(),
+        
+        // Critical elements that must NEVER be throttled or downscaled
+        WHITELIST: ['pongCanvas', 'cvs', 'sketchCanvas', 'garden-area'],
 
-    window.requestAnimationFrame = function(callback) {
-        return originalRAF(function(time) {
-            frameCounter++;
+        init() {
+            this.setupDetection();
+        },
 
-            const minigameActive = document.getElementById('page-minigame').classList.contains('active');
+        setupDetection() {
+            // Monitor active pages/modals
+            const observer = new MutationObserver(() => this.update());
+            observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class', 'style'] });
+            
+            // Interaction-based boost
+            document.addEventListener('touchstart', (e) => {
+                if (this.WHITELIST.some(id => e.target.id === id || e.target.closest('#' + id))) {
+                    this.applyTemporaryBoost(8000);
+                }
+            }, { passive: true });
+        },
 
-            // Calculate how aggressive we should be
-            let skipRate = 3; // Default: skip every 3rd frame
+        update() {
+            const stargazer = document.getElementById('page-stargazer');
+            const minigame = document.getElementById('page-minigame');
+            
+            if (stargazer?.classList.contains('active')) this.activeContexts.add('stargazer');
+            else this.activeContexts.delete('stargazer');
 
-            if (stargazerBoost) {
-                skipRate = 1; // Full performance when using Stargazer
-            } else if (batteryLevel < 0.3) {
-                skipRate = 4; // Very aggressive when battery is low
-            } else if (batteryLevel < 0.5) {
-                skipRate = 3; // Moderate saving
-            }
+            if (minigame?.classList.contains('active')) this.activeContexts.add('minigame');
+            else this.activeContexts.delete('minigame');
+        },
 
-            if (frameCounter % skipRate === 0 && !minigameActive && !stargazerBoost) {
-                window.requestAnimationFrame(callback);
-                return;
-            }
+        applyTemporaryBoost(ms) {
+            this.activeContexts.add('interaction');
+            clearTimeout(this.boostTimeout);
+            this.boostTimeout = setTimeout(() => this.activeContexts.delete('interaction'), ms);
+        },
 
-            callback(time);
-        });
+        isBoosted() {
+            return this.activeContexts.size > 0 || PowerManager.isCharging;
+        }
     };
 
     // ==========================================
-    // 6. LOW-END DEVICE DOWNGRADE
+    // 3. VISUAL MANAGER (Canvas & CSS)
     // ==========================================
-    const ram = navigator.deviceMemory || 4;
-    const cores = navigator.hardwareConcurrency || 4;
+    const VisualManager = {
+        init() {
+            this.patchCanvas();
+            this.applyStyles();
+        },
 
-    if (ram <= 4 || cores <= 4) {
-        console.log("📱 Low-end device → Glassmorphism downgraded");
-        const style = document.createElement('style');
-        style.innerHTML = `
-            #nav-bar, .glass-card, .contact-card, #mob-overlay, .status-card, #studyPanel .study-inner {
-                backdrop-filter: blur(5px) !important;
-                -webkit-backdrop-filter: blur(5px) !important;
-                background: rgba(8, 8, 18, 0.90) !important;
-            }
-        `;
-        document.head.appendChild(style);
-    }
+        patchCanvas() {
+            const origWidth = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, 'width');
+            const origHeight = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, 'height');
 
-    // ==========================================
-    // 7. TOUCH THROTTLING + VISIBILITY PAUSE
-    // ==========================================
-    let lastTouchMove = 0;
-    const originalAddEventListener = EventTarget.prototype.addEventListener;
-
-    EventTarget.prototype.addEventListener = function(type, listener, options) {
-        if (type === 'touchmove' && isMobile) {
-            const throttled = function(e) {
-                const now = Date.now();
-                if (now - lastTouchMove > 16) {
-                    lastTouchMove = now;
-                    listener.call(this, e);
+            const applyScaling = (canvas, val, descriptor) => {
+                const isStars = canvas.id === 'stars';
+                const isWhitelisted = BoostManager.WHITELIST.includes(canvas.id);
+                
+                if (isStars && !BoostManager.isBoosted()) {
+                    // background stars can be low-res
+                    descriptor.set.call(canvas, Math.floor(val * 0.7));
+                } else {
+                    descriptor.set.call(canvas, val);
                 }
             };
-            return originalAddEventListener.call(this, type, throttled, options);
+
+            Object.defineProperty(HTMLCanvasElement.prototype, 'width', {
+                set(val) { applyScaling(this, val, origWidth); },
+                get() { return origWidth.get.call(this); }
+            });
+
+            Object.defineProperty(HTMLCanvasElement.prototype, 'height', {
+                set(val) { applyScaling(this, val, origHeight); },
+                get() { return origHeight.get.call(this); }
+            });
+        },
+
+        applyStyles() {
+            if (navigator.deviceMemory <= 4) {
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    #nav-bar, .glass-card, .status-card, .sidebar, .page-header {
+                        backdrop-filter: blur(4px) !important;
+                        -webkit-backdrop-filter: blur(4px) !important;
+                        background: rgba(10, 10, 25, 0.92) !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
         }
-        return originalAddEventListener.call(this, type, listener, options);
     };
 
-    document.addEventListener('visibilitychange', function() {
-        if (document.hidden) console.log("📱 Tab hidden → Saving resources");
-    });
+    // ==========================================
+    // 4. EVENT MANAGER (Symmetric Throttling)
+    // ==========================================
+    const EventManager = {
+        wrappedListeners: new WeakMap(),
 
-    console.log("📱 All mobile optimizations applied (Stargazer Boost Enabled)");
+        init() {
+            this.patchEvents();
+        },
+
+        patchEvents() {
+            const originalAdd = EventTarget.prototype.addEventListener;
+            const originalRemove = EventTarget.prototype.removeEventListener;
+            const self = this;
+
+            EventTarget.prototype.addEventListener = function(type, listener, options) {
+                if (type === 'touchmove' && typeof listener === 'function') {
+                    const wrapped = function(e) {
+                        if (!this._lastMove || Date.now() - this._lastMove > 16) {
+                            this._lastMove = Date.now();
+                            listener.call(this, e);
+                        }
+                    };
+                    self.wrappedListeners.set(listener, wrapped);
+                    return originalAdd.call(this, type, wrapped, options);
+                }
+                return originalAdd.call(this, type, listener, options);
+            };
+
+            EventTarget.prototype.removeEventListener = function(type, listener, options) {
+                const wrapped = self.wrappedListeners.get(listener);
+                return originalRemove.call(this, type, wrapped || listener, options);
+            };
+        }
+    };
+
+    // ==========================================
+    // 5. FRAME ENGINE (RAF Patch)
+    // ==========================================
+    const FrameEngine = {
+        frameCounter: 0,
+
+        init() {
+            const originalRAF = window.requestAnimationFrame;
+            window.requestAnimationFrame = (callback) => {
+                return originalRAF((time) => {
+                    this.frameCounter++;
+                    
+                    // Logic: Skip frames only if NOT boosted AND (Battery Low OR intentionally saving)
+                    let skipRate = 1;
+                    if (!BoostManager.isBoosted()) {
+                        if (PowerManager.level < 0.15) skipRate = 3;
+                        else if (PowerManager.level < 0.4) skipRate = 2;
+                    }
+
+                    if (this.frameCounter % skipRate !== 0) {
+                        window.requestAnimationFrame(callback);
+                        return;
+                    }
+
+                    callback(time);
+                });
+            };
+        }
+    };
+
+    // ==========================================
+    // INITIALIZE
+    // ==========================================
+    PowerManager.init();
+    BoostManager.init();
+    VisualManager.init();
+    EventManager.init();
+    FrameEngine.init();
+
 })();
+

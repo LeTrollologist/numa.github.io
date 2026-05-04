@@ -7,6 +7,7 @@
     <title>Numa's Space</title>
     <script src="compute-optimizer.js"></script>
     <script src="mobile-optimizer.js"></script>
+    <script src="apple-optimizer.js"></script>
     <meta property="og:title" content="Numa's Space">
     <meta property="og:description" content="A space for Numa, study, dream, play, explore.">
 
@@ -27928,26 +27929,9 @@
         document.addEventListener('DOMContentLoaded', function () {
 
             // Sentinel analytics uplink
-            (function () {
-                var SENTINEL_URL = 'https://analytics-server-bdrm.onrender.com/log';
-                var sessionId = sessionStorage.getItem('_sid');
-                if (!sessionId) {
-                    sessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
-                    sessionStorage.setItem('_sid', sessionId);
-                }
-                fetch(SENTINEL_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        ua: navigator.userAgent,
-                        page: window.location.pathname || '/',
-                        screen: window.innerWidth + 'x' + window.innerHeight,
-                        referrer: document.referrer || '',
-                        sessionId: sessionId
-                    }),
-                    keepalive: true
-                }).catch(function () { });
-            })();
+            const analyticsScript = document.createElement('script');
+            analyticsScript.src = 'analytics.js';
+            document.head.appendChild(analyticsScript);
 
             // Sky
             sc = document.getElementById('stars');
