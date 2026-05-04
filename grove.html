@@ -1215,9 +1215,91 @@
                 background: transparent;
                 border-color: rgba(168, 159, 216, 0.1);
             }
+
+            /* --- Mobile Bottom Sheets --- */
+            .modal {
+                justify-content: flex-end;
+                padding: 0;
+            }
+
+            .mbox {
+                max-width: 100%;
+                border-bottom: none;
+                border-left: none;
+                border-right: none;
+                border-radius: 24px 24px 0 0;
+                max-height: 85vh;
+                padding: 24px 20px calc(var(--sab, 0px) + 20px);
+                background: rgba(8, 10, 24, 0.98);
+            }
+
+            .modal.open .mbox {
+                animation: m-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            }
+
+            @keyframes m-slide-up {
+                from { transform: translateY(100%); }
+                to { transform: translateY(0); }
+            }
+
+            .mkt-grid {
+                grid-template-columns: 1fr; /* Single column for better readability on small sheets */
+                gap: 10px;
+            }
+
+            .mkt-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 10px 14px;
+            }
+
+            .mkt-icon {
+                margin-bottom: 0;
+                font-size: 1.2rem;
+            }
+
+            .mkt-info {
+                flex: 1;
+            }
         }
 
         .info-bar { display: none; }
+
+        /* Weather Overlay */
+        #weather-overlay {
+            position: fixed; inset: 0; z-index: 100; pointer-events: none; overflow: hidden;
+        }
+        .rain {
+            position: absolute; width: 1.5px; height: 14px; background: rgba(168,159,216,0.25);
+            top: -20px; animation: rain-fall 0.8s linear infinite;
+        }
+        @keyframes rain-fall { to { transform: translateY(110vh); } }
+
+        .star-particle {
+            position: absolute; font-size: 8px; color: var(--gold); 
+            animation: star-fall 2s linear infinite;
+        }
+        @keyframes star-fall { 0% { transform: translateY(-10px) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
+
+        /* Nursery Modal */
+        .nursery-grid { display: grid; grid-template-columns: 1fr 40px 1fr; align-items: center; gap: 15px; margin: 20px 0; }
+        .nursery-slot { border: 1px dashed var(--border); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; cursor: pointer; transition: all .2s; position: relative; }
+        .nursery-slot:hover { border-color: var(--accent); background: var(--accent-d); }
+        .nursery-slot.selected { border-style: solid; border-color: var(--gold); background: var(--gold-d); }
+        .nursery-plus { font-size: 1.5rem; color: var(--muted); text-align: center; }
+        .nursery-result { border-top: 1px solid var(--border); padding-top: 20px; text-align: center; display: none; }
+        
+        #weather-badge {
+            font-size: .62rem; letter-spacing: .08em; color: var(--accent);
+            padding: 4px 10px; border-radius: 20px; background: rgba(168, 159, 216, 0.1);
+            display: flex; align-items: center; gap: 6px;
+        }
+        #weather-badge::before { content: '☁'; font-size: .75rem; }
+        body.weather-rain #weather-badge::before { content: '🌧'; }
+        body.weather-stars #weather-badge::before { content: '✨'; color: var(--gold); }
+        body.weather-clear #weather-badge::before { content: '☀️'; }
+        body.weather-fog #weather-badge { filter: blur(0.5px); }
 
         @media(max-width:440px) {
             .sbsec {
@@ -1241,17 +1323,19 @@
         <div class="fog fog-d"></div>
     </div>
     <div id="app">
+        <div id="weather-overlay"></div>
         <header>
             <div class="logo">The <em>Grove</em></div>
             <div class="logo-sub">Numa's Garden</div>
             <div class="hsp"></div>
+            <div id="weather-badge">Syncing Sky...</div>
+            <div class="hsp"></div>
             <div class="coins-badge" id="coins-badge">0</div>
-            <div class="mbadge" id="mbadge">Mastery · 3</div>
+            <div class="mbadge" id="mbadge">Mastery · 0</div>
             <button class="hbtn" id="audio-btn" onclick="toggleAudio()" title="Toggle Audio">🎵 Off</button>
             <button class="hbtn gold" onclick="openMarket()">Market</button>
+            <button class="hbtn" onclick="openNursery()" style="border-color:var(--gold); color:var(--gold)">Nursery</button>
             <button class="hbtn" onclick="openStats()">Records</button>
-            <button class="hbtn" onclick="doImport()">Import</button>
-            <button class="hbtn" onclick="doExport()">Export</button>
             <button class="hbtn" onclick="window.location.href='index.html'">Home</button>
         </header>
         <div class="info-bar">
@@ -1344,6 +1428,39 @@
 
     <div id="toast"></div>
 
+    <!-- Nursery Modal -->
+    <div id="nursery-modal" class="modal">
+        <div class="mbox">
+            <div class="mtitle">
+                <span>The Nursery</span>
+                <span class="mclose" onclick="closeModal('nursery-modal')">✕ Close</span>
+            </div>
+            <div class="ev-desc">
+                Select two Master Plants (Stage 5) to cross-pollinate and create a unique Hybrid Seed.
+            </div>
+            <div class="nursery-grid">
+                <div id="n-slot-1" class="nursery-slot" onclick="selectBreeder(1)">
+                    <span class="nursery-plus">+</span>
+                    <span style="font-size:0.5rem; margin-top:5px;">Select Plant 1</span>
+                </div>
+                <div class="nursery-plus">✦</div>
+                <div id="n-slot-2" class="nursery-slot" onclick="selectBreeder(2)">
+                    <span class="nursery-plus">+</span>
+                    <span style="font-size:0.5rem; margin-top:5px;">Select Plant 2</span>
+                </div>
+            </div>
+            <div id="nursery-breed-btn" style="text-align:center; display:none; margin: 15px 0;">
+                <button class="abtn" style="border-color:var(--gold); color:var(--gold); padding:10px;" onclick="doBreeding()">
+                    <span class="ainn">Ignite Cross-Pollination <span class="axp">✦ 250</span></span>
+                </button>
+            </div>
+            <div id="nursery-selection-list" style="margin-top:20px; display:none;">
+                <span class="sblbl">Available Master Plants</span>
+                <div id="n-list-inner"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Stats Modal -->
     <div id="stats-modal" class="modal">
         <div class="mbox">
@@ -1414,6 +1531,117 @@
     </div>
 
     <script>
+        /* ── WEATHER MANAGER ── */
+        class WeatherManager {
+            constructor() {
+                this.state = 'clear';
+                this.timer = 0;
+                this.overlay = document.getElementById('weather-overlay');
+            }
+            update(elapsed) {
+                this.timer -= elapsed;
+                if (this.timer <= 0) this.change();
+            }
+            change() {
+                const states = ['clear', 'rain', 'fog', 'stars'];
+                this.state = states[Math.floor(Math.random() * states.length)];
+                this.timer = 8 + Math.random() * 12; // 8-20 mins
+                document.body.className = document.body.className.replace(/weather-\w+/g, '') + ' weather-' + this.state;
+                const badge = document.getElementById('weather-badge');
+                if (badge) badge.textContent = this.state.charAt(0).toUpperCase() + this.state.slice(1);
+                this.render();
+                if (typeof addLog === 'function') addLog(`Sky Synchronized: ${this.state}`);
+            }
+            render() {
+                if (!this.overlay) return;
+                this.overlay.innerHTML = '';
+                if (this.state === 'rain') {
+                    for (let i = 0; i < 50; i++) this.spawnRain();
+                } else if (this.state === 'stars') {
+                    for (let i = 0; i < 15; i++) this.spawnStar();
+                }
+            }
+            spawnRain() {
+                const r = document.createElement('div');
+                r.className = 'rain';
+                r.style.left = Math.random() * 100 + '%';
+                r.style.animationDelay = Math.random() * 1.5 + 's';
+                r.style.opacity = (0.2 + Math.random() * 0.4).toFixed(2);
+                this.overlay.appendChild(r);
+            }
+            spawnStar() {
+                const s = document.createElement('div');
+                s.className = 'star-particle';
+                s.textContent = '✦';
+                s.style.left = Math.random() * 100 + '%';
+                s.style.top = (Math.random() * 100) + 'vh';
+                s.style.animationDelay = Math.random() * 3 + 's';
+                this.overlay.appendChild(s);
+            }
+            getMultiplier(stat) {
+                if (this.state === 'rain' && stat === 'hydration') return 2.2;
+                if (this.state === 'stars' && stat === 'happiness') return 1.6;
+                if (this.state === 'fog') return 0.85;
+                return 1.0;
+            }
+        }
+
+        const W = new WeatherManager();
+
+        /* ── NURSERY LOGIC ── */
+        let nurseryBreeder1 = null;
+        let nurseryBreeder2 = null;
+
+        function openNursery() {
+            if (G.plants.filter(p => p.stage >= 5).length < 1) {
+                toast('Requires at least one Master plant to begin.');
+                return;
+            }
+            nurseryBreeder1 = null; nurseryBreeder2 = null;
+            updateNurseryUI();
+            document.getElementById('nursery-modal').classList.add('open');
+        }
+
+        function selectBreeder(slot) {
+            const list = document.getElementById('nursery-selection-list');
+            const inner = document.getElementById('n-list-inner');
+            list.style.display = 'block';
+            const other = slot === 1 ? nurseryBreeder2 : nurseryBreeder1;
+            const masters = G.plants.filter(p => p.stage >= 5 && p !== other);
+            inner.innerHTML = masters.map(p => `
+                <div class="prow" onclick="assignBreeder(${slot}, ${p.id})">
+                    <span class="prowname">${PLANT_META[p.type].emoji} ${p.name}</span>
+                </div>
+            `).join('');
+            if (masters.length === 0) inner.innerHTML = '<div class="mitem-log">No other Masters available.</div>';
+        }
+
+        function assignBreeder(slot, id) {
+            const p = G.plants.find(x => x.id === id);
+            if (slot === 1) nurseryBreeder1 = p; else nurseryBreeder2 = p;
+            document.getElementById('nursery-selection-list').style.display = 'none';
+            updateNurseryUI();
+        }
+
+        function updateNurseryUI() {
+            const s1 = document.getElementById('n-slot-1');
+            const s2 = document.getElementById('n-slot-2');
+            s1.innerHTML = nurseryBreeder1 ? `<span>${nurseryBreeder1.name}</span>` : `<span class="nursery-plus">+</span><span style="font-size:0.5rem; margin-top:5px;">Select Plant 1</span>`;
+            s2.innerHTML = nurseryBreeder2 ? `<span>${nurseryBreeder2.name}</span>` : `<span class="nursery-plus">+</span><span style="font-size:0.5rem; margin-top:5px;">Select Plant 2</span>`;
+            document.getElementById('nursery-breed-btn').style.display = (nurseryBreeder1 && nurseryBreeder2) ? 'block' : 'none';
+        }
+
+        function doBreeding() {
+            if (G.coins < 250) { toast('Not enough coins (250 needed)'); return; }
+            G.coins -= 250;
+            const names = [nurseryBreeder1.name.slice(0,3), nurseryBreeder2.name.slice(-3)];
+            const hybridName = names[0] + names[1];
+            toast(`Breeding complete: ${hybridName} seed obtained!`);
+            addLog(`Hybrid seed "${hybridName}" created from ${nurseryBreeder1.name} & ${nurseryBreeder2.name}.`);
+            closeModal('nursery-modal');
+            updateBadge(); save();
+        }
+
 
         function mkRand(s) { s = s >>> 0; return () => { s += 0x6d2b79f5; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
         const sCvs = document.getElementById('stars-cvs'), sCtx = sCvs.getContext('2d');
@@ -1869,12 +2097,17 @@
             const elapsed = (now - G.lastTick) / 60000; // minutes
             G.lastTick = now;
 
+            W.update(elapsed);
+
             const decayMult = G.wiltWardUntil > now ? 0 : (1 - (G.upgrades.deeproots || 0) * 0.2);
-            const incMult = 1 + (G.upgrades.resonance || 0) * 0.3;
+            let incMult = 1 + (G.upgrades.resonance || 0) * 0.3;
+            
+            if (W.state === 'stars') incMult *= 1.25;
 
             G.plants.forEach(p => {
                 // decay health
-                p.health.hydration = Math.max(0, p.health.hydration - DECAY.hydration * elapsed * decayMult);
+                const hydDecay = DECAY.hydration * (W.state === 'rain' ? 0.2 : 1);
+                p.health.hydration = Math.max(0, p.health.hydration - hydDecay * elapsed * decayMult);
                 p.health.nourishment = Math.max(0, p.health.nourishment - DECAY.nourishment * elapsed * decayMult);
                 p.health.happiness = Math.max(0, p.health.happiness - DECAY.happiness * elapsed * decayMult);
                 // passive XP (very slow — health dependent)
@@ -1988,9 +2221,11 @@
                 return `<div class="${cls}" onclick="buyItem('${item.id}')">
       ${badge}
       <div class="mkt-icon">${item.icon}</div>
-      <div class="mkt-name">${item.name}${lvlInfo}</div>
-      <div class="mkt-desc">${item.desc}</div>
-      <div class="mkt-price">${maxed ? 'MAXED' : item.price + ' coins'}</div>
+      <div class="mkt-info">
+        <div class="mkt-name">${item.name}${lvlInfo}</div>
+        <div class="mkt-desc">${item.desc}</div>
+        <div class="mkt-price">${maxed ? 'MAXED' : item.price + ' coins'}</div>
+      </div>
     </div>`;
             }).join('');
         }

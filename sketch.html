@@ -410,7 +410,6 @@ input[type=range]::-moz-range-thumb {
 #canvas-container {
   position: relative;
   box-shadow: 0 0 0 1px rgba(168,159,216,.1), 0 24px 90px rgba(0,0,0,.85);
-  background: #000;
   flex-shrink: 0;
   transform-origin: center;
   transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -419,12 +418,18 @@ input[type=range]::-moz-range-thumb {
   position: absolute; inset: 0; z-index: 0;
   pointer-events: none;
 }
+#ref-layer {
+  position: absolute; inset: 0; z-index: 1;
+  pointer-events: none; opacity: 0.5;
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+  display: none;
+}
 #cvs {
-  position: relative; z-index: 1;
+  position: relative; z-index: 2;
   touch-action: none; cursor: crosshair; display: block;
 }
 #grid-layer {
-  position: absolute; inset: 0; z-index: 2;
+  position: absolute; inset: 0; z-index: 3;
   pointer-events: none; opacity: 0;
   background-image: linear-gradient(rgba(168,159,216,0.1) 1px, transparent 1px),
                     linear-gradient(90deg, rgba(168,159,216,0.1) 1px, transparent 1px);
@@ -559,12 +564,16 @@ body.cur-line  #cvs { cursor: crosshair; }
             <span class="ti">✦</span>Brush</button>
           <button class="tbtn"    data-tool="pencil"  onclick="setTool('pencil')">
             <span class="ti">✏</span>Pencil</button>
+          <button class="tbtn"    data-tool="watercolor" onclick="setTool('watercolor')">
+            <span class="ti">💧</span>Water</button>
+          <button class="tbtn"    data-tool="chalk" onclick="setTool('chalk')">
+            <span class="ti">▧</span>Chalk</button>
           <button class="tbtn"    data-tool="spray"   onclick="setTool('spray')">
             <span class="ti">✧</span>Spray</button>
-          <button class="tbtn"    data-tool="fill"    onclick="setTool('fill')">
-            <span class="ti">◈</span>Fill</button>
           <button class="tbtn"    data-tool="line"    onclick="setTool('line')">
             <span class="ti">╱</span>Line</button>
+          <button class="tbtn"    data-tool="fill"    onclick="setTool('fill')">
+            <span class="ti">◈</span>Fill</button>
           <button class="tbtn"    data-tool="eraser"  onclick="setTool('eraser')">
             <span class="ti">◻</span>Eraser</button>
         </div>
@@ -577,6 +586,11 @@ body.cur-line  #cvs { cursor: crosshair; }
           <button class="tbtn sym-btn" data-s="h" onclick="setSymmetry('h')" title="Horizontal">◫</button>
           <button class="tbtn sym-btn" data-s="v" onclick="setSymmetry('v')" title="Vertical">⊟</button>
           <button class="tbtn sym-btn" data-s="hv" onclick="setSymmetry('hv')" title="Quad">⊞</button>
+        </div>
+        <div class="sl-row" style="margin-top:10px">
+          <div class="sl-lbl"><span>Mandala</span><span id="v-man">Off</span></div>
+          <input type="range" id="r-man" min="0" max="24" value="0"
+                 oninput="setMandala(this.value)">
         </div>
       </div>
 
@@ -612,6 +626,7 @@ body.cur-line  #cvs { cursor: crosshair; }
     <!-- CANVAS -->
     <div class="canvas-wrap" id="wrap">
       <div id="canvas-container">
+        <div id="ref-layer"></div>
         <div id="bg-layer"></div>
         <canvas id="cvs"></canvas>
         <div id="grid-layer"></div>
@@ -642,6 +657,17 @@ body.cur-line  #cvs { cursor: crosshair; }
           </div>
         </div>
         <input type="color" id="cust-input" value="#a89fd8" oninput="onCust(this.value)" onchange="onCust(this.value)">
+      </div>
+
+      <div class="section">
+        <span class="sec-label">Reference Layer</span>
+        <button class="abtn" onclick="document.getElementById('ref-input').click()">📁 Load Reference</button>
+        <input type="file" id="ref-input" hidden accept="image/*" onchange="loadReference(event)">
+        <div class="sl-row" style="margin-top:8px">
+          <div class="sl-lbl"><span>Ref Opacity</span><span id="v-ref">50%</span></div>
+          <input type="range" id="r-ref" min="0" max="100" value="50" oninput="setRefOp(this.value)">
+        </div>
+        <button class="abtn danger" onclick="clearReference()" style="font-size:0.55rem; padding:4px;">✕ Clear Reference</button>
       </div>
 
       <div class="section">
@@ -681,9 +707,14 @@ body.cur-line  #cvs { cursor: crosshair; }
           <input type="checkbox" id="grid-toggle" onchange="toggleGrid(this.checked)" style="accent-color:var(--accent)">
           <label for="grid-toggle" style="font-size:0.7rem; color:var(--muted); cursor:pointer;">Show Grid</label>
         </div>
+        <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+          <input type="checkbox" id="trans-toggle" onchange="toggleTransparency(this.checked)" style="accent-color:var(--accent)">
+          <label for="trans-toggle" style="font-size:0.7rem; color:var(--muted); cursor:pointer;">Transparent Canvas</label>
+        </div>
         <div style="margin-top:14px">
           <button class="abtn" onclick="doSave()">Save Work</button>
           <button class="abtn" onclick="doExportPNG()">Export PNG</button>
+          <button class="abtn" onclick="startTimelapseExport()" style="border-color:var(--accent); color:var(--text)">🎥 Time-lapse Export</button>
           <button class="abtn" onclick="doExportJSON()">Export JSON</button>
           <button class="abtn" onclick="doImportJSON()">Import JSON</button>
         </div>
@@ -924,7 +955,7 @@ function initBg() {
    DRAWING APP
 ═══════════════════════════════════════════════════════════════════════════════════ */
 const cvs = document.getElementById('cvs');
-const ctx  = cvs.getContext('2d');
+let ctx  = cvs.getContext('2d');
 
 /* ── App State ── */
 let tool      = 'brush';
@@ -935,6 +966,11 @@ let smoothing = 0.5;
 let bgVal     = 13;
 let theme     = 'mist';
 let symmetry  = 'none'; // 'none', 'h', 'v', 'hv'
+let mandala   = 0;
+let isTransparent = false;
+let refImg    = null;
+let sessionRecording = [];
+let currentStroke = null;
 
 /* ── History ── */
 let hist = [], hIdx = -1;
@@ -1059,7 +1095,56 @@ function resizeCanvas(isManual) {
 function updateBgDisplay() {
   const v = bgVal;
   const col = `rgb(${v},${Math.round(v*1.05)},${Math.round(v*1.4)})`;
-  document.getElementById('bg-layer').style.background = col;
+  const bgLayer = document.getElementById('bg-layer');
+  if (isTransparent) {
+    bgLayer.style.background = 'repeating-conic-gradient(rgba(255,255,255,0.03) 0% 25%, transparent 0% 50%) 50% / 20px 20px';
+  } else {
+    bgLayer.style.background = col;
+  }
+}
+
+function setMandala(v) {
+  mandala = parseInt(v);
+  document.getElementById('v-man').textContent = mandala > 0 ? mandala : 'Off';
+  status(mandala > 0 ? `Mandala: ${mandala} segments` : 'Mandala Off');
+}
+
+function toggleTransparency(on) {
+  isTransparent = on;
+  updateBgDisplay();
+  status(on ? 'Transparency Enabled' : 'Transparency Disabled');
+}
+
+function loadReference(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(f) {
+    const img = new Image();
+    img.onload = function() {
+      refImg = img;
+      const rl = document.getElementById('ref-layer');
+      rl.style.backgroundImage = `url(${f.target.result})`;
+      rl.style.display = 'block';
+      status('Reference Loaded');
+    };
+    img.src = f.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function setRefOp(v) {
+  const op = v / 100;
+  document.getElementById('ref-layer').style.opacity = op;
+  document.getElementById('v-ref').textContent = v + '%';
+}
+
+function clearReference() {
+  refImg = null;
+  const rl = document.getElementById('ref-layer');
+  rl.style.backgroundImage = 'none';
+  rl.style.display = 'none';
+  status('Reference Cleared');
 }
 
 function fillBg() {
@@ -1301,8 +1386,20 @@ function onDown(e) {
 
   drawing=true; lx=p.x; ly=p.y; lp=p.p;
 
+  // Recording
+  currentStroke = {
+    tool: tool,
+    color: color,
+    size: brushSz,
+    opacity: opacity,
+    symmetry: symmetry,
+    mandala: mandala,
+    points: [{x: p.x, y: p.y, p: p.p}]
+  };
+
   if (tool==='fill') {
     floodFill(Math.floor(p.x), Math.floor(p.y), color);
+    sessionRecording.push(currentStroke);
     drawing=false; snapHistory(); return;
   }
   if (tool==='line') {
@@ -1355,6 +1452,10 @@ function onUp(e) {
     drawLine(lineStart.x, lineStart.y, p.x, p.y, lp);
     lineStart=null;
   }
+  if (currentStroke) {
+    sessionRecording.push(currentStroke);
+    currentStroke = null;
+  }
   ctx.shadowBlur=0; ctx.globalAlpha=1;
   ctx.globalCompositeOperation='source-over';
   snapHistory();
@@ -1381,13 +1482,23 @@ function prepCtx(p) {
       ctx.globalAlpha=opacity*(0.45+Math.random()*.55)*(0.35+p*.85);
       ctx.strokeStyle=ctx.fillStyle=color;
       break;
+    case 'watercolor':
+      ctx.globalAlpha=opacity * 0.18;
+      ctx.strokeStyle=ctx.fillStyle=color;
+      ctx.shadowColor=color; ctx.shadowBlur=brushSz*1.2;
+      break;
+    case 'chalk':
+      ctx.globalAlpha=opacity * 0.7;
+      ctx.strokeStyle=ctx.fillStyle=color;
+      ctx.setLineDash([Math.random()*2, Math.random()*4]);
+      break;
     case 'spray': case 'line':
       ctx.globalAlpha=opacity;
       ctx.strokeStyle=ctx.fillStyle=color;
       break;
     case 'eraser':
       ctx.globalCompositeOperation='destination-out';
-      ctx.globalAlpha=opacity*(0.55+p*.55);
+      ctx.globalAlpha=opacity;
       ctx.strokeStyle=ctx.fillStyle='rgba(0,0,0,1)';
       break;
   }
@@ -1395,10 +1506,34 @@ function prepCtx(p) {
 
 function cleanCtx() {
   ctx.globalCompositeOperation='source-over';
-  ctx.globalAlpha=1; ctx.shadowBlur=0;
+  ctx.globalAlpha=1; ctx.shadowBlur=0; ctx.setLineDash([]);
+}
+
+function renderRadial(x1, y1, x2, y2, p1, p2, isDot) {
+  const cx = cvs.width / 2;
+  const cy = cvs.height / 2;
+  const step = (Math.PI * 2) / mandala;
+  
+  for (let i = 1; i < mandala; i++) {
+    const ang = step * i;
+    const cos = Math.cos(ang);
+    const sin = Math.sin(ang);
+    
+    const rx1 = cx + (x1 - cx) * cos - (y1 - cy) * sin;
+    const ry1 = cy + (x1 - cx) * sin + (y1 - cy) * cos;
+    
+    if (isDot) {
+      ctx.beginPath(); ctx.arc(rx1, ry1, effSz(p1)/2, 0, Math.PI*2); ctx.fill();
+    } else {
+      const rx2 = cx + (x2 - cx) * cos - (y2 - cy) * sin;
+      const ry2 = cy + (x2 - cx) * sin + (y2 - cy) * cos;
+      ctx.beginPath(); ctx.moveTo(rx1, ry1); ctx.lineTo(rx2, ry2); ctx.stroke();
+    }
+  }
 }
 
 function paintDot(x,y,p) {
+  if (currentStroke) currentStroke.points.push({x,y,p});
   const s=effSz(p);
   prepCtx(p);
   ctx.lineWidth=s;
@@ -1409,10 +1544,12 @@ function paintDot(x,y,p) {
   if (symmetry==='h' || symmetry==='hv') draw(cvs.width-x, y);
   if (symmetry==='v' || symmetry==='hv') draw(x, cvs.height-y);
   if (symmetry==='hv') draw(cvs.width-x, cvs.height-y);
+  if (mandala > 1) renderRadial(x, y, 0, 0, p, 0, true);
   cleanCtx();
 }
 
 function paintStroke(x1,y1,x2,y2,p1,p2) {
+  if (currentStroke) currentStroke.points.push({x:x2,y:y2,p:p2});
   if (tool==='spray') { sprayAt(x2,y2,p2); return; }
   prepCtx((p1+p2)/2);
   ctx.lineWidth=(effSz(p1)+effSz(p2))/2;
@@ -1423,6 +1560,7 @@ function paintStroke(x1,y1,x2,y2,p1,p2) {
   if (symmetry==='h' || symmetry==='hv') draw(cvs.width-x1, y1, cvs.width-x2, y2);
   if (symmetry==='v' || symmetry==='hv') draw(x1, cvs.height-y1, x2, cvs.height-y2);
   if (symmetry==='hv') draw(cvs.width-x1, cvs.height-y1, cvs.width-x2, cvs.height-y2);
+  if (mandala > 1) renderRadial(x1, y1, x2, y2, p1, p2, false);
   cleanCtx();
 }
 
@@ -1527,12 +1665,12 @@ function doExportPNG() {
   exportCvs.height = cvs.height;
   const exCtx = exportCvs.getContext('2d');
   
-  // Draw flattened background
-  const v = bgVal;
-  exCtx.fillStyle = `rgb(${v},${Math.round(v*1.05)},${Math.round(v*1.4)})`;
-  exCtx.fillRect(0, 0, exportCvs.width, exportCvs.height);
+  if (!isTransparent) {
+    const v = bgVal;
+    exCtx.fillStyle = `rgb(${v},${Math.round(v*1.05)},${Math.round(v*1.4)})`;
+    exCtx.fillRect(0, 0, exportCvs.width, exportCvs.height);
+  }
   
-  // Draw drawing
   exCtx.drawImage(cvs, 0, 0);
   
   const link = document.createElement('a');
@@ -1540,6 +1678,80 @@ function doExportPNG() {
   link.href = exportCvs.toDataURL('image/png');
   link.click();
   status('Exported as PNG');
+}
+
+function startTimelapseExport() {
+  if (sessionRecording.length === 0) {
+    status('No drawing data to export.');
+    return;
+  }
+
+  const tCvs = document.createElement('canvas');
+  tCvs.width = cvs.width; tCvs.height = cvs.height;
+  const tCtx = tCvs.getContext('2d');
+  
+  const stream = tCvs.captureStream(30);
+  const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+  const chunks = [];
+  
+  recorder.ondataavailable = e => chunks.push(e.data);
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: 'video/webm' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `timelapse_${Date.now()}.webm`;
+    a.click();
+    status('Timelapse Exported');
+  };
+
+  status('Rendering Timelapse...');
+  recorder.start();
+
+  let sIdx = 0;
+  const renderNext = () => {
+    if (sIdx >= sessionRecording.length) {
+      setTimeout(() => recorder.stop(), 1000);
+      return;
+    }
+    const s = sessionRecording[sIdx];
+    // This is a simplified playback - real playback would animate the points
+    // For now, we'll draw one stroke per frame or every few frames
+    playbackStroke(tCtx, s);
+    sIdx++;
+    requestAnimationFrame(renderNext);
+  };
+
+  // Setup initial background if not transparent
+  if (!isTransparent) {
+    const v = bgVal;
+    tCtx.fillStyle = `rgb(${v},${Math.round(v*1.05)},${Math.round(v*1.4)})`;
+    tCtx.fillRect(0,0,tCvs.width,tCvs.height);
+  }
+
+  renderNext();
+}
+
+function playbackStroke(targetCtx, s) {
+  const originalCtx = ctx;
+  ctx = targetCtx; // Swap global ctx so drawing helpers use it
+  
+  // We need to store original global state to restore later
+  const oldTool = tool, oldCol = color, oldSz = brushSz, oldOp = opacity, oldSym = symmetry, oldMan = mandala;
+  
+  tool = s.tool; color = s.color; brushSz = s.size; opacity = s.opacity; symmetry = s.symmetry; mandala = s.mandala;
+  
+  if (tool === 'fill') {
+    floodFill(s.points[0].x, s.points[0].y, color);
+  } else {
+    paintDot(s.points[0].x, s.points[0].y, s.points[0].p);
+    for (let i = 1; i < s.points.length; i++) {
+      paintStroke(s.points[i-1].x, s.points[i-1].y, s.points[i].x, s.points[i].y, s.points[i-1].p, s.points[i].p);
+    }
+  }
+
+  // Restore global state and original ctx
+  tool = oldTool; color = oldCol; brushSz = oldSz; opacity = oldOp; symmetry = oldSym; mandala = oldMan;
+  ctx = originalCtx;
 }
 
 function doExportJSON() {
