@@ -1127,16 +1127,28 @@
             }
 
             header {
-                height: auto;
-                padding-top: calc(var(--sat, 0px) + 8px) !important;
-                padding-bottom: 8px;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 6px;
+                height: 44px;
+                padding-top: var(--sat, 0px) !important;
+                flex-wrap: nowrap;
+                justify-content: space-between;
+                padding-left: 12px;
+                padding-right: 12px;
             }
 
             .logo-sub, .hbtn:not(#audio-btn):not(.gold):not([onclick*="index.html"]) {
-                display: none; /* Hide non-essential buttons on mobile */
+                display: none; 
+            }
+
+            .info-bar {
+                display: flex !important;
+                height: 32px;
+                background: rgba(10, 12, 30, 0.6);
+                border-bottom: 1px solid var(--border);
+                backdrop-filter: blur(10px);
+                align-items: center;
+                justify-content: center;
+                gap: 15px;
+                z-index: 10;
             }
 
             .main {
@@ -1144,27 +1156,29 @@
             }
 
             #garden-area {
-                height: calc(100vh - 280px); /* Leave room for the action bar */
+                height: calc(100vh - 44px - 32px - 190px - 24px); /* header + infobar + sidebar + statusbar */
                 flex: none;
                 width: 100%;
             }
 
             .sidebar {
                 width: 100%;
-                height: 230px;
+                height: 190px;
                 border-left: none;
                 border-top: 1px solid var(--border);
                 flex-direction: row !important;
                 overflow-x: auto;
                 overflow-y: hidden;
                 padding-bottom: var(--sab, 0px);
-                background: rgba(8, 10, 28, 0.96);
+                background: rgba(8, 10, 28, 0.98);
                 scrollbar-width: none;
+                -webkit-overflow-scrolling: touch;
             }
 
             .sbsec {
-                min-width: 220px;
+                min-width: 160px;
                 height: 100%;
+                padding: 8px 12px;
                 border-bottom: none;
                 border-right: 1px solid rgba(168, 159, 216, .08);
                 display: flex;
@@ -1177,18 +1191,17 @@
             }
 
             .sblbl {
-                font-size: .52rem;
-                margin-bottom: 6px;
-                opacity: 0.8;
-            }
-
-            .abtn {
+                font-size: .5rem;
                 margin-bottom: 4px;
             }
 
+            .abtn {
+                margin-bottom: 3px;
+            }
+
             .ainn {
-                padding: 6px 10px;
-                font-size: .6rem;
+                padding: 5px 8px;
+                font-size: .58rem;
             }
 
             .statusbar {
@@ -1197,23 +1210,14 @@
             }
 
             .coins-badge, .mbadge {
-                font-size: 0.58rem;
-                padding: 3px 8px;
-            }
-
-            .health-panel {
-                padding: 4px 8px;
-            }
-
-            .hp-row {
-                margin-bottom: 3px;
-            }
-
-            .hp-val {
-                font-size: 0.5rem;
-                width: 22px;
+                font-size: 0.55rem;
+                padding: 2px 8px;
+                background: transparent;
+                border-color: rgba(168, 159, 216, 0.1);
             }
         }
+
+        .info-bar { display: none; }
 
         @media(max-width:440px) {
             .sbsec {
@@ -1250,6 +1254,11 @@
             <button class="hbtn" onclick="doExport()">Export</button>
             <button class="hbtn" onclick="window.location.href='index.html'">Home</button>
         </header>
+        <div class="info-bar">
+            <!-- Badges move here on mobile via CSS/DOM -->
+            <div class="coins-badge" id="coins-badge-mobile">0</div>
+            <div class="mbadge" id="mbadge-mobile">Mastery · 3</div>
+        </div>
         <div class="main">
             <div id="garden-area">
                 <canvas id="ground-cvs"></canvas>
@@ -1754,9 +1763,19 @@
 
         /* ── COINS / BADGE ── */
         function updateBadge() {
-            document.getElementById('coins-badge').textContent = Math.floor(G.coins);
+            const coins = Math.floor(G.coins);
+            document.getElementById('coins-badge').textContent = coins;
+            if (document.getElementById('coins-badge-mobile')) {
+                document.getElementById('coins-badge-mobile').textContent = coins;
+            }
+            
             const tot = G.plants.reduce((s, p) => s + p.stage, 0);
-            document.getElementById('mbadge').textContent = `Mastery · ${tot}`;
+            const masteryTxt = `Mastery · ${tot}`;
+            document.getElementById('mbadge').textContent = masteryTxt;
+            if (document.getElementById('mbadge-mobile')) {
+                document.getElementById('mbadge-mobile').textContent = masteryTxt;
+            }
+
             const totalRate = G.plants.reduce((s, p) => s + incomeRate(p), 0);
             document.getElementById('income-rate').textContent = `✦ ${totalRate.toFixed(1)}/min`;
         }
