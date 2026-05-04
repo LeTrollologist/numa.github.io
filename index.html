@@ -3628,34 +3628,49 @@
         // ══════════════════════════════════════════════════════════
         function runDiagnostics() {
             var msg = document.getElementById('statusMessage');
-            var nodes = ['mainSite', 'analytics', 'database', 'checkIns'];
-            msg.innerText = 'Running pings… (may take 30s)';
+            var nodes = ['analytics', 'database', 'checkIns'];
+            msg.innerText = 'Synchronizing with Sentinel…';
+            
+            // 1. Immediate Main Site Verification
+            document.getElementById('txt-mainSite').innerText = 'ONLINE';
+            document.getElementById('txt-mainSite').style.color = '#00ff88';
+            document.getElementById('dot-mainSite').className = 'dot online';
+
+            // 2. Prepare other nodes
             nodes.forEach(function (n) {
                 document.getElementById('txt-' + n).innerText = 'PINGING…';
                 document.getElementById('txt-' + n).style.color = '#facc15';
                 document.getElementById('dot-' + n).className = 'dot loading';
             });
-            fetch('https://analytics-server-bdrm.onrender.com/api/health')
+
+            // 3. Fetch remote health with timeout
+            var controller = new AbortController();
+            var timeoutId = setTimeout(function() { controller.abort(); }, 8000);
+
+            fetch('https://analytics-server-bdrm.onrender.com/api/health', { signal: controller.signal })
                 .then(function (r) { return r.json(); })
                 .then(function (d) {
+                    clearTimeout(timeoutId);
                     nodes.forEach(function (n) {
-                        var ok = d[n] === 'ONLINE';
-                        document.getElementById('txt-' + n).innerText = ok ? 'ONLINE' : 'OFFLINE';
-                        document.getElementById('txt-' + n).style.color = ok ? '#00ff88' : '#ff4040';
-                        document.getElementById('dot-' + n).className = 'dot ' + (ok ? 'online' : 'offline');
+                        // Check if server specifically reported this node, otherwise fallback to STANDBY/UNKNOWN
+                        var status = d[n];
+                        var ok = status === 'ONLINE';
+                        var label = status || 'UNKNOWN';
+                        
+                        document.getElementById('txt-' + n).innerText = label;
+                        document.getElementById('txt-' + n).style.color = ok ? '#00ff88' : (status === 'OFFLINE' ? '#ff4040' : '#facc15');
+                        document.getElementById('dot-' + n).className = 'dot ' + (ok ? 'online' : (status === 'OFFLINE' ? 'offline' : 'loading'));
                     });
-                    msg.innerText = 'Diagnostics complete.';
+                    msg.innerText = 'System synchronization successful.';
                 })
-                .catch(function () {
+                .catch(function (err) {
+                    clearTimeout(timeoutId);
                     nodes.forEach(function (n) {
                         document.getElementById('txt-' + n).innerText = 'UNREACHABLE';
                         document.getElementById('txt-' + n).style.color = '#ff4040';
                         document.getElementById('dot-' + n).className = 'dot offline';
                     });
-                    document.getElementById('txt-mainSite').innerText = 'ONLINE';
-                    document.getElementById('txt-mainSite').style.color = '#00ff88';
-                    document.getElementById('dot-mainSite').className = 'dot online';
-                    msg.innerText = 'CRITICAL: Sentinel Core unreachable.';
+                    msg.innerText = err.name === 'AbortError' ? 'Diagnostic timeout.' : 'CRITICAL: Sentinel Core unreachable.';
                 });
         }
 
