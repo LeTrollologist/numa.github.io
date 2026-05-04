@@ -1,7 +1,7 @@
 /**
  * apple-optimizer.js
- * Premium iOS & WebKit Enhancement Engine v1.0
- * Targeting: iPhone Notch, Safe Areas, OLED, and ProMotion.
+ * Premium iOS & WebKit Enhancement Engine v1.1
+ * Targets: Dynamic Safe Areas, Keyboard, OLED, ProMotion, Battery, Interaction
  */
 (function() {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -9,122 +9,171 @@
     
     if (!isIOS) return;
 
-    console.log("🍎 Apple Optimizer v1.0 Initialized");
+    console.log("🍎 Apple Optimizer v1.1 Initialized");
 
     // ==========================================
-    // 1. SAFE AREA & NOTCH INJECTOR
+    // 1. DYNAMIC SAFE AREAS & KEYBOARD
     // ==========================================
-    const injectSafeAreas = () => {
+    const setupSafeAreas = () => {
         const style = document.createElement('style');
+        style.id = 'apple-dynamic-styles';
         style.innerHTML = `
             :root {
-                --sat: env(safe-area-inset-top);
-                --sar: env(safe-area-inset-right);
-                --sab: env(safe-area-inset-bottom);
-                --sal: env(safe-area-inset-left);
+                --sat: env(safe-area-inset-top, 0px);
+                --sar: env(safe-area-inset-right, 0px);
+                --sab: env(safe-area-inset-bottom, 0px);
+                --sal: env(safe-area-inset-left, 0px);
+                --keyboard-h: 0px;
             }
 
-            /* Adjust fixed headers */
             header, .page-header, #nav-bar {
-                padding-top: calc(var(--sat, 0px) + 10px) !important;
+                padding-top: calc(var(--sat) + 10px) !important;
             }
 
-            /* Adjust fixed footers/tabs */
-            footer, .nav-tabs, .fab, #mob-overlay {
-                padding-bottom: calc(var(--sab, 0px) + 10px) !important;
+            /* Adjust bottom elements for both Notch and Keyboard */
+            footer, .nav-tabs, .fab, #mob-overlay, .statusbar {
+                padding-bottom: calc(var(--sab) + var(--keyboard-h) + 10px) !important;
             }
 
-            /* Force momentum scrolling */
-            * {
-                -webkit-overflow-scrolling: touch;
-            }
-
-            /* Prevent auto-zoom on input focus */
-            input, textarea, select {
-                font-size: 16px !important;
-            }
-
-            /* Retina Typography */
+            /* Prevent system bounce on the main body */
             body {
-                -webkit-font-smoothing: antialiased;
-                -moz-osx-font-smoothing: grayscale;
+                overscroll-behavior: none;
             }
         `;
         document.head.appendChild(style);
-    };
 
-    // ==========================================
-    // 2. OLED TRUE BLACK DETECTION
-    // ==========================================
-    const applyOLEDTheme = () => {
-        // iPhone X, XS, 11 Pro, 12, 13, 14, 15 (OLED Aspect Ratios)
-        const isOLED = (window.devicePixelRatio >= 3);
-        
-        if (isOLED) {
-            const style = document.createElement('style');
-            style.innerHTML = `
-                body, .main-container, #gameContainer {
-                    background: #000000 !important;
-                }
-                .glass, .glass-card, .card {
-                    background: rgba(20, 20, 30, 0.7) !important;
-                    border-color: rgba(255, 255, 255, 0.08) !important;
-                }
-            `;
-            document.head.appendChild(style);
-            console.log("🍎 OLED Display Detected → True Black Mode Enabled");
+        // Handle Keyboard / Visual Viewport changes
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                const keyboardHeight = window.innerHeight - window.visualViewport.height;
+                document.documentElement.style.setProperty('--keyboard-h', `${Math.max(0, keyboardHeight)}px`);
+            });
         }
     };
 
     // ==========================================
-    // 3. TAPTIC INTERACTION SIMULATOR
+    // 2. BATTERY & MOTION AWARENESS
     // ==========================================
-    const setupTapticFeel = () => {
-        document.addEventListener('touchstart', (e) => {
-            const target = e.target.closest('button, .btn, .nav-tab, .task-item, .mood-btn');
-            if (target) {
-                target.style.transition = 'transform 0.1s cubic-bezier(0,0,0.2,1)';
-                target.style.transform = 'scale(0.96)';
-            }
-        }, { passive: true });
+    const setupBatteryAndMotion = async () => {
+        const updateMotion = (isLow) => {
+            document.documentElement.setAttribute('data-reduce-motion', isLow);
+        };
 
-        document.addEventListener('touchend', (e) => {
-            const target = e.target.closest('button, .btn, .nav-tab, .task-item, .mood-btn');
-            if (target) {
-                target.style.transform = 'scale(1)';
-            }
-        }, { passive: true });
-    };
-
-    // ==========================================
-    // 4. PREVENT SYSTEM CONTEXT MENUS
-    // ==========================================
-    const preventCallouts = () => {
+        if (navigator.getBattery) {
+            try {
+                const battery = await navigator.getBattery();
+                const check = () => updateMotion(battery.level <= 0.2 && !battery.charging);
+                battery.addEventListener('levelchange', check);
+                battery.addEventListener('chargingchange', check);
+                check();
+            } catch(e) {}
+        }
+        
         const style = document.createElement('style');
         style.innerHTML = `
-            .no-select, img, a, button {
-                -webkit-touch-callout: none !important;
-                -webkit-user-select: none !important;
+            @media (prefers-reduced-motion: reduce) {
+                *, ::before, ::after {
+                    animation-delay: -1ms !important;
+                    animation-duration: 1ms !important;
+                    animation-iteration-count: 1 !important;
+                    background-attachment: initial !important;
+                    scroll-behavior: auto !important;
+                    transition-duration: 0s !important;
+                    transition-delay: 0s !important;
+                }
             }
-            canvas {
-                touch-action: none;
+            [data-reduce-motion="true"] * {
+                animation-duration: 0.1s !important;
+                transition-duration: 0.1s !important;
             }
         `;
         document.head.appendChild(style);
     };
 
     // ==========================================
-    // INITIALIZE
+    // 3. PROMOTION & GPU OPTIMIZATION
     // ==========================================
-    injectSafeAreas();
-    applyOLEDTheme();
-    setupTapticFeel();
-    preventCallouts();
+    const setupProMotion = () => {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            /* Surgical layer promotion */
+            #app, .main, #gameContainer, canvas, .sidebar {
+                will-change: transform;
+                -webkit-backface-visibility: hidden;
+                backface-visibility: hidden;
+            }
+            /* Native iOS timing for ProMotion displays */
+            .glass, .card, .btn, .nav-tab {
+                transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+            }
+        `;
+        document.head.appendChild(style);
+    };
 
-    // Home Screen Web App specific
-    if (window.navigator.standalone) {
-        console.log("🍎 Running as Standalone Web App");
-        document.body.classList.add('ios-pwa');
-    }
+    // ==========================================
+    // 4. REFINED TAPTIC & INTERACTION
+    // ==========================================
+    const setupInteractions = () => {
+        const selector = 'button, .btn, .nav-tab, .task-item, .mood-btn, .interactive';
+        
+        // Visual Taptic Feel
+        document.addEventListener('touchstart', (e) => {
+            const target = e.target.closest(selector);
+            if (target) {
+                target.style.transition = 'transform 0.08s cubic-bezier(0,0,0.2,1)';
+                target.style.transform = 'scale(0.95)';
+            }
+            
+            // Audio Engine Warmup
+            if (window.AudioContext || window.webkitAudioContext) {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (ctx.state === 'suspended') ctx.resume();
+            }
+        }, { passive: true });
 
+        document.addEventListener('touchend', (e) => {
+            const target = e.target.closest(selector);
+            if (target) target.style.transform = 'scale(1)';
+        }, { passive: true });
+
+        // Hardening
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .no-select, img, a, button, canvas {
+                -webkit-touch-callout: none !important;
+                -webkit-user-select: none !important;
+                user-select: none !important;
+            }
+            input, textarea, select { font-size: 16px !important; }
+            * { -webkit-overflow-scrolling: touch; }
+        `;
+        document.head.appendChild(style);
+    };
+
+    // ==========================================
+    // 5. OLED THEME SYNC
+    // ==========================================
+    const applyRetinaPolishing = () => {
+        const isOLED = (window.devicePixelRatio >= 3);
+        if (isOLED) {
+            const style = document.createElement('style');
+            style.innerHTML = `
+                body, .main-container, #gameContainer { background: #000000 !important; }
+                .glass, .glass-card, .card, .sidebar { 
+                    background: rgba(15, 15, 25, 0.8) !important; 
+                    backdrop-filter: blur(25px) saturate(180%) !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    };
+
+    // INITIALIZE
+    setupSafeAreas();
+    setupBatteryAndMotion();
+    setupProMotion();
+    setupInteractions();
+    applyRetinaPolishing();
+
+    if (window.navigator.standalone) document.body.classList.add('ios-pwa');
 })();
