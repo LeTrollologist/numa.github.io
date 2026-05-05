@@ -418,6 +418,12 @@
             background: var(--gold-d);
         }
 
+        .hbtn:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+            background: rgba(255,255,255,.025);
+        }
+
         /* Main layout */
         .main {
             flex: 1;
@@ -1289,6 +1295,55 @@
         .nursery-slot.selected { border-style: solid; border-color: var(--gold); background: var(--gold-d); }
         .nursery-plus { font-size: 1.5rem; color: var(--muted); text-align: center; }
         .nursery-result { border-top: 1px solid var(--border); padding-top: 20px; text-align: center; display: none; }
+        .nursery-note {
+            margin-bottom: 14px;
+            color: var(--muted);
+            font-size: .68rem;
+            line-height: 1.5;
+            letter-spacing: .04em;
+        }
+        .nursery-select-row {
+            display: grid;
+            grid-template-columns: 1fr 28px 1fr;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .nursery-select {
+            min-width: 0;
+            width: 100%;
+            background: rgba(3, 5, 14, .98);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 9px;
+            font-family: 'Josefin Sans', sans-serif;
+            font-size: .7rem;
+            outline: none;
+            cursor: pointer;
+            color-scheme: dark;
+        }
+        .nursery-select option {
+            background: #050816;
+            color: var(--text);
+        }
+        .nursery-select:focus {
+            border-color: var(--gold);
+        }
+        .nursery-cross {
+            color: var(--gold);
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        .nursery-preview {
+            border: 1px solid rgba(201, 168, 76, .18);
+            background: rgba(201, 168, 76, .07);
+            color: var(--gold);
+            padding: 9px 10px;
+            font-size: .66rem;
+            letter-spacing: .07em;
+            line-height: 1.35;
+            margin-bottom: 14px;
+        }
         
         #weather-badge {
             font-size: .62rem; letter-spacing: .08em; color: var(--accent);
@@ -1307,6 +1362,12 @@
             }
             .logo {
                 font-size: 0.85rem;
+            }
+            .nursery-select-row {
+                grid-template-columns: 1fr;
+            }
+            .nursery-cross {
+                line-height: 1;
             }
         }
     </style>
@@ -1334,7 +1395,7 @@
             <div class="mbadge" id="mbadge">Mastery · 0</div>
             <button class="hbtn" id="audio-btn" onclick="toggleAudio()" title="Toggle Audio">🎵 Off</button>
             <button class="hbtn gold" onclick="openMarket()">Market</button>
-            <button class="hbtn" onclick="openNursery()" style="border-color:var(--gold); color:var(--gold)">Nursery</button>
+            <button class="hbtn gold" onclick="openNursery()">Nursery</button>
             <button class="hbtn" onclick="openStats()">Records</button>
             <button class="hbtn" onclick="window.location.href='index.html'">Home</button>
         </header>
@@ -1428,8 +1489,8 @@
 
     <div id="toast"></div>
 
-    <!-- Nursery Modal -->
-    <div id="nursery-modal" class="modal">
+    <!-- Legacy Nursery Modal (kept inert; active nursery lives below rename modal) -->
+    <div id="nursery-modal-legacy" class="modal" aria-hidden="true">
         <div class="mbox">
             <div class="mtitle">
                 <span>The Nursery</span>
@@ -1514,17 +1575,14 @@
         <div class="mbox" style="max-width:380px">
             <div class="mtitle">The Nursery <span class="mclose" onclick="closeModal('nursery-modal')">✕ Close</span>
             </div>
-            <div class="sblbl" style="margin-bottom:12px; line-height: 1.4; text-transform:none;">Combine the essence of
-                two Ancient plants to cultivate a rare hybrid. (Requires an empty plot)</div>
-            <div style="display:flex; gap:12px; margin-bottom: 16px;">
-                <select id="nursery-p1"
-                    style="flex:1; background:var(--panel); border:1px solid var(--border); color:var(--text); padding:8px; font-family:'Josefin Sans', sans-serif; outline:none; cursor:pointer;">
-                </select>
-                <div style="color:var(--accent); font-size:1.2rem; display:flex; align-items:center;">+</div>
-                <select id="nursery-p2"
-                    style="flex:1; background:var(--panel); border:1px solid var(--border); color:var(--text); padding:8px; font-family:'Josefin Sans', sans-serif; outline:none; cursor:pointer;">
-                </select>
+            <div class="nursery-note" id="nursery-note">Combine two Ancient base plants to cultivate a rare hybrid.
+                Requires one empty plot and 250 coins.</div>
+            <div class="nursery-select-row">
+                <select id="nursery-p1" class="nursery-select"></select>
+                <div class="nursery-cross">+</div>
+                <select id="nursery-p2" class="nursery-select"></select>
             </div>
+            <div class="nursery-preview" id="nursery-preview">Choose two compatible plants.</div>
             <button class="hbtn gold" style="width:100%; justify-content:center;"
                 onclick="crossPollinate()">Cross-Pollinate</button>
         </div>
@@ -1586,6 +1644,41 @@
             }
         }
 
+        /* ── SKY MANAGER (Day/Night Cycle) ── */
+        class SkyManager {
+            constructor() {
+                this.overlay = document.createElement('div');
+                this.overlay.id = 'sky-overlay';
+                this.overlay.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:1;transition:background 10s ease;';
+                document.body.appendChild(this.overlay);
+                this.update();
+            }
+            update() {
+                const hour = new Date().getHours();
+                let bg = '';
+                let ambient = 1.0;
+                
+                if (hour >= 5 && hour < 8) { // Dawn
+                    bg = 'rgba(255, 154, 158, 0.15)';
+                    ambient = 0.9;
+                } else if (hour >= 8 && hour < 17) { // Day
+                    bg = 'transparent';
+                    ambient = 1.0;
+                } else if (hour >= 17 && hour < 20) { // Dusk
+                    bg = 'rgba(51, 8, 103, 0.25)';
+                    ambient = 0.8;
+                } else { // Night
+                    bg = 'rgba(0, 0, 20, 0.45)';
+                    ambient = 0.6;
+                }
+                
+                this.overlay.style.background = bg;
+                document.documentElement.style.setProperty('--ambient-light', ambient);
+                document.body.setAttribute('data-time-phase', hour < 6 || hour > 19 ? 'night' : 'day');
+            }
+        }
+
+        const S = new SkyManager();
         const W = new WeatherManager();
 
         /* ── NURSERY LOGIC ── */
@@ -1634,12 +1727,38 @@
         function doBreeding() {
             if (G.coins < 250) { toast('Not enough coins (250 needed)'); return; }
             G.coins -= 250;
-            const names = [nurseryBreeder1.name.slice(0,3), nurseryBreeder2.name.slice(-3)];
-            const hybridName = names[0] + names[1];
-            toast(`Breeding complete: ${hybridName} seed obtained!`);
-            addLog(`Hybrid seed "${hybridName}" created from ${nurseryBreeder1.name} & ${nurseryBreeder2.name}.`);
+            
+            const p1 = nurseryBreeder1;
+            const p2 = nurseryBreeder2;
+            
+            // Mix names
+            const hybridName = p1.name.slice(0, Math.floor(p1.name.length/2)) + p2.name.slice(Math.floor(p2.name.length/2));
+            
+            // Mix colors
+            const c1 = PLANT_META[p1.type].color;
+            const c2 = PLANT_META[p2.type].color;
+            
+            // Procedural hybrid plant creation
+            const newPlant = {
+                id: Date.now(),
+                type: 'hybrid', // Special hybrid type
+                name: hybridName,
+                stage: 0,
+                xp: 0,
+                health: { hydration: 80, nourishment: 80, happiness: 100 },
+                born: Date.now(),
+                traits: {
+                    color: c1, // primary color
+                    accent: c2, // accent from parent 2
+                    glow: true
+                }
+            };
+            
+            G.plants.push(newPlant);
+            toast(`Breeding complete: ${hybridName} is born!`);
+            addLog(`Hybrid plant "${hybridName}" successfully germinated from ${p1.name} & ${p2.name}.`);
             closeModal('nursery-modal');
-            updateBadge(); save();
+            renderPlants(); renderPlantList(); updateBadge(); save();
         }
 
 
@@ -1693,6 +1812,31 @@
             sunflare: { emoji: '☀️', color: '#fde047', incomeBase: 4.0, label: 'Sunflare Lotus' },
         };
 
+        const BASE_PLANT_TYPES = ['moonflower', 'starbloom', 'emberleaf'];
+        const NURSERY_COST = 250;
+        const NURSERY_RECIPES = {
+            'emberleaf+moonflower': 'bramble',
+            'moonflower+starbloom': 'frostlily',
+            'emberleaf+starbloom': 'sunflare'
+        };
+
+        function plantLabel(type) {
+            return PLANT_META[type]?.label || (type ? type.replace(/(^|_)(\w)/g, (_, s, c) => (s ? ' ' : '') + c.toUpperCase()) : 'Unknown');
+        }
+
+        function normalizePlant(p, fallbackIndex) {
+            const base = G?.plants?.[fallbackIndex] || {};
+            return {
+                id: p.id ?? base.id ?? ('p' + Date.now() + '_' + fallbackIndex),
+                type: PLANT_META[p.type] ? p.type : (base.type || 'moonflower'),
+                stage: Math.min(5, Math.max(1, p.stage || base.stage || 1)),
+                xp: Number.isFinite(+p.xp) ? +p.xp : 0,
+                totalXp: Number.isFinite(+p.totalXp) ? +p.totalXp : 0,
+                name: p.name || base.name || plantLabel(p.type || base.type),
+                health: Object.assign({ hydration: 80, nourishment: 75, happiness: 70 }, p.health || {})
+            };
+        }
+
         // XP needed per stage (1→2, 2→3, 3→4, 4→5) — deliberately slow
         const XP_PER_STAGE = [0, 200, 480, 900, 1600, Infinity];
 
@@ -1716,7 +1860,7 @@
         function incomeRate(plant) {
             const h = plantAvgHealth(plant);
             const hm = Math.max(0, h / 100);
-            return PLANT_META[plant.type].incomeBase * plant.stage * hm * 0.5;
+            return (PLANT_META[plant.type]?.incomeBase || 1) * plant.stage * hm * 0.5;
         }
 
         function plantAvgHealth(plant) {
@@ -1916,7 +2060,7 @@
                 const swCls = ['psa', 'psb', 'psc', 'psa'][i];
                 const sc = PLANT_SCALE[p.stage];
                 const glowR = [0, 38, 52, 68, 85, 105][p.stage];
-                const glowCol = GLOW_COL[p.type];
+                const glowCol = GLOW_COL[p.type] || 'rgba(168,159,216,0.18)';
 
                 // Outer group: position only
                 plants += `<g transform="translate(${pos.x.toFixed(1)},${pos.y.toFixed(1)})">`;
@@ -2097,6 +2241,7 @@
             const elapsed = (now - G.lastTick) / 60000; // minutes
             G.lastTick = now;
 
+            S.update();
             W.update(elapsed);
 
             const decayMult = G.wiltWardUntil > now ? 0 : (1 - (G.upgrades.deeproots || 0) * 0.2);
@@ -2349,6 +2494,132 @@
             save();
         }
 
+        function nurseryEligiblePlants() {
+            return G.plants.filter(p => p.stage >= 5 && BASE_PLANT_TYPES.includes(p.type));
+        }
+
+        function nurseryPair() {
+            const id1 = document.getElementById('nursery-p1')?.value;
+            const id2 = document.getElementById('nursery-p2')?.value;
+            return [
+                G.plants.find(p => String(p.id) === String(id1)),
+                G.plants.find(p => String(p.id) === String(id2))
+            ];
+        }
+
+        function nurseryHybridFor(pA, pB) {
+            if (!pA || !pB || pA.id === pB.id) return '';
+            return NURSERY_RECIPES[[pA.type, pB.type].sort().join('+')] || '';
+        }
+
+        function updateNurseryPreview() {
+            const preview = document.getElementById('nursery-preview');
+            if (!preview) return;
+            const [a, b] = nurseryPair();
+            if (!a || !b) {
+                preview.textContent = 'Choose two compatible plants.';
+                return;
+            }
+            if (a.id === b.id) {
+                preview.textContent = 'Choose two different plants.';
+                return;
+            }
+            const hybrid = nurseryHybridFor(a, b);
+            preview.textContent = hybrid
+                ? `${a.name} + ${b.name} will grow ${PLANT_META[hybrid].emoji} ${plantLabel(hybrid)}.`
+                : 'These essences are incompatible.';
+        }
+
+        function hasHybrid(type) {
+            return G.plants.some(p => p.type === type);
+        }
+
+        function openNursery() {
+            const p1 = document.getElementById('nursery-p1');
+            const p2 = document.getElementById('nursery-p2');
+            const note = document.getElementById('nursery-note');
+            const preview = document.getElementById('nursery-preview');
+            const masters = nurseryEligiblePlants();
+            const hasRoom = G.plants.length < 4;
+            p1.innerHTML = '';
+            p2.innerHTML = '';
+
+            if (!hasRoom) {
+                note.textContent = 'The grove is full. No more plots are available yet.';
+            } else if (masters.length < 2) {
+                note.textContent = 'Raise at least two base plants to Ancient stage before cross-pollination.';
+            } else {
+                note.textContent = `Combine two Ancient base plants to cultivate a rare hybrid. Requires one empty plot and ${NURSERY_COST} coins.`;
+            }
+
+            if (!masters.length) {
+                p1.innerHTML = '<option value="">No Ancient base plants</option>';
+                p2.innerHTML = '<option value="">No Ancient base plants</option>';
+            } else {
+                masters.forEach(p => {
+                    const label = `${PLANT_META[p.type].emoji} ${p.name} (${plantLabel(p.type)})`;
+                    p1.innerHTML += `<option value="${p.id}">${label}</option>`;
+                    p2.innerHTML += `<option value="${p.id}">${label}</option>`;
+                });
+                if (masters[1]) p2.value = String(masters[1].id);
+            }
+
+            p1.onchange = updateNurseryPreview;
+            p2.onchange = updateNurseryPreview;
+            updateNurseryPreview();
+            if (preview) preview.style.opacity = hasRoom && masters.length >= 2 ? '1' : '.7';
+            const btn = document.querySelector('#nursery-modal .hbtn.gold');
+            if (btn) btn.disabled = !hasRoom || masters.length < 2;
+            document.getElementById('nursery-modal').classList.add('open');
+        }
+
+        function crossPollinate() {
+            if (G.plants.length >= 4) {
+                toast("The Grove is full. No more plots are available.");
+                return;
+            }
+            const [pA, pB] = nurseryPair();
+            if (!pA || !pB) {
+                toast("Select two Ancient base plants first.");
+                return;
+            }
+            if (pA.id === pB.id) {
+                toast("You must select two different plants.");
+                return;
+            }
+            const hybridType = nurseryHybridFor(pA, pB);
+            if (!hybridType) {
+                toast("These essences are incompatible.");
+                return;
+            }
+            if (hasHybrid(hybridType)) {
+                toast(`${plantLabel(hybridType)} already grows here.`);
+                return;
+            }
+            if (G.coins < NURSERY_COST) {
+                toast(`${NURSERY_COST} coins are needed for nursery work.`);
+                return;
+            }
+            G.coins -= NURSERY_COST;
+
+            closeModal('nursery-modal');
+
+            const newPlant = {
+                id: 'p' + Date.now(),
+                type: hybridType, name: PLANT_META[hybridType].label, stage: 1, xp: 0, totalXp: 0,
+                health: { hydration: 100, nourishment: 100, happiness: 100 }
+            };
+            G.plants.push(newPlant);
+
+            playSfx('poof');
+            spawnParticles('bloom', document.getElementById('garden-area').clientWidth / 2, document.getElementById('garden-area').clientHeight / 2, 40);
+
+            renderPlants(); renderHealth(); renderPlantList(); updateBadge();
+            toast(`A ${newPlant.name} seedling has emerged!`);
+            addLog(`Cross-pollinated ${PLANT_META[pA.type].emoji} ${pA.name} and ${PLANT_META[pB.type].emoji} ${pB.name} to create ${PLANT_META[hybridType].emoji} ${newPlant.name}.`);
+            save();
+        }
+
         /* ── MILESTONES ── */
         const MILE = [
             { id: 'first_care', test: () => G.totalCare >= 1, label: 'First care given' },
@@ -2400,9 +2671,9 @@
         function openStats() {
             const tot = G.plants.reduce((s, p) => s + p.stage, 0);
             const totXp = G.plants.reduce((s, p) => s + (p.totalXp || 0), 0);
-            const avgH = G.plants.reduce((s, p) => s + plantAvgHealth(p), 0) / 3;
+            const avgH = G.plants.length ? G.plants.reduce((s, p) => s + plantAvgHealth(p), 0) / G.plants.length : 0;
             document.getElementById('stats-rows').innerHTML = [
-                ['Mastery Level', tot + ' / 15'],
+                ['Mastery Level', tot + ' / ' + (G.plants.length * 5)],
                 ['Total XP', Math.round(totXp).toLocaleString()],
                 ['Coins', Math.floor(G.coins)],
                 ['Care Actions', G.totalCare],
@@ -2467,7 +2738,7 @@
             try {
                 const raw = localStorage.getItem('grove_v5'); if (!raw) return false;
                 const d = JSON.parse(raw);
-                if (d.plants) d.plants.forEach((sp, i) => { if (G.plants[i]) Object.assign(G.plants[i], sp); });
+                if (Array.isArray(d.plants) && d.plants.length) G.plants = d.plants.map(normalizePlant);
                 if (d.coins != null) G.coins = d.coins;
                 if (d.cd) Object.assign(G.cd, d.cd);
                 if (d.lastTick) G.lastTick = d.lastTick;
@@ -2528,7 +2799,7 @@
                 r.onload = ev => {
                     try {
                         const d = JSON.parse(ev.target.result);
-                        if (d.plants) d.plants.forEach((sp, i) => { if (G.plants[i]) Object.assign(G.plants[i], sp); });
+                        if (Array.isArray(d.plants) && d.plants.length) G.plants = d.plants.map(normalizePlant);
                         if (d.coins != null) G.coins = d.coins;
                         if (d.milestones) G.milestones = d.milestones;
                         if (d.log) G.log = d.log;
@@ -2557,7 +2828,7 @@
             if (e.key === 'p') doAction('pet');
             if (e.key === 's') doAction('sing');
             if (e.key === 'm') openMarket();
-            if (e.key === 'Escape') ['stats-modal', 'market-modal', 'event-modal', 'rename-modal'].forEach(closeModal);
+            if (e.key === 'Escape') ['stats-modal', 'market-modal', 'event-modal', 'rename-modal', 'nursery-modal'].forEach(closeModal);
         });
 
         /* ── RESIZE ── */

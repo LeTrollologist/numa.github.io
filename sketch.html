@@ -976,14 +976,17 @@ body.cur-move #cvs { cursor: move; }
 
     <nav class="mobile-dock" aria-label="Quick tools">
       <div class="mobile-dock-inner">
-        <button type="button" class="tbtn" onclick="setTool('brush')">Brush</button>
-        <button type="button" class="tbtn" onclick="setTool('eraser')">Erase</button>
-        <button type="button" class="tbtn" onclick="setTool('fill')">Fill</button>
-        <button type="button" class="tbtn" onclick="setTool('marquee')">Select</button>
-        <button type="button" class="tbtn" onclick="setTool('move')">Move</button>
+        <button type="button" class="tbtn" data-tool="brush" onclick="setTool('brush')">Brush</button>
+        <button type="button" class="tbtn" data-tool="eraser" onclick="setTool('eraser')">Erase</button>
+        <button type="button" class="tbtn" data-tool="fill" onclick="setTool('fill')">Fill</button>
+        <button type="button" class="tbtn" data-tool="marquee" onclick="setTool('marquee')">Select</button>
+        <button type="button" class="tbtn" data-tool="move" onclick="setTool('move')">Move</button>
         <button type="button" class="tbtn" onclick="openQuickMenuAtCenter()">Menu</button>
+        <button type="button" class="tbtn" onclick="stepBrushSize(-2)">Size -</button>
+        <button type="button" class="tbtn" onclick="stepBrushSize(2)">Size +</button>
         <button type="button" class="tbtn" onclick="doUndo()">Undo</button>
         <button type="button" class="tbtn" onclick="resetView()">View</button>
+        <button type="button" class="tbtn" onclick="doSave()">Save</button>
         <button type="button" class="tbtn" onclick="toggleHelp()">Help</button>
       </div>
     </nav>
@@ -2500,6 +2503,13 @@ function setBlendMode(mode) {
 function setSz(v)  { brushSz=+v;    document.getElementById('v-sz').textContent=v+'px'; updatePill(); }
 function setOp(v)  { opacity=v/100;  document.getElementById('v-op').textContent=v+'%'; updatePill(); }
 function setSm(v)  { smoothing=v/100; document.getElementById('v-sm').textContent=v+'%'; }
+function stepBrushSize(delta) {
+  const next = Math.max(1, Math.min(120, brushSz + delta));
+  const rs = document.getElementById('r-sz');
+  if (rs) rs.value = String(next);
+  setSz(next);
+  status(`Size: ${next}px`);
+}
 function onBgSlide(v) {
   bgVal=+v;
   const lbl=['Very Dark','Dark','Mid Dark','Mid','Light'];
