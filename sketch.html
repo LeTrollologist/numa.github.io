@@ -368,10 +368,13 @@ input[type=range]::-moz-range-thumb {
 .select-trigger:hover { border-color: var(--border-h); background: rgba(255,255,255,0.07); }
 .select-options {
   position: absolute; bottom: 100%; left: 0; right: 0;
-  background: var(--panel); border: 1px solid var(--border-h);
+  background: rgba(3,5,14,.98); border: 1px solid var(--border-h);
   z-index: 200; display: none;
   box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
   margin-bottom: 4px; backdrop-filter: blur(20px);
+  color: var(--text);
+  max-height: min(320px, 70vh);
+  overflow-y: auto;
 }
 .select-options.open { display: block; }
 .select-option {
@@ -516,14 +519,96 @@ body.cur-move #cvs { cursor: move; }
   font-family: 'Josefin Sans', sans-serif;
   font-size: 0.72rem;
   padding: 7px 10px;
-  background: rgba(255,255,255,0.035);
+  background: rgba(3,5,14,.98);
   border: 1px solid var(--border);
   color: var(--text);
-  border-radius: 0;
+  border-radius: 4px;
   cursor: pointer;
   outline: none;
+  color-scheme: dark;
 }
 .blend-select:focus { border-color: var(--accent); }
+.blend-select option,
+.layer-blend-sm option {
+  background: #050816;
+  color: var(--text);
+}
+.layer-blend-sm {
+  background: rgba(3,5,14,.98);
+  color-scheme: dark;
+}
+
+#quick-menu {
+  position: fixed;
+  z-index: 420;
+  width: min(250px, calc(100vw - 24px));
+  display: none;
+  padding: 10px;
+  background: rgba(3,5,14,.98);
+  border: 1px solid var(--border-h);
+  border-radius: 12px;
+  box-shadow: 0 18px 60px rgba(0,0,0,.78);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  touch-action: manipulation;
+}
+#quick-menu.open { display: block; }
+.qm-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--accent);
+  font-size: .62rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin: 0 2px 8px;
+}
+.qm-close {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: rgba(255,255,255,.035);
+  color: var(--text);
+  cursor: pointer;
+}
+.qm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.qm-btn {
+  min-height: 46px;
+  padding: 7px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255,255,255,.03);
+  color: var(--text);
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: .62rem;
+  letter-spacing: .08em;
+  text-align: left;
+  cursor: pointer;
+}
+.qm-btn strong {
+  display: block;
+  color: var(--accent);
+  font-size: .65rem;
+  margin-bottom: 2px;
+}
+.qm-btn span {
+  display: block;
+  color: var(--muted);
+  font-size: .55rem;
+  line-height: 1.25;
+}
+.qm-btn:hover,
+.qm-btn:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  outline: none;
+}
 
 /* ── Status bar ── */
 .statusbar {
@@ -646,11 +731,51 @@ body.cur-move #cvs { cursor: move; }
 
 /* ═══════════════════════════════════ MOBILE ════════════════════════════════════════ */
 @media(max-width:680px) {
+  header { min-height: 54px; gap: 8px; }
+  .h-right {
+    gap: 5px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 62vw;
+    padding-bottom: 2px;
+  }
+  .hbtn {
+    min-height: 34px;
+    padding: 7px 9px;
+    font-size: .56rem;
+    flex-shrink: 0;
+  }
   .sidebar, .r-sidebar { display: none; }
   .h-center { display: none; }
   .logo-sub { display: none; }
-  .main { padding-bottom: 52px; }
+  .logo { font-size: 1.08rem; white-space: nowrap; }
+  .main { padding-bottom: 64px; }
+  .canvas-wrap { padding: 10px; }
   .mobile-dock { display: block; }
+  .mobile-dock .tbtn {
+    min-width: 58px;
+    min-height: 42px;
+    justify-content: center;
+  }
+  .statusbar {
+    height: 30px;
+    padding: 0 9px;
+    gap: 8px;
+    font-size: .52rem;
+  }
+  #quick-menu {
+    width: calc(100vw - 18px);
+    left: 9px !important;
+    max-height: calc(100vh - 90px);
+    overflow-y: auto;
+  }
+  .qm-grid { grid-template-columns: 1fr 1fr; }
+  .qm-btn {
+    min-height: 52px;
+    padding: 8px;
+  }
+  #gallery { padding: 18px 14px 76px; }
+  .gal-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
 }
 </style>
 </head>
@@ -683,6 +808,7 @@ body.cur-move #cvs { cursor: move; }
       <button type="button" class="hbtn" onclick="toggleHelp()" aria-label="Keyboard shortcuts and help">Help (?)</button>
       <button type="button" class="hbtn" onclick="showGallery()" aria-label="Open saved gallery">Gallery</button>
       <button class="hbtn" onclick="doImportJSON()">Import</button>
+      <button class="hbtn" onclick="doExportProject()">Export Project</button>
       <button class="hbtn" onclick="doExportJSON()">Export JSON</button>
       <button class="hbtn" onclick="doExportPNG()">Export PNG</button>
       <button class="hbtn" onclick="window.location.href='index.html'">Home</button>
@@ -855,6 +981,7 @@ body.cur-move #cvs { cursor: move; }
         <button type="button" class="tbtn" onclick="setTool('fill')">Fill</button>
         <button type="button" class="tbtn" onclick="setTool('marquee')">Select</button>
         <button type="button" class="tbtn" onclick="setTool('move')">Move</button>
+        <button type="button" class="tbtn" onclick="openQuickMenuAtCenter()">Menu</button>
         <button type="button" class="tbtn" onclick="doUndo()">Undo</button>
         <button type="button" class="tbtn" onclick="resetView()">View</button>
         <button type="button" class="tbtn" onclick="toggleHelp()">Help</button>
@@ -882,6 +1009,9 @@ body.cur-move #cvs { cursor: move; }
         <span class="sec-label">Layers</span>
         <div id="layer-list"></div>
         <button type="button" class="abtn" onclick="addLayer()" style="margin-top:8px">＋ New Layer</button>
+        <button type="button" class="abtn" onclick="duplicateActiveLayer()">Duplicate Active</button>
+        <button type="button" class="abtn" onclick="renameActiveLayer()">Rename Active</button>
+        <button type="button" class="abtn" onclick="clearActiveLayer()">Clear Active</button>
         <button type="button" class="abtn" onclick="deleteActiveLayer()">🗑 Delete Active</button>
         <button type="button" class="abtn" onclick="mergeLayerDown()">⏬ Merge Down</button>
         <button type="button" class="abtn" onclick="mergeVisibleLayers()">⏬ Merge Visible</button>
@@ -990,6 +1120,7 @@ body.cur-move #cvs { cursor: move; }
         </div>
         <div style="margin-top:14px">
           <button type="button" class="abtn" onclick="doSave()">Save Work</button>
+          <button type="button" class="abtn" onclick="doExportProject()">Export project (layers)</button>
           <button type="button" class="abtn" onclick="doExportPNG()">Export image (flat)</button>
           <button type="button" class="abtn" onclick="doExportLayersZip()" style="border-color:var(--accent); color:var(--text)">📦 Export Layers (.zip)</button>
           <button class="abtn" onclick="doExportJSON()">Export JSON</button>
@@ -1010,6 +1141,33 @@ body.cur-move #cvs { cursor: move; }
   </div>
 
 </div><!-- /app -->
+
+<div id="quick-menu" role="menu" aria-label="Canvas quick actions">
+  <div class="qm-title">
+    <span>Canvas Actions</span>
+    <button type="button" class="qm-close" onclick="hideQuickMenu()" aria-label="Close canvas actions">×</button>
+  </div>
+  <div class="qm-grid">
+    <button type="button" class="qm-btn" onclick="quickMenuAction('secondary')" role="menuitem">
+      <strong>Secondary</strong><span>Use secondary colour once</span>
+    </button>
+    <button type="button" class="qm-btn" onclick="quickMenuAction('eyedrop')" role="menuitem">
+      <strong>Pick</strong><span>Sample colour here</span>
+    </button>
+    <button type="button" class="qm-btn" onclick="quickMenuAction('fill')" role="menuitem">
+      <strong>Fill</strong><span>Flood fill from point</span>
+    </button>
+    <button type="button" class="qm-btn" onclick="quickMenuAction('clone')" role="menuitem">
+      <strong>Clone</strong><span>Set clone source</span>
+    </button>
+    <button type="button" class="qm-btn" onclick="quickMenuAction('deselect')" role="menuitem">
+      <strong>Deselect</strong><span>Clear active selection</span>
+    </button>
+    <button type="button" class="qm-btn" onclick="quickMenuAction('undo')" role="menuitem">
+      <strong>Undo</strong><span>Step back</span>
+    </button>
+  </div>
+</div>
 
 <div id="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-title">
   <div class="help-panel">
@@ -1293,6 +1451,12 @@ let colorSecondary = '#130f30';
 let colorSlot = 'primary';
 let colorHistory = [];
 let useSecondaryColor = false;
+let nextStrokeColor = null;
+let quickMenuPoint = null;
+let longPressTimer = null;
+let longPressPointer = null;
+let longPressLayerSnap = null;
+let quickMenuOpen = false;
 let spacePressed = false;
 let viewportPanDrag = false;
 let vpPanAnchor = null;
@@ -1348,10 +1512,16 @@ function initDB() {
   };
 }
 
-function autoSave() {
-  if (!db || layers.length === 0) return;
-  const data = {
-    id: 'current_session',
+function serializeProject() {
+  return {
+    version: 3,
+    app: 'hollow-sketchbook',
+    canvasSize: { w: cvs.width, h: cvs.height },
+    currentRes,
+    bgVal,
+    isTransparent,
+    theme,
+    activeIndex: Math.max(0, layers.indexOf(activeLayer)),
     layers: layers.map(l => ({
       id: l.id,
       name: l.name,
@@ -1362,10 +1532,81 @@ function autoSave() {
       offsetX: l.offsetX || 0,
       offsetY: l.offsetY || 0,
       data: l.canvas.toDataURL('image/png')
-    })),
-    canvasSize: { w: interactionCvs.width, h: interactionCvs.height },
-    timestamp: Date.now()
+    }))
   };
+}
+
+function applyProject(project, opts = {}) {
+  if (!project || !project.canvasSize || !Array.isArray(project.layers)) {
+    status('Invalid project data');
+    return Promise.resolve(false);
+  }
+  const W = Math.max(1, project.canvasSize.w | 0);
+  const H = Math.max(1, project.canvasSize.h | 0);
+  currentRes = `${W}x${H}`;
+  const rc = document.getElementById('res-current');
+  if (rc) rc.textContent = `Custom ${W}x${H}`;
+  document.querySelectorAll('.select-option').forEach(opt => opt.classList.remove('active'));
+
+  bgVal = Number.isFinite(+project.bgVal) ? +project.bgVal : bgVal;
+  const bgSlider = document.getElementById('r-bg');
+  if (bgSlider) bgSlider.value = String(bgVal);
+  onBgSlide(bgVal);
+
+  isTransparent = !!project.isTransparent;
+  const trans = document.getElementById('trans-toggle');
+  if (trans) trans.checked = isTransparent;
+
+  setTheme(project.theme || theme || 'mist');
+  resizeCanvas(true);
+
+  const stack = document.getElementById('layer-stack');
+  stack.innerHTML = '';
+  layers.forEach(l => l.canvas.remove());
+  layers = [];
+  activeLayer = null;
+  layerCounter = 0;
+
+  const jobs = project.layers.map((src, idx) => new Promise(resolve => {
+    const layer = addLayer(src.name || `Layer ${idx + 1}`, false);
+    layer.visible = src.visible !== false;
+    layer.locked = !!src.locked;
+    layer.opacity = Number.isFinite(+src.opacity) ? +src.opacity : 1;
+    layer.blendMode = src.blendMode || 'source-over';
+    layer.offsetX = +src.offsetX || 0;
+    layer.offsetY = +src.offsetY || 0;
+    layer.canvas.style.display = layer.visible ? 'block' : 'none';
+    const img = new Image();
+    img.onload = () => {
+      layer.ctx.clearRect(0, 0, cvs.width, cvs.height);
+      layer.ctx.drawImage(img, 0, 0);
+      resolve();
+    };
+    img.onerror = resolve;
+    img.src = src.data;
+  }));
+
+  return Promise.all(jobs).then(() => {
+    if (!layers.length) addLayer('Layer 1', true);
+    const ai = Math.min(Math.max(0, project.activeIndex | 0), layers.length - 1);
+    setActiveLayer(layers[ai]?.id || layers[0].id);
+    updateLayerUI();
+    updateBgDisplay();
+    hist = [];
+    hIdx = -1;
+    snapHistory();
+    redrawOverlay();
+    syncViewportTransform();
+    if (!opts.silent) status('Project loaded');
+    return true;
+  });
+}
+
+function autoSave() {
+  if (!db || layers.length === 0) return;
+  const data = serializeProject();
+  data.id = 'current_session';
+  data.timestamp = Date.now();
   const tx = db.transaction(STORE_NAME, 'readwrite');
   tx.objectStore(STORE_NAME).put(data);
 }
@@ -1375,42 +1616,8 @@ async function restoreAutoSave() {
   const req = tx.objectStore(STORE_NAME).get('current_session');
   req.onsuccess = () => {
     if (req.result && req.result.layers && req.result.layers.length > 0) {
-      const stack = document.getElementById('layer-stack');
-      stack.innerHTML = '';
-      layers = [];
-      activeLayer = null;
-
-      const session = req.result;
-      let pending = session.layers.length;
-      const last = session.layers.length - 1;
-      session.layers.forEach((l, idx) => {
-        const layer = addLayer(l.name, idx === last);
-        layer.visible = l.visible;
-        layer.locked = !!l.locked;
-        layer.opacity = l.opacity;
-        layer.blendMode = l.blendMode || 'source-over';
-        layer.offsetX = l.offsetX || 0;
-        layer.offsetY = l.offsetY || 0;
-        const img = new Image();
-        img.onload = () => {
-          layer.ctx.drawImage(img, 0, 0);
-          updateLayerUI();
-          pending--;
-          if (pending === 0 && activeLayer) {
-            hist = []; hIdx = -1;
-            snapHistory();
-            showRecoveryToastOnce();
-          }
-        };
-        img.onerror = () => {
-          pending--;
-          if (pending === 0 && activeLayer) {
-            hist = []; hIdx = -1;
-            snapHistory();
-            showRecoveryToastOnce();
-          }
-        };
-        img.src = l.data;
+      applyProject(req.result, { silent: true }).then(ok => {
+        if (ok) showRecoveryToastOnce();
       });
     }
   };
@@ -1559,6 +1766,46 @@ function deleteActiveLayer() {
   updateLayerUI();
 }
 
+function duplicateActiveLayer() {
+  if (!activeLayer) return;
+  const src = activeLayer;
+  const copy = addLayer(src.name + ' copy', true);
+  copy.opacity = src.opacity;
+  copy.blendMode = src.blendMode || 'source-over';
+  copy.visible = src.visible;
+  copy.locked = false;
+  copy.offsetX = src.offsetX || 0;
+  copy.offsetY = src.offsetY || 0;
+  copy.ctx.clearRect(0, 0, cvs.width, cvs.height);
+  copy.ctx.drawImage(src.canvas, 0, 0);
+  updateLayerUI();
+  snapHistory();
+  status('Layer duplicated');
+}
+
+function renameActiveLayer() {
+  if (!activeLayer) return;
+  const next = prompt('Layer name:', activeLayer.name);
+  if (!next || !next.trim()) return;
+  activeLayer.name = next.trim().slice(0, 40);
+  updateLayerUI();
+  autoSave();
+  status('Layer renamed');
+}
+
+function clearActiveLayer() {
+  if (!activeLayer) return;
+  if (activeLayer.locked) {
+    status('Layer is locked');
+    return;
+  }
+  if (!confirm(`Clear "${activeLayer.name}"?`)) return;
+  activeLayer.ctx.clearRect(0, 0, cvs.width, cvs.height);
+  snapHistory();
+  autoSave();
+  status('Layer cleared');
+}
+
 function updateLayerUI() {
   const list = document.getElementById('layer-list');
   if (!list) return;
@@ -1692,6 +1939,155 @@ function dismissRecovery() {
 
 function toggleHelp() {
   document.getElementById('help-modal')?.classList.toggle('open');
+}
+
+function hideQuickMenu() {
+  const menu = document.getElementById('quick-menu');
+  if (menu) menu.classList.remove('open');
+  quickMenuOpen = false;
+}
+
+function placeQuickMenu(clientX, clientY, point) {
+  const menu = document.getElementById('quick-menu');
+  if (!menu) return;
+  quickMenuPoint = point || null;
+  menu.classList.add('open');
+  quickMenuOpen = true;
+  const pad = 12;
+  const w = menu.offsetWidth || 250;
+  const h = menu.offsetHeight || 230;
+  const left = Math.max(pad, Math.min(window.innerWidth - w - pad, clientX));
+  const top = Math.max(pad, Math.min(window.innerHeight - h - pad, clientY));
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
+}
+
+function openQuickMenuFromEvent(e, point) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const p = point || (e ? getPos(e) : { x: cvs.width / 2, y: cvs.height / 2, p: 0.5 });
+  const clientX = e?.clientX ?? (window.innerWidth / 2 - 120);
+  const clientY = e?.clientY ?? (window.innerHeight / 2 - 110);
+  placeQuickMenu(clientX, clientY, p);
+  status('Canvas actions');
+}
+
+function openQuickMenuAtCenter() {
+  const r = cvs.getBoundingClientRect();
+  placeQuickMenu(
+    Math.min(window.innerWidth - 260, Math.max(12, r.left + r.width / 2 - 125)),
+    Math.min(window.innerHeight - 240, Math.max(12, r.top + r.height / 2 - 115)),
+    { x: cvs.width / 2, y: cvs.height / 2, p: 0.5 }
+  );
+}
+
+function canvasPointFromClient(clientX, clientY) {
+  return getPos({ clientX, clientY, pressure: 0.5 });
+}
+
+function cancelLongPress() {
+  clearTimeout(longPressTimer);
+  longPressTimer = null;
+  longPressPointer = null;
+  longPressLayerSnap = null;
+}
+
+function queueLongPress(e, p) {
+  cancelLongPress();
+  if (e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
+  try {
+    longPressLayerSnap = activeLayer?.ctx.getImageData(0, 0, cvs.width, cvs.height) || null;
+  } catch (err) {
+    longPressLayerSnap = null;
+  }
+  longPressPointer = { id: e.pointerId, x: e.clientX, y: e.clientY, p };
+  longPressTimer = setTimeout(() => {
+    if (!longPressPointer || longPressPointer.id !== e.pointerId) return;
+    if (longPressLayerSnap && activeLayer) {
+      try { activeLayer.ctx.putImageData(longPressLayerSnap, 0, 0); } catch (err) {}
+    }
+    drawing = false;
+    openQuickMenuFromEvent(e, p);
+    cancelLongPress();
+  }, 520);
+}
+
+function queueTouchLongPress(e) {
+  const t = e.touches && e.touches[0];
+  if (!t) return;
+  cancelLongPress();
+  const p = canvasPointFromClient(t.clientX, t.clientY);
+  try {
+    longPressLayerSnap = activeLayer?.ctx.getImageData(0, 0, cvs.width, cvs.height) || null;
+  } catch (err) {
+    longPressLayerSnap = null;
+  }
+  longPressPointer = { id: 'touch', x: t.clientX, y: t.clientY, p };
+  longPressTimer = setTimeout(() => {
+    if (!longPressPointer || longPressPointer.id !== 'touch') return;
+    if (longPressLayerSnap && activeLayer) {
+      try { activeLayer.ctx.putImageData(longPressLayerSnap, 0, 0); } catch (err) {}
+    }
+    drawing = false;
+    placeQuickMenu(t.clientX, t.clientY, p);
+    status('Canvas actions');
+    cancelLongPress();
+  }, 560);
+}
+
+function updateTouchLongPress(e) {
+  if (!longPressPointer || longPressPointer.id !== 'touch') return;
+  const t = e.touches && e.touches[0];
+  if (!t) {
+    cancelLongPress();
+    return;
+  }
+  if (Math.hypot(t.clientX - longPressPointer.x, t.clientY - longPressPointer.y) > 12) {
+    cancelLongPress();
+  }
+}
+
+function updateLongPress(e) {
+  if (!longPressPointer || longPressPointer.id !== e.pointerId) return;
+  if (Math.hypot(e.clientX - longPressPointer.x, e.clientY - longPressPointer.y) > 12) {
+    cancelLongPress();
+  }
+}
+
+function quickMenuAction(action) {
+  const p = quickMenuPoint || { x: cvs.width / 2, y: cvs.height / 2, p: 0.5 };
+  hideQuickMenu();
+  switch (action) {
+    case 'secondary':
+      nextStrokeColor = 'secondary';
+      status('Secondary colour armed for next stroke');
+      break;
+    case 'eyedrop':
+      pickFromCanvas(Math.floor(p.x), Math.floor(p.y));
+      status('Colour picked');
+      break;
+    case 'fill':
+      if (activeLayer?.locked) {
+        status('Layer is locked');
+        break;
+      }
+      floodFill(Math.floor(p.x), Math.floor(p.y), brushHex());
+      snapHistory();
+      status('Filled from menu point');
+      break;
+    case 'clone':
+      cloneSource = { x: Math.floor(p.x), y: Math.floor(p.y) };
+      status('Clone source set');
+      break;
+    case 'deselect':
+      clearSelection();
+      break;
+    case 'undo':
+      doUndo();
+      break;
+  }
 }
 
 /* ── Pointer state ── */
@@ -2908,22 +3304,38 @@ function setupPointer() {
   cvs.addEventListener('pointerup',   onUp);
   cvs.addEventListener('pointerout',  onUp);
   cvs.addEventListener('pointercancel', onUp);
-  cvs.addEventListener('contextmenu', e=>e.preventDefault());
+  cvs.addEventListener('contextmenu', e => openQuickMenuFromEvent(e));
+  cvs.addEventListener('touchstart', queueTouchLongPress, { passive: true });
+  cvs.addEventListener('touchmove', updateTouchLongPress, { passive: true });
+  cvs.addEventListener('touchend', cancelLongPress, { passive: true });
+  cvs.addEventListener('touchcancel', cancelLongPress, { passive: true });
   cvs.addEventListener('pointermove', e=>{
     const p=getPos(e);
     document.getElementById('st-xy').textContent=
       `${Math.floor(p.x)} · ${Math.floor(p.y)}`;
   });
+  document.addEventListener('pointerdown', e => {
+    if (!document.getElementById('quick-menu')?.contains(e.target) && e.target !== cvs) {
+      hideQuickMenu();
+    }
+  }, true);
 }
 
 function onDown(e) {
   e.preventDefault();
   if (spacePressed) return;
+  if (quickMenuOpen) hideQuickMenu();
   if (e.button === 1) return;
   lastShiftKey = e.shiftKey;
-  useSecondaryColor = (e.button === 2);
   cvs.setPointerCapture(e.pointerId);
   const p = getPos(e);
+  if (e.button === 2) {
+    openQuickMenuFromEvent(e, p);
+    return;
+  }
+  queueLongPress(e, p);
+  useSecondaryColor = nextStrokeColor === 'secondary';
+  nextStrokeColor = null;
 
   if (tool === 'eye' && e.button === 0) {
     pickFromCanvas(Math.floor(p.x), Math.floor(p.y));
@@ -3050,6 +3462,7 @@ function pickFromCanvas(x, y) {
 
 function onMove(e) {
   e.preventDefault();
+  updateLongPress(e);
   lastShiftKey = e.shiftKey;
   const p = getPos(e);
 
@@ -3112,6 +3525,7 @@ function onMove(e) {
 }
 
 function onUp(e) {
+  cancelLongPress();
   const wasDrawing = drawing;
   drawing = false;
 
@@ -3646,13 +4060,30 @@ function doSave() {
   const name=prompt('Name this work:','Sketch '+new Date().toLocaleDateString());
   if(!name) return;
   const data = compositeCanvas().toDataURL('image/png');
-  works.push({id:Date.now(), name, data, date:new Date().toISOString(), theme});
+  works.push({
+    id: Date.now(),
+    name,
+    data,
+    date: new Date().toISOString(),
+    theme,
+    project: serializeProject()
+  });
   saveWorks(); status('Saved: '+name);
+  autoSave();
 }
 
 function loadWork(id, silent) {
   const w=works.find(x=>x.id===id);
   if(!w) return;
+  if (w.project) {
+    applyProject(w.project, { silent: true }).then(ok => {
+      if (ok) {
+        if(!silent) status('Loaded: '+w.name);
+        if(w.theme) setTheme(w.theme);
+      }
+    });
+    return;
+  }
   const img=new Image();
   img.onload=()=>{
     layers.forEach(l => l.ctx.clearRect(0, 0, cvs.width, cvs.height));
@@ -3662,6 +4093,19 @@ function loadWork(id, silent) {
     if(w.theme) setTheme(w.theme);
   };
   img.src=w.data;
+}
+
+function doExportProject() {
+  const project = serializeProject();
+  project.preview = compositeCanvas().toDataURL('image/png');
+  project.exported = new Date().toISOString();
+  const blob = new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.download = 'hollow_project_' + Date.now() + '.json';
+  link.href = URL.createObjectURL(blob);
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  status('Exported layered project');
 }
 
 function doExportPNG() {
@@ -3718,16 +4162,33 @@ function doImportJSON() {
     const reader=new FileReader();
     reader.onload=ev=>{
       try {
-        const arr=JSON.parse(ev.target.result);
-        if(!Array.isArray(arr)) throw new Error('Not an array');
+        const parsed=JSON.parse(ev.target.result);
+        const arr=Array.isArray(parsed) ? parsed : [projectToWork(parsed)];
         let added=0;
-        arr.forEach(w=>{ if(!works.find(x=>x.id===w.id)){works.push(w);added++;} });
+        arr.filter(Boolean).forEach(w=>{
+          if(!works.find(x=>x.id===w.id)){
+            works.push(w);
+            added++;
+          }
+        });
         saveWorks(); status(`Imported ${added} work(s)`);
       } catch(err) { status('Invalid JSON file'); }
     };
     reader.readAsText(f);
   };
   inp.click();
+}
+
+function projectToWork(project) {
+  if (!project || !Array.isArray(project.layers) || !project.canvasSize) return null;
+  return {
+    id: Date.now(),
+    name: 'Imported project',
+    data: project.preview || project.layers.find(l => l && l.data)?.data || '',
+    date: new Date().toISOString(),
+    theme: project.theme || 'mist',
+    project
+  };
 }
 
 
@@ -3780,6 +4241,11 @@ function setupKeys() {
       return;
     }
     if (e.key === 'Escape') {
+      if (quickMenuOpen) {
+        hideQuickMenu();
+        e.preventDefault();
+        return;
+      }
       const hm = document.getElementById('help-modal');
       if (hm && hm.classList.contains('open')) {
         hm.classList.remove('open');
