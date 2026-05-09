@@ -4,7 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self';
+            script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+            style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+            font-src 'self' https://fonts.gstatic.com;
+            img-src 'self' data: https://raw.githubusercontent.com;
+            connect-src 'self' https://analytics-server-bdrm.onrender.com;
+            media-src 'self' https://your-media-source.example.com;">
     <title>The Grove · Numa's Garden</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400;1,500&family=Cinzel:wght@400;500&family=Josefin+Sans:wght@300;400;500&display=swap"
@@ -1497,7 +1503,7 @@
         </div>
         <div class="statusbar">
             <div class="sdot"></div>
-            <span id="status-text">The grove is quiet tonight…</span>
+            <span id="status-text"></span>
             <div class="ssp"></div>
             <span id="income-rate" style="color:var(--gold)"></span>
         </div>
@@ -1516,15 +1522,13 @@
                 Select two Master Plants (Stage 5) to cross-pollinate and create a unique Hybrid Seed.
             </div>
             <div class="nursery-grid">
-                <div id="n-slot-1" class="nursery-slot" onclick="selectBreeder(1)">
-                    <span class="nursery-plus">+</span>
-                    <span style="font-size:0.5rem; margin-top:5px;">Select Plant 1</span>
-                </div>
-                <div class="nursery-plus">✦</div>
-                <div id="n-slot-2" class="nursery-slot" onclick="selectBreeder(2)">
-                    <span class="nursery-plus">+</span>
-                    <span style="font-size:0.5rem; margin-top:5px;">Select Plant 2</span>
-                </div>
+                <!-- Merge nurseries: show 6 plots -->
+                <div class="nursery-slot" id="n-plot-1"></div>
+                <div class="nursery-slot" id="n-plot-2"></div>
+                <div class="nursery-slot" id="n-plot-3"></div>
+                <div class="nursery-slot" id="n-plot-4"></div>
+                <div class="nursery-slot" id="n-plot-5"></div>
+                <div class="nursery-slot" id="n-plot-6"></div>
             </div>
             <div id="nursery-breed-btn" style="text-align:center; display:none; margin: 15px 0;">
                 <button class="abtn" style="border-color:var(--gold); color:var(--gold); padding:10px;" onclick="doBreeding()">
@@ -1690,7 +1694,13 @@
                 
                 this.overlay.style.background = bg;
                 document.documentElement.style.setProperty('--ambient-light', ambient);
-                document.body.setAttribute('data-time-phase', hour < 6 || hour > 19 ? 'night' : 'day');
+                const isNight = hour < 6 || hour > 19;
+                document.body.setAttribute('data-time-phase', isNight ? 'night' : 'day');
+                // Update status text
+                const statusText = document.getElementById('status-text');
+                if (statusText) {
+                    statusText.textContent = isNight ? 'The grove is quiet tonight…' : 'The grove is quiet today…';
+                }
             }
         }
 
