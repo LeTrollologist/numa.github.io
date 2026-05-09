@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self';
+  script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src 'self' https://fonts.gstatic.com;
+  img-src 'self' data: https://raw.githubusercontent.com;
+  connect-src 'self' https://analytics-server-bdrm.onrender.com;">
 <title>The Hollow · Numa's Sketchbook</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400;1,500&family=Cinzel:wght@400;500&family=Josefin+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="compute-optimizer.js"></script>
@@ -3351,7 +3356,7 @@ function setupPointer() {
   cvs.addEventListener('pointerup',   onUp);
   cvs.addEventListener('pointerout',  onUp);
   cvs.addEventListener('pointercancel', onUp);
-  const paintTools = ['brush','pencil','watercolor','chalk','spray','smudge','clone','eraser','fill','line','rect','ellipse','gradient'];
+  // paintTools defined globally below
   cvs.addEventListener('contextmenu', e => {
     if (paintTools.includes(tool)) {
       e.preventDefault();
@@ -3384,7 +3389,6 @@ function onDown(e) {
   cvs.setPointerCapture(e.pointerId);
   const p = getPos(e);
   const rightClick = e.button === 2;
-  const paintTools = ['brush','pencil','watercolor','chalk','spray','smudge','clone','eraser','fill','line','rect','ellipse','gradient'];
   if (rightClick && !paintTools.includes(tool)) {
     openQuickMenuFromEvent(e, p);
     return;
@@ -3460,13 +3464,15 @@ function onDown(e) {
     return;
   }
 
-  const paintTools = ['brush', 'pencil', 'watercolor', 'chalk', 'spray', 'smudge', 'clone', 'eraser', 'fill', 'line', 'rect', 'ellipse', 'gradient'];
   if (activeLayer && activeLayer.locked && e.button === 0 && paintTools.includes(tool)) {
     status('Layer is locked');
     return;
   }
 
   if (e.button !== 0 && tool !== 'fill') return;
+
+// Global paintTools definition (move to top-level script scope)
+const paintTools = ['brush', 'pencil', 'watercolor', 'chalk', 'spray', 'smudge', 'clone', 'eraser', 'fill', 'line', 'rect', 'ellipse', 'gradient'];
 
   drawing = true;
   lx = p.x;
