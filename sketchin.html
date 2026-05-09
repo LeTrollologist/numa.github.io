@@ -1487,6 +1487,9 @@ let gradientA = null;
 let selectionRect = null;
 let selectionMask = null;
 let lassoPts = [];
+let lassoActive = false;
+let lassoClosed = false;
+let lassoPreview = null;
 let marqueeBegin = null;
 let cropBegin = null;
 const overlayCvs = typeof document !== 'undefined' ? document.getElementById('overlay-cvs') : null;
@@ -2961,7 +2964,18 @@ function redrawOverlay() {
     overlayCtx.setLineDash([]);
     overlayCtx.beginPath();
     lassoPts.forEach((pt, i) => i === 0 ? overlayCtx.moveTo(pt.x, pt.y) : overlayCtx.lineTo(pt.x, pt.y));
+    if (lassoClosed) overlayCtx.closePath();
     overlayCtx.stroke();
+    // Draw preview line if not closed
+    if (lassoActive && !lassoClosed && lassoPreview) {
+      const last = lassoPts[lassoPts.length - 1];
+      overlayCtx.beginPath();
+      overlayCtx.moveTo(last.x, last.y);
+      overlayCtx.lineTo(lassoPreview.x, lassoPreview.y);
+      overlayCtx.strokeStyle = 'rgba(255,255,255,0.5)';
+      overlayCtx.stroke();
+      overlayCtx.strokeStyle = 'rgba(255,255,255,.85)';
+    }
   }
   if (polygonPts.length > 1) {
     overlayCtx.setLineDash([4, 4]);
@@ -3038,6 +3052,9 @@ function doMagicWandSync(sx, sy) {
 
 function closeLassoSelection() {
   if (lassoPts.length < 2) return;
+  lassoClosed = true;
+  lassoActive = false;
+  lassoPreview = null;
   const W = cvs.width, H = cvs.height;
   const t = document.createElement('canvas');
   t.width = W;
@@ -3423,8 +3440,27 @@ function onDown(e) {
     return;
   }
   if (tool === 'lasso') {
-    lassoPts = [{ x: p.x, y: p.y }];
-    drawing = true;
+    if (!lassoActive || lassoClosed) {
+      lassoPts = [{ x: p.x, y: p.y }];
+      lassoActive = true;
+      lassoClosed = false;
+      drawing = true;
+      redrawOverlay();
+      return;
+    }
+    // Check if click is near the starting point to close
+    const first = lassoPts[0];
+    if (Math.hypot(p.x - first.x, p.y - first.y) < 8 && lassoPts.length > 2) {
+      lassoClosed = true;
+      lassoActive = false;
+      closeLassoSelection();
+      drawing = false;
+      redrawOverlay();
+      return;
+    }
+    // Add new point
+    lassoPts.push({ x: p.x, y: p.y });
+    redrawOverlay();
     return;
   }
   if (tool === 'polygon' && e.button === 0) {
@@ -3555,9 +3591,8 @@ function onMove(e) {
     redrawOverlay();
     return;
   }
-  if (tool === 'lasso' && drawing && lassoPts.length) {
-    const last = lassoPts[lassoPts.length - 1];
-    if (Math.hypot(p.x - last.x, p.y - last.y) > 2) lassoPts.push({ x: p.x, y: p.y });
+  if (tool === 'lasso' && drawing && lassoActive && !lassoClosed && lassoPts.length) {
+    lassoPreview = { x: p.x, y: p.y };
     redrawOverlay();
     return;
   }
@@ -3635,12 +3670,17 @@ function onUp(e) {
     return;
   }
 
-  if (tool === 'lasso' && wasDrawing && lassoPts.length > 1) {
-    closeLassoSelection();
-    if (secondaryColorOnce) {
-      useSecondaryColor = false;
-      secondaryColorOnce = false;
+  if (tool === 'lasso' && lassoActive && !lassoClosed) {
+    // Double-click closes lasso
+    if (e.detail === 2 && lassoPts.length > 2) {
+      lassoClosed = true;
+      lassoActive = false;
+      closeLassoSelection();
+      drawing = false;
+      redrawOverlay();
+      return;
     }
+    // Otherwise, keep adding points on click (handled in onDown)
     return;
   }
 
