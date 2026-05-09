@@ -2956,25 +2956,35 @@ function redrawOverlay() {
   overlayCtx.lineDashOffset = -dashOff;
   overlayCtx.strokeStyle = 'rgba(255,255,255,.85)';
   overlayCtx.lineWidth = 1;
-  if (selectionRect && selectionRect.w > 0 && selectionRect.h > 0) {
+  // Only draw rectangle for rectangular selections (marquee/crop)
+  if (selectionRect && selectionRect.w > 0 && selectionRect.h > 0 && !(lassoClosed && lassoPts.length > 1)) {
     const r = selectionRect;
     overlayCtx.strokeRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1);
   }
+  // Draw lasso marching ants if closed
   if (lassoPts.length > 1) {
-    overlayCtx.setLineDash([]);
-    overlayCtx.beginPath();
-    lassoPts.forEach((pt, i) => i === 0 ? overlayCtx.moveTo(pt.x, pt.y) : overlayCtx.lineTo(pt.x, pt.y));
-    if (lassoClosed) overlayCtx.closePath();
-    overlayCtx.stroke();
-    // Draw preview line if not closed
-    if (lassoActive && !lassoClosed && lassoPreview) {
-      const last = lassoPts[lassoPts.length - 1];
+    if (lassoClosed) {
+      overlayCtx.setLineDash([6, 4]);
       overlayCtx.beginPath();
-      overlayCtx.moveTo(last.x, last.y);
-      overlayCtx.lineTo(lassoPreview.x, lassoPreview.y);
-      overlayCtx.strokeStyle = 'rgba(255,255,255,0.5)';
+      lassoPts.forEach((pt, i) => i === 0 ? overlayCtx.moveTo(pt.x, pt.y) : overlayCtx.lineTo(pt.x, pt.y));
+      overlayCtx.closePath();
       overlayCtx.stroke();
-      overlayCtx.strokeStyle = 'rgba(255,255,255,.85)';
+      overlayCtx.setLineDash([]);
+    } else {
+      overlayCtx.setLineDash([]);
+      overlayCtx.beginPath();
+      lassoPts.forEach((pt, i) => i === 0 ? overlayCtx.moveTo(pt.x, pt.y) : overlayCtx.lineTo(pt.x, pt.y));
+      overlayCtx.stroke();
+      // Draw preview line if not closed
+      if (lassoActive && lassoPreview) {
+        const last = lassoPts[lassoPts.length - 1];
+        overlayCtx.beginPath();
+        overlayCtx.moveTo(last.x, last.y);
+        overlayCtx.lineTo(lassoPreview.x, lassoPreview.y);
+        overlayCtx.strokeStyle = 'rgba(255,255,255,0.5)';
+        overlayCtx.stroke();
+        overlayCtx.strokeStyle = 'rgba(255,255,255,.85)';
+      }
     }
   }
   if (polygonPts.length > 1) {
