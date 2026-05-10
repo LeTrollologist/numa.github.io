@@ -1413,13 +1413,7 @@
             <button class="hbtn" onclick="openStats()">Records</button>
                         <button class="hbtn" onclick="openCodex()">Codex</button>
 
-            <!-- Grove Codex Modal -->
-            <div id="codex-modal" class="modal">
-                <div class="mbox">
-                    <div class="mtitle">Grove Codex <span class="mclose" onclick="closeModal('codex-modal')">✕ Close</span></div>
-                    <div id="codex-content"></div>
-                </div>
-            </div>
+
 
             <button class="hbtn" onclick="window.location.href='index.html'">Home</button>
         </header>
@@ -1564,6 +1558,14 @@
                 <button onclick="doResetGarden()" class="hbtn" style="flex:1; border-color: #ef4444; color: #ef4444; display:flex; justify-content:center;">Uproot All</button>
                 <button onclick="closeModal('reset-modal')" class="hbtn" style="flex:1; display:flex; justify-content:center;">Cancel</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Grove Codex Modal -->
+    <div id="codex-modal" class="modal">
+        <div class="mbox">
+            <div class="mtitle">Grove Codex <span class="mclose" onclick="closeModal('codex-modal')">✕ Close</span></div>
+            <div id="codex-content"></div>
         </div>
     </div>
 
