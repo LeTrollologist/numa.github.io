@@ -1,3 +1,72 @@
+
+// ── MASTERY MILESTONES & EVENTS ──
+function checkMasteryMilestones() {
+    G.plants.forEach(p => {
+        if (p.stage === 5 && !p.hasMasteryEvent) {
+            p.hasMasteryEvent = true;
+            showMasteryEvent(p);
+        }
+        // Example: 24h old
+        if (!p.hasAgeEvent && Date.now() - p.born > 24*60*60*1000) {
+            p.hasAgeEvent = true;
+            showMasteryEvent(p, true);
+        }
+    });
+}
+
+function showMasteryEvent(plant, isAge) {
+    const modal = document.createElement('div');
+    modal.className = 'modal open';
+    modal.innerHTML = `<div class="mbox"><div class="mtitle">Mastery Milestone</div><div style="padding:18px 0;">${isAge ? `${plant.name} has thrived for a day!` : `${plant.name} reached Mastery (Stage 5)!`}<br><br><button class='hbtn gold' onclick='this.closest(".modal").remove()'>Celebrate 🎉</button></div></div>`;
+    document.body.appendChild(modal);
+}
+
+setInterval(checkMasteryMilestones, 60000); // check every minute
+document.addEventListener('DOMContentLoaded', checkMasteryMilestones);
+
+// ── SEASONAL GARDEN ROTATION ──
+const SEASONS = ['Spring', 'Summer', 'Autumn', 'Winter'];
+function getCurrentSeason() {
+    // Use real date for now: rotate every 7 days
+    const start = new Date(2026, 0, 1); // Jan 1, 2026
+    const now = new Date();
+    const days = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+    return SEASONS[Math.floor(days / 7) % 4];
+}
+
+function updateSeasonUI() {
+    let badge = document.getElementById('season-badge');
+    if (!badge) {
+        badge = document.createElement('div');
+        badge.id = 'season-badge';
+        badge.className = 'mbadge';
+        document.querySelector('header').appendChild(badge);
+    }
+    badge.textContent = getCurrentSeason();
+}
+
+function applySeasonalEffects() {
+    const season = getCurrentSeason();
+    // Example: boost growth in Spring, happiness in Summer, etc.
+    G.season = season;
+    G.plants.forEach(p => {
+        if (!p.seasonal) p.seasonal = {};
+        if (season === 'Spring') p.seasonal.growthBoost = 1.2;
+        else if (season === 'Summer') p.seasonal.happinessBoost = 1.2;
+        else if (season === 'Autumn') p.seasonal.nourishBoost = 1.2;
+        else if (season === 'Winter') p.seasonal.decayResist = 0.8;
+        else p.seasonal = {};
+    });
+}
+
+setInterval(() => {
+    updateSeasonUI();
+    applySeasonalEffects();
+}, 60000); // update every minute
+document.addEventListener('DOMContentLoaded', () => {
+    updateSeasonUI();
+    applySeasonalEffects();
+});
 <!DOCTYPE html>
 <html lang="en">
 
@@ -1417,8 +1486,48 @@
             <div class="mbadge" id="mbadge">Mastery · 0</div>
             <button class="hbtn" id="audio-btn" onclick="toggleAudio()" title="Toggle Audio">🎵 Off</button>
             <button class="hbtn gold" onclick="openMarket()">Market</button>
-            <button class="hbtn gold" onclick="openNursery()">Nursery</button>
             <button class="hbtn" onclick="openStats()">Records</button>
+                        <button class="hbtn" onclick="openCodex()">Codex</button>
+
+            <!-- Grove Codex Modal -->
+            <div id="codex-modal" class="modal" style="display:none;">
+                <div class="mbox">
+                    <div class="mtitle">Grove Codex <span class="mclose" onclick="closeModal('codex-modal')">✕ Close</span></div>
+                    <div id="codex-content"></div>
+                </div>
+            </div>
+
+            // ── GROVE CODEX/COLLECTION SYSTEM ──
+            function openCodex() {
+                const modal = document.getElementById('codex-modal');
+                const content = document.getElementById('codex-content');
+                const types = Object.keys(PLANT_META);
+                let html = '<b>Plant Types</b><ul>';
+                types.forEach(type => {
+                    const owned = G.plants.filter(p => p.type === type).length;
+                    const maxStage = Math.max(0, ...G.plants.filter(p => p.type === type).map(p => p.stage));
+                    html += `<li>${PLANT_META[type].emoji} <b>${PLANT_META[type].label}</b> — Owned: ${owned}, Max Stage: ${maxStage}</li>`;
+                });
+                html += '</ul>';
+                // Hybrids
+                const hybrids = G.plants.filter(p => p.type === 'hybrid');
+                html += `<b>Hybrids</b><ul>`;
+                hybrids.forEach(h => {
+                    html += `<li>${h.name} (Stage ${h.stage})</li>`;
+                });
+                html += '</ul>';
+                // Milestones
+                html += '<b>Milestones</b><ul>';
+                if (G.plants.every(p => p.stage >= 5)) html += '<li>All plants reached Mastery!</li>';
+                html += '</ul>';
+                content.innerHTML = html;
+                modal.style.display = 'block';
+                modal.classList.add('open');
+            }
+            function closeModal(id) {
+                const m = document.getElementById(id);
+                if (m) { m.style.display = 'none'; m.classList.remove('open'); }
+            }
             <button class="hbtn" onclick="window.location.href='index.html'">Home</button>
         </header>
         <div class="info-bar">
