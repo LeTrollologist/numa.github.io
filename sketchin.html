@@ -40,7 +40,6 @@ html, body { width:100%; height:100%; overflow:hidden; background:#04060e; }
   --text:       #cdd5ed;
   --muted:      #5c6a85;
   --gold:       #c9a84c;
-}
   --canvas-bg:  13;
   --danger-bg:  rgba(200,55,55,0.15);
   --danger-bd:  rgba(200,55,55,0.30);
@@ -3775,7 +3774,7 @@ function prepCtx(p, targetCtx) {
       }
       break;
     case 'pencil':
-      c.globalAlpha = opacity * (0.45 + Math.random() * 0.55) * (0.35 + p * 0.85);
+      c.globalAlpha = opacity;
       c.strokeStyle = c.fillStyle = pc;
       break;
     case 'watercolor':
@@ -3943,7 +3942,7 @@ function paintStroke(x1, y1, x2, y2, p1, p2) {
     });
     return;
   }
-  const spacedTools = ['brush', 'pencil', 'watercolor', 'chalk'];
+  const spacedTools = ['watercolor', 'chalk'];
   if (spacedTools.includes(tool)) {
     const spacing = Math.max(0.8, brushSz * (0.08 + brushSpacing * 0.42));
     const d = Math.hypot(x2 - x1, y2 - y1);
