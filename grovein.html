@@ -1414,43 +1414,13 @@
                         <button class="hbtn" onclick="openCodex()">Codex</button>
 
             <!-- Grove Codex Modal -->
-            <div id="codex-modal" class="modal" style="display:none;">
+            <div id="codex-modal" class="modal">
                 <div class="mbox">
                     <div class="mtitle">Grove Codex <span class="mclose" onclick="closeModal('codex-modal')">✕ Close</span></div>
                     <div id="codex-content"></div>
                 </div>
             </div>
 
-<script>
-function openCodex() {
-    const modal = document.getElementById('codex-modal');
-    const content = document.getElementById('codex-content');
-    const types = Object.keys(PLANT_META);
-    let html = '<b>Plant Types</b><ul>';
-    types.forEach(type => {
-        const owned = G.plants.filter(p => p.type === type).length;
-        const maxStage = Math.max(0, ...G.plants.filter(p => p.type === type).map(p => p.stage));
-        html += `<li>${PLANT_META[type].emoji} <b>${PLANT_META[type].label}</b> — Owned: ${owned}, Max Stage: ${maxStage}</li>`;
-    });
-    html += '</ul>';
-    const hybrids = G.plants.filter(p => p.type === 'hybrid');
-    html += `<b>Hybrids</b><ul>`;
-    hybrids.forEach(h => {
-        html += `<li>${h.name} (Stage ${h.stage})</li>`;
-    });
-    html += '</ul>';
-    html += `<b>Milestones</b><ul>`;
-    if (G.plants.every(p => p.stage >= 5)) html += '<li>All plants reached Mastery!</li>';
-    html += '</ul>';
-    content.innerHTML = html;
-    modal.style.display = 'block';
-    modal.classList.add('open');
-}
-function closeModal(id) {
-    const m = document.getElementById(id);
-    if (m) { m.style.display = 'none'; m.classList.remove('open'); }
-}
-</script>
             <button class="hbtn" onclick="window.location.href='index.html'">Home</button>
         </header>
         <div class="info-bar">
@@ -1581,6 +1551,19 @@ function closeModal(id) {
                     Close</span></div>
             <div id="stats-rows"></div>
             <div style="margin-top:14px;max-height:160px;overflow-y:auto;" id="log-list"></div>
+            <button class="hbtn" style="margin-top: 15px; width: 100%; border-color: rgba(239, 68, 68, 0.3); color: #ef4444; display: flex; justify-content: center;" onclick="confirmReset()">Reset Garden</button>
+        </div>
+    </div>
+
+    <!-- Reset Modal -->
+    <div id="reset-modal" class="modal">
+        <div class="mbox" style="max-width:340px; text-align:center;">
+            <div class="mtitle" style="color: #ef4444; border-bottom: 1px solid rgba(239, 68, 68, 0.2); justify-content:center; padding-bottom:10px;">Reset Garden</div>
+            <p style="margin:20px 0; font-size: 0.9rem; color: var(--muted); line-height: 1.5">Are you completely sure you want to uproot everything? All your plants, coins, and upgrades will return to the soil.</p>
+            <div style="display:flex;gap:10px;">
+                <button onclick="doResetGarden()" class="hbtn" style="flex:1; border-color: #ef4444; color: #ef4444; display:flex; justify-content:center;">Uproot All</button>
+                <button onclick="closeModal('reset-modal')" class="hbtn" style="flex:1; display:flex; justify-content:center;">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -1874,6 +1857,7 @@ function closeModal(id) {
             sunflare: { emoji: '☀️', color: '#fde047', incomeBase: 4.0, label: 'Sunflare Lotus' },
             shadowbloom: { emoji: '🌑', color: '#6366f1', incomeBase: 2.5, label: 'Shadow Bloom' },
             crystalvine: { emoji: '💎', color: '#ec4899', incomeBase: 3.2, label: 'Crystal Vine' },
+            eternity: { emoji: '✨', color: '#ffffff', incomeBase: 10.0, label: 'Eternity Tree' },
         };
 
         const BASE_PLANT_TYPES = ['moonflower', 'starbloom', 'emberleaf'];
@@ -1997,6 +1981,7 @@ function closeModal(id) {
             { id: 'growthspurt', name: 'Growth Spurt Elixir', icon: '🌱', desc: 'Upgrade: +20% XP gain. (Max 3)', price: 65, type: 'upgrade', maxLevel: 3 },
             { id: 'fertileground', name: 'Fertile Ground', icon: '🌾', desc: 'Upgrade: +25% nourishment gain. (Max 3)', price: 70, type: 'upgrade', maxLevel: 3 },
             { id: 'blessing', name: 'Divine Blessing', icon: '🙏', desc: 'Upgrade: +15% all health gains. (Max 3)', price: 75, type: 'upgrade', maxLevel: 3 },
+            { id: 'eternity_seed', name: 'Seed of Eternity', icon: '<svg viewBox="0 0 100 100" style="width:1.5rem;height:1.5rem;vertical-align:middle"><defs><radialGradient id="egg-glow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs><circle cx="50" cy="50" r="40" fill="url(#egg-glow)"/><path d="M50 15 C 65 35, 75 60, 50 85 C 25 60, 35 35, 50 15 Z" fill="#ec4899" /><circle cx="50" cy="45" r="10" fill="#fde047" /></svg>', desc: 'A mythical seed of pure light. What will grow from it?', price: 100000, type: 'consumable', badge: 'mythic' },
         ];
 
         /* ── RANDOM EVENTS ── */
@@ -2494,6 +2479,15 @@ function closeModal(id) {
                 case 'sunvial': G.cooldownHalf = now + 300000; toast('Cooldowns halved for 5 minutes!'); break;
                 case 'wiltward': G.wiltWardUntil = now + 600000; toast('Wilt Ward active for 10 minutes!'); break;
                 case 'nightbloom': G.nightbloomLeft = 3; toast('Next 3 care actions give double XP!'); break;
+                case 'eternity_seed': 
+                    if (G.plants.length >= 7) { toast("The Grove is full. No more plots are available."); G.inventory[id]++; return; }
+                    G.plants.push({
+                        id: 'p' + Date.now(),
+                        type: 'eternity', name: 'Eternity Seedling', stage: 1, xp: 0, totalXp: 0,
+                        health: { hydration: 100, nourishment: 100, happiness: 100 }
+                    });
+                    toast('The Eternity Seed has been planted!'); 
+                    break;
                 default: toast('Item has no effect.'); return;
             }
             G.inventory[id]--;
@@ -3015,45 +3009,42 @@ function closeModal(id) {
         }
         init();
 
-</script>
-<script>
-// ── GROVE CODEX/COLLECTION SYSTEM ──
-// ── GROVE CODEX/COLLECTION SYSTEM ──
-function openCodex() {
-    const modal = document.getElementById('codex-modal');
-    const content = document.getElementById('codex-content');
-    const types = Object.keys(PLANT_META);
-    let html = '<b>Plant Types</b><ul>';
-    types.forEach(type => {
-        const owned = G.plants.filter(p => p.type === type).length;
-        const maxStage = Math.max(0, ...G.plants.filter(p => p.type === type).map(p => p.stage));
-        html += `<li>${PLANT_META[type].emoji} <b>${PLANT_META[type].label}</b> — Owned: ${owned}, Max Stage: ${maxStage}</li>`;
-    });
-    html += '</ul>';
-    // Hybrids
-    const hybrids = G.plants.filter(p => p.type === 'hybrid');
-    html += `<b>Hybrids</b><ul>`;
-    hybrids.forEach(h => {
-        html += `<li>${h.name} (Stage ${h.stage})</li>`;
-    });
-    html += '</ul>';
-    // Milestones
-    html += '<b>Milestones</b><ul>';
-    if (G.plants.every(p => p.stage >= 5)) html += '<li>All plants reached Mastery!</li>';
-    html += '</ul>';
-    content.innerHTML = html;
-    modal.style.display = 'block';
-    modal.classList.add('open');
-}
-function closeModal(id) {
-    const m = document.getElementById(id);
-    if (m) { m.style.display = 'none'; m.classList.remove('open'); }
-}
-</script>
+        function confirmReset() {
+            closeModal('stats-modal');
+            document.getElementById('reset-modal').classList.add('open');
+        }
 
-</body>
-<script>
-// ── MASTERY MILESTONES & EVENTS ──
+        function doResetGarden() {
+            localStorage.removeItem('grove_v5');
+            location.reload();
+        }
+
+        // ── GROVE CODEX/COLLECTION SYSTEM ──
+        function openCodex() {
+            const modal = document.getElementById('codex-modal');
+            const content = document.getElementById('codex-content');
+            const types = Object.keys(PLANT_META);
+            let html = '<b>Plant Types</b><ul>';
+            types.forEach(type => {
+                const owned = G.plants.filter(p => p.type === type).length;
+                const maxStage = Math.max(0, ...G.plants.filter(p => p.type === type).map(p => p.stage));
+                html += `<li>${PLANT_META[type].emoji} <b>${plantLabel(type)}</b> — Owned: ${owned}, Max Stage: ${maxStage}</li>`;
+            });
+            html += '</ul>';
+            const hybrids = G.plants.filter(p => p.type === 'hybrid');
+            html += `<b>Hybrids</b><ul>`;
+            hybrids.forEach(h => {
+                html += `<li>${h.name} (Stage ${h.stage})</li>`;
+            });
+            html += '</ul>';
+            html += `<b>Milestones</b><ul>`;
+            if (G.plants.every(p => p.stage >= 5)) html += '<li>All plants reached Mastery!</li>';
+            html += '</ul>';
+            content.innerHTML = html;
+            modal.classList.add('open');
+        }
+
+        // ── MASTERY MILESTONES & EVENTS ──
 function checkMasteryMilestones() {
     G.plants.forEach(p => {
         if (p.stage === 5 && !p.hasMasteryEvent) {
@@ -3121,6 +3112,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSeasonUI();
     applySeasonalEffects();
 });
-</script>
-
+    </script>
+</body>
 </html>
