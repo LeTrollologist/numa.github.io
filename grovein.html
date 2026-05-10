@@ -1421,37 +1421,36 @@
                 </div>
             </div>
 
-            // ── GROVE CODEX/COLLECTION SYSTEM ──
-            function openCodex() {
-                const modal = document.getElementById('codex-modal');
-                const content = document.getElementById('codex-content');
-                const types = Object.keys(PLANT_META);
-                let html = '<b>Plant Types</b><ul>';
-                types.forEach(type => {
-                    const owned = G.plants.filter(p => p.type === type).length;
-                    const maxStage = Math.max(0, ...G.plants.filter(p => p.type === type).map(p => p.stage));
-                    html += `<li>${PLANT_META[type].emoji} <b>${PLANT_META[type].label}</b> — Owned: ${owned}, Max Stage: ${maxStage}</li>`;
-                });
-                html += '</ul>';
-                // Hybrids
-                const hybrids = G.plants.filter(p => p.type === 'hybrid');
-                html += `<b>Hybrids</b><ul>`;
-                hybrids.forEach(h => {
-                    html += `<li>${h.name} (Stage ${h.stage})</li>`;
-                });
-                html += '</ul>';
-                // Milestones
-                html += '<b>Milestones</b><ul>';
-                if (G.plants.every(p => p.stage >= 5)) html += '<li>All plants reached Mastery!</li>';
-                html += '</ul>';
-                content.innerHTML = html;
-                modal.style.display = 'block';
-                modal.classList.add('open');
-            }
-            function closeModal(id) {
-                const m = document.getElementById(id);
-                if (m) { m.style.display = 'none'; m.classList.remove('open'); }
-            }
+<script>
+function openCodex() {
+    const modal = document.getElementById('codex-modal');
+    const content = document.getElementById('codex-content');
+    const types = Object.keys(PLANT_META);
+    let html = '<b>Plant Types</b><ul>';
+    types.forEach(type => {
+        const owned = G.plants.filter(p => p.type === type).length;
+        const maxStage = Math.max(0, ...G.plants.filter(p => p.type === type).map(p => p.stage));
+        html += `<li>${PLANT_META[type].emoji} <b>${PLANT_META[type].label}</b> — Owned: ${owned}, Max Stage: ${maxStage}</li>`;
+    });
+    html += '</ul>';
+    const hybrids = G.plants.filter(p => p.type === 'hybrid');
+    html += `<b>Hybrids</b><ul>`;
+    hybrids.forEach(h => {
+        html += `<li>${h.name} (Stage ${h.stage})</li>`;
+    });
+    html += '</ul>';
+    html += `<b>Milestones</b><ul>`;
+    if (G.plants.every(p => p.stage >= 5)) html += '<li>All plants reached Mastery!</li>';
+    html += '</ul>';
+    content.innerHTML = html;
+    modal.style.display = 'block';
+    modal.classList.add('open');
+}
+function closeModal(id) {
+    const m = document.getElementById(id);
+    if (m) { m.style.display = 'none'; m.classList.remove('open'); }
+}
+</script>
             <button class="hbtn" onclick="window.location.href='index.html'">Home</button>
         </header>
         <div class="info-bar">
@@ -3016,7 +3015,42 @@
         }
         init();
 
-    </script>
+</script>
+<script>
+// ── GROVE CODEX/COLLECTION SYSTEM ──
+// ── GROVE CODEX/COLLECTION SYSTEM ──
+function openCodex() {
+    const modal = document.getElementById('codex-modal');
+    const content = document.getElementById('codex-content');
+    const types = Object.keys(PLANT_META);
+    let html = '<b>Plant Types</b><ul>';
+    types.forEach(type => {
+        const owned = G.plants.filter(p => p.type === type).length;
+        const maxStage = Math.max(0, ...G.plants.filter(p => p.type === type).map(p => p.stage));
+        html += `<li>${PLANT_META[type].emoji} <b>${PLANT_META[type].label}</b> — Owned: ${owned}, Max Stage: ${maxStage}</li>`;
+    });
+    html += '</ul>';
+    // Hybrids
+    const hybrids = G.plants.filter(p => p.type === 'hybrid');
+    html += `<b>Hybrids</b><ul>`;
+    hybrids.forEach(h => {
+        html += `<li>${h.name} (Stage ${h.stage})</li>`;
+    });
+    html += '</ul>';
+    // Milestones
+    html += '<b>Milestones</b><ul>';
+    if (G.plants.every(p => p.stage >= 5)) html += '<li>All plants reached Mastery!</li>';
+    html += '</ul>';
+    content.innerHTML = html;
+    modal.style.display = 'block';
+    modal.classList.add('open');
+}
+function closeModal(id) {
+    const m = document.getElementById(id);
+    if (m) { m.style.display = 'none'; m.classList.remove('open'); }
+}
+</script>
+
 </body>
 <script>
 // ── MASTERY MILESTONES & EVENTS ──
