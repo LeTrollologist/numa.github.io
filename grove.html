@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://raw.githubusercontent.com; connect-src 'self' https://analytics-server-bdrm.onrender.com; media-src 'self' https://res.cloudinary.com;">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Grove · Numa's Garden</title>
@@ -702,6 +702,21 @@
             color: var(--accent);
         }
 
+        .prow-sell {
+            position: absolute;
+            top: 6px;
+            right: 28px;
+            font-size: .65rem;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 2px 4px;
+            transition: color .2s;
+        }
+
+        .prow-sell:hover {
+            color: var(--gold);
+        }
+
         /* Theme buttons */
         .thrw {
             display: flex;
@@ -1395,8 +1410,11 @@
             <div class="mbadge" id="mbadge">Mastery · 0</div>
             <button class="hbtn" id="audio-btn" onclick="toggleAudio()" title="Toggle Audio">🎵 Off</button>
             <button class="hbtn gold" onclick="openMarket()">Market</button>
-            <button class="hbtn gold" onclick="openNursery()">Nursery</button>
             <button class="hbtn" onclick="openStats()">Records</button>
+                        <button class="hbtn" onclick="openCodex()">Codex</button>
+
+
+
             <button class="hbtn" onclick="window.location.href='index.html'">Home</button>
         </header>
         <div class="info-bar">
@@ -1481,7 +1499,7 @@
         </div>
         <div class="statusbar">
             <div class="sdot"></div>
-            <span id="status-text">The grove is quiet tonight…</span>
+            <span id="status-text"></span>
             <div class="ssp"></div>
             <span id="income-rate" style="color:var(--gold)"></span>
         </div>
@@ -1500,15 +1518,13 @@
                 Select two Master Plants (Stage 5) to cross-pollinate and create a unique Hybrid Seed.
             </div>
             <div class="nursery-grid">
-                <div id="n-slot-1" class="nursery-slot" onclick="selectBreeder(1)">
-                    <span class="nursery-plus">+</span>
-                    <span style="font-size:0.5rem; margin-top:5px;">Select Plant 1</span>
-                </div>
-                <div class="nursery-plus">✦</div>
-                <div id="n-slot-2" class="nursery-slot" onclick="selectBreeder(2)">
-                    <span class="nursery-plus">+</span>
-                    <span style="font-size:0.5rem; margin-top:5px;">Select Plant 2</span>
-                </div>
+                <!-- Merge nurseries: show 6 plots -->
+                <div class="nursery-slot" id="n-plot-1"></div>
+                <div class="nursery-slot" id="n-plot-2"></div>
+                <div class="nursery-slot" id="n-plot-3"></div>
+                <div class="nursery-slot" id="n-plot-4"></div>
+                <div class="nursery-slot" id="n-plot-5"></div>
+                <div class="nursery-slot" id="n-plot-6"></div>
             </div>
             <div id="nursery-breed-btn" style="text-align:center; display:none; margin: 15px 0;">
                 <button class="abtn" style="border-color:var(--gold); color:var(--gold); padding:10px;" onclick="doBreeding()">
@@ -1529,6 +1545,27 @@
                     Close</span></div>
             <div id="stats-rows"></div>
             <div style="margin-top:14px;max-height:160px;overflow-y:auto;" id="log-list"></div>
+            <button class="hbtn" style="margin-top: 15px; width: 100%; border-color: rgba(239, 68, 68, 0.3); color: #ef4444; display: flex; justify-content: center;" onclick="confirmReset()">Reset Garden</button>
+        </div>
+    </div>
+
+    <!-- Reset Modal -->
+    <div id="reset-modal" class="modal">
+        <div class="mbox" style="max-width:340px; text-align:center;">
+            <div class="mtitle" style="color: #ef4444; border-bottom: 1px solid rgba(239, 68, 68, 0.2); justify-content:center; padding-bottom:10px;">Reset Garden</div>
+            <p style="margin:20px 0; font-size: 0.9rem; color: var(--muted); line-height: 1.5">Are you completely sure you want to uproot everything? All your plants, coins, and upgrades will return to the soil.</p>
+            <div style="display:flex;gap:10px;">
+                <button onclick="doResetGarden()" class="hbtn" style="flex:1; border-color: #ef4444; color: #ef4444; display:flex; justify-content:center;">Uproot All</button>
+                <button onclick="closeModal('reset-modal')" class="hbtn" style="flex:1; display:flex; justify-content:center;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grove Codex Modal -->
+    <div id="codex-modal" class="modal">
+        <div class="mbox">
+            <div class="mtitle">Grove Codex <span class="mclose" onclick="closeModal('codex-modal')">✕ Close</span></div>
+            <div id="codex-content"></div>
         </div>
     </div>
 
@@ -1674,7 +1711,13 @@
                 
                 this.overlay.style.background = bg;
                 document.documentElement.style.setProperty('--ambient-light', ambient);
-                document.body.setAttribute('data-time-phase', hour < 6 || hour > 19 ? 'night' : 'day');
+                const isNight = hour < 6 || hour > 19;
+                document.body.setAttribute('data-time-phase', isNight ? 'night' : 'day');
+                // Update status text
+                const statusText = document.getElementById('status-text');
+                if (statusText) {
+                    statusText.textContent = isNight ? 'The grove is quiet tonight…' : 'The grove is quiet today…';
+                }
             }
         }
 
@@ -1703,7 +1746,7 @@
             const masters = G.plants.filter(p => p.stage >= 5 && p !== other);
             inner.innerHTML = masters.map(p => `
                 <div class="prow" onclick="assignBreeder(${slot}, ${p.id})">
-                    <span class="prowname">${PLANT_META[p.type].emoji} ${p.name}</span>
+                    <span class="prowname">${PLANT_META[p.type].emoji} ${sanitize(p.name)}</span>
                 </div>
             `).join('');
             if (masters.length === 0) inner.innerHTML = '<div class="mitem-log">No other Masters available.</div>';
@@ -1719,8 +1762,8 @@
         function updateNurseryUI() {
             const s1 = document.getElementById('n-slot-1');
             const s2 = document.getElementById('n-slot-2');
-            s1.innerHTML = nurseryBreeder1 ? `<span>${nurseryBreeder1.name}</span>` : `<span class="nursery-plus">+</span><span style="font-size:0.5rem; margin-top:5px;">Select Plant 1</span>`;
-            s2.innerHTML = nurseryBreeder2 ? `<span>${nurseryBreeder2.name}</span>` : `<span class="nursery-plus">+</span><span style="font-size:0.5rem; margin-top:5px;">Select Plant 2</span>`;
+            s1.innerHTML = nurseryBreeder1 ? `<span>${sanitize(nurseryBreeder1.name)}</span>` : `<span class="nursery-plus">+</span><span style="font-size:0.5rem; margin-top:5px;">Select Plant 1</span>`;
+            s2.innerHTML = nurseryBreeder2 ? `<span>${sanitize(nurseryBreeder2.name)}</span>` : `<span class="nursery-plus">+</span><span style="font-size:0.5rem; margin-top:5px;">Select Plant 2</span>`;
             document.getElementById('nursery-breed-btn').style.display = (nurseryBreeder1 && nurseryBreeder2) ? 'block' : 'none';
         }
 
@@ -1792,6 +1835,10 @@
 
         function sunflareSVG(stage, health) { let s = ''; const mR = [14, 18, 22, 27, 32][stage - 1]; const wilt = health < 40; s += `<ellipse cx="0" cy="3" rx="${mR}" ry="${Math.round(mR * .38)}" fill="#0a1520" opacity=".9"/>`; if (stage === 1) { s += `<path d="M0,0 C-10,-10 10,-10 0,-20" fill="${wilt ? '#3a2a0a' : '#fde047'}"/>`; } else if (stage === 2) { s += `<path d="M0,0 C-15,-20 15,-30 0,-50" stroke="${wilt ? '#3a2a0a' : '#facc15'}" stroke-width="2.5" fill="none"/>`; s += `<path d="M-1,-20 C-10,-25 -10,-15 0,-30" fill="${wilt ? '#2a1a0a' : '#f59e0b'}"/>`; s += `<path d="M1,-35 C10,-40 10,-30 0,-45" fill="${wilt ? '#1a2a3a' : '#22d3ee'}"/>`; } else if (stage === 3) { s += `<path d="M0,0 C-20,-30 20,-50 0,-80" stroke="${wilt ? '#3a2a0a' : '#facc15'}" stroke-width="3" fill="none"/>`; s += `<path d="M-2,-30 C-15,-35 -15,-25 -1,-45" fill="${wilt ? '#2a1a0a' : '#f59e0b'}"/>`; s += `<path d="M2,-55 C15,-60 15,-50 1,-70" fill="${wilt ? '#1a2a3a' : '#22d3ee'}"/>`; s += `<g transform="translate(0,-80)">`; for (let r = 0; r < 360; r += 72) s += `<path d="M0,0 C-5,-15 5,-15 0,-25" fill="${wilt ? '#3a2a0a' : '#fde047'}" transform="rotate(${r})"/>`; s += `</g>`; } else if (stage === 4) { s += `<path d="M0,0 C-30,-40 30,-80 0,-120" stroke="${wilt ? '#3a2a0a' : '#facc15'}" stroke-width="3.5" fill="none"/>`; s += `<path d="M-3,-40 C-20,-45 -20,-35 -2,-60" fill="${wilt ? '#2a1a0a' : '#f59e0b'}"/>`; s += `<path d="M3,-80 C20,-85 20,-75 2,-100" fill="${wilt ? '#1a2a3a' : '#22d3ee'}"/>`; s += `<g transform="translate(0,-120)">`; for (let r = 0; r < 360; r += 60) s += `<path d="M0,0 C-8,-20 8,-20 0,-35" fill="${wilt ? '#3a2a0a' : '#fde047'}" transform="rotate(${r})"/>`; s += `<circle cx="0" cy="0" r="5" fill="#fef08a"/></g>`; } else { s += `<path d="M0,0 C-40,-50 40,-100 0,-150" stroke="${wilt ? '#3a2a0a' : '#facc15'}" stroke-width="4" fill="none"/>`; s += `<path d="M-4,-50 C-25,-55 -25,-45 -3,-75" fill="${wilt ? '#2a1a0a' : '#f59e0b'}"/>`; s += `<path d="M4,-100 C25,-105 25,-95 3,-125" fill="${wilt ? '#1a2a3a' : '#22d3ee'}"/>`; s += `<g transform="translate(0,-150)" filter="url(#glow-fire)">`; for (let r = 0; r < 360; r += 45) s += `<path d="M0,0 C-10,-25 10,-25 0,-45" fill="${wilt ? '#3a2a0a' : '#fde047'}" transform="rotate(${r})"/>`; for (let r = 22.5; r < 360; r += 45) s += `<path d="M0,0 C-5,-15 5,-15 0,-25" fill="${wilt ? '#1a2a3a' : '#67e8f9'}" transform="rotate(${r})"/>`; s += `<circle cx="0" cy="0" r="7" fill="#fff"/></g>`; } return s; }
 
+        function shadowbloomSVG(stage, health) { let s = ''; const mR = [14, 18, 22, 27, 32][stage - 1]; const wilt = health < 40; s += `<ellipse cx="0" cy="3" rx="${mR}" ry="${Math.round(mR * .38)}" fill="#0a1520" opacity=".9"/>`; if (stage === 1) { s += `<path d="M0,0 Q-8,-12 0,-24 Q8,-12 0,0" fill="${wilt ? '#1a1a2a' : '#6366f1'}"/>`; } else if (stage === 2) { s += `<path d="M0,0 Q-12,-18 0,-36 Q12,-18 0,0" fill="${wilt ? '#1a1a2a' : '#6366f1'}"/>`; s += `<circle cx="-6" cy="-18" r="3" fill="${wilt ? '#2a2a3a' : '#8b5cf6'}"/>`; s += `<circle cx="6" cy="-18" r="3" fill="${wilt ? '#2a2a3a' : '#8b5cf6'}"/>`; } else if (stage === 3) { s += `<path d="M0,0 Q-16,-24 0,-48 Q16,-24 0,0" fill="${wilt ? '#1a1a2a' : '#6366f1'}"/>`; s += `<circle cx="-8" cy="-24" r="4" fill="${wilt ? '#2a2a3a' : '#8b5cf6'}"/>`; s += `<circle cx="8" cy="-24" r="4" fill="${wilt ? '#2a2a3a' : '#8b5cf6'}"/>`; s += `<circle cx="0" cy="-36" r="3" fill="${wilt ? '#3a3a4a' : '#a78bfa'}"/>`; } else if (stage === 4) { s += `<path d="M0,0 Q-20,-30 0,-60 Q20,-30 0,0" fill="${wilt ? '#1a1a2a' : '#6366f1'}"/>`; s += `<circle cx="-10" cy="-30" r="5" fill="${wilt ? '#2a2a3a' : '#8b5cf6'}"/>`; s += `<circle cx="10" cy="-30" r="5" fill="${wilt ? '#2a2a3a' : '#8b5cf6'}"/>`; s += `<circle cx="0" cy="-45" r="4" fill="${wilt ? '#3a3a4a' : '#a78bfa'}"/>`; s += `<circle cx="-15" cy="-45" r="3" fill="${wilt ? '#4a4a5a' : '#c4b5fd'}"/>`; s += `<circle cx="15" cy="-45" r="3" fill="${wilt ? '#4a4a5a' : '#c4b5fd'}"/>`; } else { s += `<path d="M0,0 Q-24,-36 0,-72 Q24,-36 0,0" fill="${wilt ? '#1a1a2a' : '#6366f1'}"/>`; s += `<circle cx="-12" cy="-36" r="6" fill="${wilt ? '#2a2a3a' : '#8b5cf6'}"/>`; s += `<circle cx="12" cy="-36" r="6" fill="${wilt ? '#2a2a3a' : '#8b5cf6'}"/>`; s += `<circle cx="0" cy="-54" r="5" fill="${wilt ? '#3a3a4a' : '#a78bfa'}"/>`; s += `<circle cx="-18" cy="-54" r="4" fill="${wilt ? '#4a4a5a' : '#c4b5fd'}"/>`; s += `<circle cx="18" cy="-54" r="4" fill="${wilt ? '#4a4a5a' : '#c4b5fd'}"/>`; s += `<circle cx="0" cy="-66" r="3" fill="${wilt ? '#5a5a6a' : '#ddd6fe'}"/>`; } return s; }
+
+        function crystalvineSVG(stage, health) { let s = ''; const mR = [14, 18, 22, 27, 32][stage - 1]; const wilt = health < 40; s += `<ellipse cx="0" cy="3" rx="${mR}" ry="${Math.round(mR * .38)}" fill="#0a1520" opacity=".9"/>`; if (stage === 1) { s += `<polygon points="0,-10 -4,-2 4,-2" fill="${wilt ? '#2a1a2a' : '#ec4899'}"/>`; } else if (stage === 2) { s += `<polygon points="0,-15 -6,-5 6,-5" fill="${wilt ? '#2a1a2a' : '#ec4899'}"/>`; s += `<polygon points="-8,-8 -12,0 -4,0" fill="${wilt ? '#3a2a3a' : '#f97316'}"/>`; s += `<polygon points="8,-8 12,0 4,0" fill="${wilt ? '#3a2a3a' : '#f97316'}"/>`; } else if (stage === 3) { s += `<polygon points="0,-20 -8,-8 8,-8" fill="${wilt ? '#2a1a2a' : '#ec4899'}"/>`; s += `<polygon points="-10,-12 -16,0 -4,0" fill="${wilt ? '#3a2a3a' : '#f97316'}"/>`; s += `<polygon points="10,-12 16,0 4,0" fill="${wilt ? '#3a2a3a' : '#f97316'}"/>`; s += `<polygon points="0,-28 -4,-20 4,-20" fill="${wilt ? '#4a3a4a' : '#fb7185'}"/>`; } else if (stage === 4) { s += `<polygon points="0,-25 -10,-10 10,-10" fill="${wilt ? '#2a1a2a' : '#ec4899'}"/>`; s += `<polygon points="-12,-15 -20,0 -4,0" fill="${wilt ? '#3a2a3a' : '#f97316'}"/>`; s += `<polygon points="12,-15 20,0 4,0" fill="${wilt ? '#3a2a3a' : '#f97316'}"/>`; s += `<polygon points="0,-35 -6,-25 6,-25" fill="${wilt ? '#4a3a4a' : '#fb7185'}"/>`; s += `<polygon points="-16,-20 -22,-10 -10,-10" fill="${wilt ? '#5a4a5a' : '#fdba74'}"/>`; s += `<polygon points="16,-20 22,-10 10,-10" fill="${wilt ? '#5a4a5a' : '#fdba74'}"/>`; } else { s += `<polygon points="0,-30 -12,-12 12,-12" fill="${wilt ? '#2a1a2a' : '#ec4899'}"/>`; s += `<polygon points="-14,-18 -24,0 -4,0" fill="${wilt ? '#3a2a3a' : '#f97316'}"/>`; s += `<polygon points="14,-18 24,0 4,0" fill="${wilt ? '#3a2a3a' : '#f97316'}"/>`; s += `<polygon points="0,-42 -8,-30 8,-30" fill="${wilt ? '#4a3a4a' : '#fb7185'}"/>`; s += `<polygon points="-18,-25 -26,-12 -10,-12" fill="${wilt ? '#5a4a5a' : '#fdba74'}"/>`; s += `<polygon points="18,-25 26,-12 10,-12" fill="${wilt ? '#5a4a5a' : '#fdba74'}"/>`; s += `<polygon points="0,-50 -4,-40 4,-40" fill="${wilt ? '#6a5a6a' : '#fecaca'}"/>`; } return s; }
+
         /* ══════════════════════════════════════════════════════════
            GROVE GAME ENGINE v2
            - Plant health system (hydration, nourishment, happiness)
@@ -1810,6 +1857,9 @@
             bramble: { emoji: '🔮', color: '#d946ef', incomeBase: 3.5, label: 'Twilight Bramble' },
             frostlily: { emoji: '❄️', color: '#bae6fd', incomeBase: 3.0, label: 'Frost Lily' },
             sunflare: { emoji: '☀️', color: '#fde047', incomeBase: 4.0, label: 'Sunflare Lotus' },
+            shadowbloom: { emoji: '🌑', color: '#6366f1', incomeBase: 2.5, label: 'Shadow Bloom' },
+            crystalvine: { emoji: '💎', color: '#ec4899', incomeBase: 3.2, label: 'Crystal Vine' },
+            eternity: { emoji: '✨', color: '#ffffff', incomeBase: 10.0, label: 'Eternity Tree' },
         };
 
         const BASE_PLANT_TYPES = ['moonflower', 'starbloom', 'emberleaf'];
@@ -1849,6 +1899,11 @@
             sing: { hydration: 12, nourishment: 12, happiness: 16, cd: 32000 },
         };
 
+        // Simple sanitizer for user inputs
+        function sanitize(str) {
+            return str.replace(/[<>'"&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;', '&': '&amp;' }[c]));
+        }
+
         // XP per action depends on average health
         function actionXP(action, avgHealth) {
             const base = { water: 8, talk: 6, pet: 5, sing: 18 };
@@ -1882,6 +1937,18 @@
                     id: 3, type: 'emberleaf', stage: 1, xp: 0, name: 'Emberleaf',
                     health: { hydration: 80, nourishment: 75, happiness: 70 }, totalXp: 0
                 },
+                {
+                    id: 4, type: 'bramble', stage: 1, xp: 0, name: 'Twilight Bramble',
+                    health: { hydration: 80, nourishment: 75, happiness: 70 }, totalXp: 0
+                },
+                {
+                    id: 5, type: 'frostlily', stage: 1, xp: 0, name: 'Frost Lily',
+                    health: { hydration: 80, nourishment: 75, happiness: 70 }, totalXp: 0
+                },
+                {
+                    id: 6, type: 'sunflare', stage: 1, xp: 0, name: 'Sunflare Lotus',
+                    health: { hydration: 80, nourishment: 75, happiness: 70 }, totalXp: 0
+                },
             ],
             coins: 12,
             cd: { water: 0, talk: 0, pet: 0, sing: 0 },
@@ -1909,7 +1976,14 @@
             { id: 'richsoil', name: 'Rich Soil', icon: '🌿', desc: 'Upgrade: +25% XP from all care. (Max 3)', price: 35, type: 'upgrade', maxLevel: 3 },
             { id: 'resonance', name: 'Resonance Bell', icon: '🔔', desc: 'Upgrade: +30% passive income. (Max 3)', price: 40, type: 'upgrade', maxLevel: 3 },
             { id: 'deeproots', name: 'Deep Roots', icon: '🌲', desc: 'Upgrade: Reduce health decay -20%. (Max 3)', price: 45, type: 'upgrade', maxLevel: 3 },
+            { id: 'auraglow', name: 'Aura Glow', icon: '🌟', desc: 'Upgrade: +20% happiness gain. (Max 3)', price: 50, type: 'upgrade', maxLevel: 3 },
+            { id: 'vitalbloom', name: 'Vital Bloom', icon: '🌸', desc: 'Upgrade: +15% hydration and nourishment. (Max 3)', price: 55, type: 'upgrade', maxLevel: 3 },
+            { id: 'harmony', name: 'Harmony Crystal', icon: '💎', desc: 'Upgrade: +10% XP and income. (Max 3)', price: 60, type: 'upgrade', maxLevel: 3 },
             { id: 'nightbloom', name: 'Nightbloom Dust', icon: '✨', desc: 'Rare: Double XP for next 3 care actions.', price: 55, type: 'consumable', badge: 'rare' },
+            { id: 'growthspurt', name: 'Growth Spurt Elixir', icon: '🌱', desc: 'Upgrade: +20% XP gain. (Max 3)', price: 65, type: 'upgrade', maxLevel: 3 },
+            { id: 'fertileground', name: 'Fertile Ground', icon: '🌾', desc: 'Upgrade: +25% nourishment gain. (Max 3)', price: 70, type: 'upgrade', maxLevel: 3 },
+            { id: 'blessing', name: 'Divine Blessing', icon: '🙏', desc: 'Upgrade: +15% all health gains. (Max 3)', price: 75, type: 'upgrade', maxLevel: 3 },
+            { id: 'eternity_seed', name: 'Seed of Eternity', icon: '<svg viewBox="0 0 100 100" style="width:1.5rem;height:1.5rem;vertical-align:middle"><defs><radialGradient id="egg-glow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs><circle cx="50" cy="50" r="40" fill="url(#egg-glow)"/><path d="M50 15 C 65 35, 75 60, 50 85 C 25 60, 35 35, 50 15 Z" fill="#ec4899" /><circle cx="50" cy="45" r="10" fill="#fde047" /></svg>', desc: 'A mythical seed of pure light. What will grow from it?', price: 100000, type: 'consumable', badge: 'mythic' },
         ];
 
         /* ── RANDOM EVENTS ── */
@@ -2018,13 +2092,16 @@
             const W = ga.clientWidth, H = ga.clientHeight;
             const pos3 = [0.23, 0.51, 0.78];
             const pos4 = [0.16, 0.38, 0.62, 0.84];
-            const arr = G.plants.length === 4 ? pos4 : pos3;
+            const pos5 = [0.12, 0.28, 0.44, 0.6, 0.76];
+            const pos6 = [0.1, 0.24, 0.38, 0.52, 0.66, 0.8];
+            const pos7 = [0.08, 0.2, 0.32, 0.44, 0.56, 0.68, 0.8];
+            const arr = G.plants.length <= 3 ? pos3 : G.plants.length === 4 ? pos4 : G.plants.length === 5 ? pos5 : G.plants.length === 6 ? pos6 : pos7;
             return { x: W * arr[idx], y: H * 0.81 };
         }
 
         /* ── RENDER PLANTS ── */
         const pSvg = document.getElementById('plants-svg');
-        const GENS = { moonflower: moonflowerSVG, starbloom: starbloomSVG, emberleaf: emberleafSVG, bramble: brambleSVG, frostlily: frostlilySVG, sunflare: sunflareSVG };
+        const GENS = { moonflower: moonflowerSVG, starbloom: starbloomSVG, emberleaf: emberleafSVG, bramble: brambleSVG, frostlily: frostlilySVG, sunflare: sunflareSVG, shadowbloom: shadowbloomSVG, crystalvine: crystalvineSVG };
         const STAGE_COLS = ['', '#6b7280', '#22d3ee', '#a78bfa', '#c084fc', '#e9d5ff'];
         const STAGE_LBL = ['', 'Seedling', 'Sprout', 'Sapling', 'Bloom', 'Ancient'];
 
@@ -2077,7 +2154,7 @@
 
                 const lx = pos.x, ly = pos.y + 30;
                 const fc = avgH < 30 ? '#f87171' : col;
-                labels += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" class="pname" fill="${fc}" onclick="openRename(${p.id})">${p.name}</text>`;
+                labels += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" class="pname" fill="${fc}" onclick="openRename(${p.id})">${sanitize(p.name)}</text>`;
                 labels += `<text x="${lx.toFixed(1)}" y="${(ly + 14).toFixed(1)}" class="plvl">${STAGE_LBL[p.stage]}</text>`;
                 if (p.stage < 5) {
                     const bw = 58, pct = Math.min(1, p.xp / XP_PER_STAGE[p.stage]), bx = lx - bw / 2, by = ly + 19;
@@ -2099,7 +2176,7 @@
                 const col = PLANT_META[p.type].color;
                 const warn = v => v < 30 ? '#f87171' : v < 55 ? '#fbbf24' : col;
                 h += `<div style="margin-bottom:9px">`;
-                h += `<div style="font-size:.58rem;letter-spacing:.10em;text-transform:uppercase;color:${col};margin-bottom:5px">${p.name}</div>`;
+                h += `<div style="font-size:.58rem;letter-spacing:.10em;text-transform:uppercase;color:${col};margin-bottom:5px">${sanitize(p.name)}</div>`;
                 h += `<div class="hp-row"><span class="hp-icon">💧</span><div class="hp-bar"><div class="hp-fill" style="width:${hyd}%;background:${warn(hyd)}"></div></div><span class="hp-val" style="color:${warn(hyd)}">${hyd}</span></div>`;
                 h += `<div class="hp-row"><span class="hp-icon">🌱</span><div class="hp-bar"><div class="hp-fill" style="width:${nou}%;background:${warn(nou)}"></div></div><span class="hp-val" style="color:${warn(nou)}">${nou}</span></div>`;
                 h += `<div class="hp-row"><span class="hp-icon">✦</span><div class="hp-bar"><div class="hp-fill" style="width:${hap}%;background:${warn(hap)}"></div></div><span class="hp-val" style="color:${warn(hap)}">${hap}</span></div>`;
@@ -2119,8 +2196,9 @@
                 const rate = incomeRate(p).toFixed(1);
                 h += `<div class="prow" onclick="clickPlant(${p.id})">
       <div class="prowtop">
-        <span class="prowname">${PLANT_META[p.type].emoji} ${p.name}</span>
+        <span class="prowname">${PLANT_META[p.type].emoji} ${sanitize(p.name)}</span>
         <span class="prow-rename" onclick="event.stopPropagation();openRename(${p.id})" title="Rename">✎</span>
+        <span class="prow-sell" onclick="event.stopPropagation();sellPlant(${p.id})" title="Sell">💰</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <span class="prowstage" style="color:${col}">${STAGE_LBL[p.stage]}</span>
@@ -2170,14 +2248,16 @@
             else playSfx('chime');
 
             const fx = CARE_EFFECTS[action];
-            const xpMult = 1 + (G.upgrades.richsoil || 0) * 0.25;
+            const xpMult = 1 + (G.upgrades.richsoil || 0) * 0.25 + (G.upgrades.harmony || 0) * 0.1 + (G.upgrades.growthspurt || 0) * 0.2;
+            const happyMult = 1 + (G.upgrades.auraglow || 0) * 0.2 + (G.upgrades.blessing || 0) * 0.15;
+            const vitalMult = 1 + (G.upgrades.vitalbloom || 0) * 0.15 + (G.upgrades.fertileground || 0) * 0.25 + (G.upgrades.blessing || 0) * 0.15;
             let anyBloomed = false;
 
             G.plants.forEach((p, i) => {
                 // Apply health
-                p.health.hydration = Math.min(100, p.health.hydration + fx.hydration);
-                p.health.nourishment = Math.min(100, p.health.nourishment + fx.nourishment);
-                p.health.happiness = Math.min(100, p.health.happiness + fx.happiness);
+                p.health.hydration = Math.min(100, p.health.hydration + fx.hydration * vitalMult);
+                p.health.nourishment = Math.min(100, p.health.nourishment + fx.nourishment * vitalMult);
+                p.health.happiness = Math.min(100, p.health.happiness + fx.happiness * happyMult);
 
                 // XP
                 const avgH = plantAvgHealth(p);
@@ -2245,7 +2325,7 @@
             W.update(elapsed);
 
             const decayMult = G.wiltWardUntil > now ? 0 : (1 - (G.upgrades.deeproots || 0) * 0.2);
-            let incMult = 1 + (G.upgrades.resonance || 0) * 0.3;
+            let incMult = 1 + (G.upgrades.resonance || 0) * 0.3 + (G.upgrades.harmony || 0) * 0.1;
             
             if (W.state === 'stars') incMult *= 1.25;
 
@@ -2401,6 +2481,15 @@
                 case 'sunvial': G.cooldownHalf = now + 300000; toast('Cooldowns halved for 5 minutes!'); break;
                 case 'wiltward': G.wiltWardUntil = now + 600000; toast('Wilt Ward active for 10 minutes!'); break;
                 case 'nightbloom': G.nightbloomLeft = 3; toast('Next 3 care actions give double XP!'); break;
+                case 'eternity_seed': 
+                    if (G.plants.length >= 7) { toast("The Grove is full. No more plots are available."); G.inventory[id]++; return; }
+                    G.plants.push({
+                        id: 'p' + Date.now(),
+                        type: 'eternity', name: 'Eternity Seedling', stage: 1, xp: 0, totalXp: 0,
+                        health: { hydration: 100, nourishment: 100, happiness: 100 }
+                    });
+                    toast('The Eternity Seed has been planted!'); 
+                    break;
                 default: toast('Item has no effect.'); return;
             }
             G.inventory[id]--;
@@ -2419,7 +2508,7 @@
             setTimeout(() => document.getElementById('rename-input').focus(), 80);
         }
         function confirmRename() {
-            const val = document.getElementById('rename-input').value.trim().slice(0, 20);
+            const val = sanitize(document.getElementById('rename-input').value.trim().slice(0, 20));
             if (!val) return;
             const p = G.plants.find(x => x.id === G.renamingId);
             if (p) { p.name = val; toast(`Renamed to "${val}".`); renderPlants(); renderHealth(); renderPlantList(); save(); }
@@ -2440,6 +2529,20 @@
             toast(`${p.name} whispers quietly.`);
         }
 
+        function sellPlant(id) {
+            const p = G.plants.find(x => x.id === id);
+            if (!p) return;
+            const value = Math.floor(p.totalXp || 0) + p.stage * 10;
+            if (confirm(`Sell ${p.name} for ${value} coins?`)) {
+                G.coins += value;
+                G.plants = G.plants.filter(x => x.id !== id);
+                renderPlants();
+                renderPlantList();
+                updateUI();
+                toast(`Sold ${p.name} for ${value} coins!`);
+            }
+        }
+
         /* ── CROSS POLLINATION ── */
         function openNursery() {
             if (!A.started) initAudio();
@@ -2448,15 +2551,15 @@
             p1.innerHTML = ''; p2.innerHTML = '';
             G.plants.forEach(p => {
                 if (p.stage === 5 && p.type !== 'bramble' && p.type !== 'frostlily' && p.type !== 'sunflare') {
-                    p1.innerHTML += `<option value="${p.type}">${p.name}</option>`;
-                    p2.innerHTML += `<option value="${p.type}">${p.name}</option>`;
+                    p1.innerHTML += `<option value="${p.type}">${sanitize(p.name)}</option>`;
+                    p2.innerHTML += `<option value="${p.type}">${sanitize(p.name)}</option>`;
                 }
             });
             document.getElementById('nursery-modal').classList.add('open');
         }
 
         function crossPollinate() {
-            if (G.plants.length >= 4) {
+            if (G.plants.length >= 7) {
                 toast("The Grove is full. No more plots are available.");
                 return;
             }
@@ -2574,7 +2677,7 @@
         }
 
         function crossPollinate() {
-            if (G.plants.length >= 4) {
+            if (G.plants.length >= 7) {
                 toast("The Grove is full. No more plots are available.");
                 return;
             }
@@ -2908,7 +3011,109 @@
         }
         init();
 
+        function confirmReset() {
+            closeModal('stats-modal');
+            document.getElementById('reset-modal').classList.add('open');
+        }
+
+        function doResetGarden() {
+            localStorage.removeItem('grove_v5');
+            location.reload();
+        }
+
+        // ── GROVE CODEX/COLLECTION SYSTEM ──
+        function openCodex() {
+            const modal = document.getElementById('codex-modal');
+            const content = document.getElementById('codex-content');
+            const types = Object.keys(PLANT_META);
+            let html = '<b>Plant Types</b><ul>';
+            types.forEach(type => {
+                const owned = G.plants.filter(p => p.type === type).length;
+                const maxStage = Math.max(0, ...G.plants.filter(p => p.type === type).map(p => p.stage));
+                html += `<li>${PLANT_META[type].emoji} <b>${plantLabel(type)}</b> — Owned: ${owned}, Max Stage: ${maxStage}</li>`;
+            });
+            html += '</ul>';
+            const hybrids = G.plants.filter(p => p.type === 'hybrid');
+            html += `<b>Hybrids</b><ul>`;
+            hybrids.forEach(h => {
+                html += `<li>${h.name} (Stage ${h.stage})</li>`;
+            });
+            html += '</ul>';
+            html += `<b>Milestones</b><ul>`;
+            if (G.plants.every(p => p.stage >= 5)) html += '<li>All plants reached Mastery!</li>';
+            html += '</ul>';
+            content.innerHTML = html;
+            modal.classList.add('open');
+        }
+
+        // ── MASTERY MILESTONES & EVENTS ──
+function checkMasteryMilestones() {
+    G.plants.forEach(p => {
+        if (p.stage === 5 && !p.hasMasteryEvent) {
+            p.hasMasteryEvent = true;
+            showMasteryEvent(p);
+        }
+        // Example: 24h old
+        if (!p.hasAgeEvent && Date.now() - p.born > 24*60*60*1000) {
+            p.hasAgeEvent = true;
+            showMasteryEvent(p, true);
+        }
+    });
+}
+
+function showMasteryEvent(plant, isAge) {
+    const modal = document.createElement('div');
+    modal.className = 'modal open';
+    modal.innerHTML = `<div class=\"mbox\"><div class=\"mtitle\">Mastery Milestone</div><div style=\"padding:18px 0;\">${isAge ? `${plant.name} has thrived for a day!` : `${plant.name} reached Mastery (Stage 5)!`}<br><br><button class='hbtn gold' onclick='this.closest(\".modal\").remove()'>Celebrate 🎉</button></div></div>`;
+    document.body.appendChild(modal);
+}
+
+setInterval(checkMasteryMilestones, 60000); // check every minute
+document.addEventListener('DOMContentLoaded', checkMasteryMilestones);
+
+// ── SEASONAL GARDEN ROTATION ──
+const SEASONS = ['Spring', 'Summer', 'Autumn', 'Winter'];
+function getCurrentSeason() {
+    // Use real date for now: rotate every 7 days
+    const start = new Date(2026, 0, 1); // Jan 1, 2026
+    const now = new Date();
+    const days = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+    return SEASONS[Math.floor(days / 7) % 4];
+}
+
+function updateSeasonUI() {
+    let badge = document.getElementById('season-badge');
+    if (!badge) {
+        badge = document.createElement('div');
+        badge.id = 'season-badge';
+        badge.className = 'mbadge';
+        document.querySelector('header').appendChild(badge);
+    }
+    badge.textContent = getCurrentSeason();
+}
+
+function applySeasonalEffects() {
+    const season = getCurrentSeason();
+    // Example: boost growth in Spring, happiness in Summer, etc.
+    G.season = season;
+    G.plants.forEach(p => {
+        if (!p.seasonal) p.seasonal = {};
+        if (season === 'Spring') p.seasonal.growthBoost = 1.2;
+        else if (season === 'Summer') p.seasonal.happinessBoost = 1.2;
+        else if (season === 'Autumn') p.seasonal.nourishBoost = 1.2;
+        else if (season === 'Winter') p.seasonal.decayResist = 0.8;
+        else p.seasonal = {};
+    });
+}
+
+setInterval(() => {
+    updateSeasonUI();
+    applySeasonalEffects();
+}, 60000); // update every minute
+document.addEventListener('DOMContentLoaded', () => {
+    updateSeasonUI();
+    applySeasonalEffects();
+});
     </script>
 </body>
-
 </html>
