@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self';
+  script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src 'self' https://fonts.gstatic.com;
+  img-src 'self' data: https://raw.githubusercontent.com;
+  connect-src 'self' https://analytics-server-bdrm.onrender.com;">
 <title>The Hollow · Numa's Sketchbook</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400;1,500&family=Cinzel:wght@400;500&family=Josefin+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="compute-optimizer.js"></script>
@@ -33,6 +39,7 @@ html, body { width:100%; height:100%; overflow:hidden; background:#04060e; }
   --accent-dim: rgba(168,159,216,0.18);
   --text:       #cdd5ed;
   --muted:      #5c6a85;
+  --gold:       #c9a84c;
   --canvas-bg:  13;
   --danger-bg:  rgba(200,55,55,0.15);
   --danger-bd:  rgba(200,55,55,0.30);
@@ -159,6 +166,8 @@ header {
 }
 .hbtn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 .hbtn.hi { border-color: var(--border-h); color: var(--accent); background: var(--accent-dim); }
+.hbtn.gold { border-color: var(--gold); color: var(--gold); background: rgba(201, 168, 76, 0.1); }
+.hbtn.gold:hover { background: rgba(201, 168, 76, 0.2); }
 
 /* ── Main ── */
 .main { flex: 1; display: flex; overflow: hidden; min-height: 0; }
@@ -417,7 +426,6 @@ input[type=range]::-moz-range-thumb {
 #viewport {
   position: relative;
   transform-origin: center center;
-  will-change: transform;
 }
 #canvas-container {
   position: relative;
@@ -811,6 +819,7 @@ body.cur-move #cvs { cursor: move; }
       <button class="hbtn" onclick="doExportProject()">Export Project</button>
       <button class="hbtn" onclick="doExportJSON()">Export JSON</button>
       <button class="hbtn" onclick="doExportPNG()">Export PNG</button>
+      <button class="hbtn" id="audio-btn" onclick="toggleAudio()" title="Toggle Audio">🎵 Off</button>
       <button class="hbtn" onclick="window.location.href='index.html'">Home</button>
       <button class="hbtn hi" onclick="doSave()">Save</button>
     </div>
@@ -1028,10 +1037,14 @@ body.cur-move #cvs { cursor: move; }
       <div class="section">
         <span class="sec-label">Colours · Click = primary · Right-click paint uses secondary</span>
         <div class="dual-color">
-          <div class="dual-swatch on" id="sw-primary" title="Primary" onclick="setActiveColorSlot('primary')" style="background:#a89fd8"></div>
-          <div class="dual-swatch sec" id="sw-secondary" title="Secondary" onclick="setActiveColorSlot('secondary')" style="background:#130f30"></div>
+          <div class="dual-swatch on" id="sw-primary" title="Primary" onclick="setActiveColorSlot('primary')" oncontextmenu="event.preventDefault(); event.stopPropagation(); setActiveColorSlot('secondary'); return false;" style="background:#a89fd8"></div>
+          <div class="dual-swatch sec" id="sw-secondary" title="Secondary" onclick="setActiveColorSlot('secondary')" oncontextmenu="event.preventDefault(); event.stopPropagation(); setActiveColorSlot('primary'); return false;" style="background:#130f30"></div>
         </div>
         <button type="button" class="abtn" onclick="swapColors()" style="margin-bottom:8px">⇄ Swap colours (X)</button>
+        <label style="font-size:0.58rem;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:8px">
+          <input type="checkbox" id="use-secondary" onchange="useSecondaryColor = this.checked" style="accent-color:var(--accent)">
+          <span>Use secondary color</span>
+        </label>
         <span class="sec-label" style="margin-top:4px">History</span>
         <div class="color-history" id="color-history"></div>
       </div>
@@ -1433,6 +1446,7 @@ const cvs = interactionCvs;
 let layers = [];
 let activeLayer = null;
 let layerCounter = 0;
+let isTempDrawing = false;
 
 /* ── App State ── */
 let tool      = 'brush';
@@ -1455,6 +1469,7 @@ let colorSlot = 'primary';
 let colorHistory = [];
 let useSecondaryColor = false;
 let nextStrokeColor = null;
+let secondaryColorOnce = false;
 let quickMenuPoint = null;
 let longPressTimer = null;
 let longPressPointer = null;
@@ -1471,6 +1486,8 @@ let gradientA = null;
 let selectionRect = null;
 let selectionMask = null;
 let lassoPts = [];
+let lassoActive = false;
+let lassoClosed = false;
 let marqueeBegin = null;
 let cropBegin = null;
 const overlayCvs = typeof document !== 'undefined' ? document.getElementById('overlay-cvs') : null;
@@ -1882,9 +1899,32 @@ function snapHistory() {
 
 function restoreHistSnap(snap) {
   if (!snap || !snap.layers) return;
-  if (snap.w !== cvs.width || snap.h !== cvs.height) {
-    status('Undo limited: canvas size changed');
-    return;
+  const needsResize = snap.w !== cvs.width || snap.h !== cvs.height;
+  if (needsResize) {
+    // Resize canvas and layers
+    cvs.width = snap.w;
+    cvs.height = snap.h;
+    interactionCtx = cvs.getContext('2d');
+    if (overlayCvs) {
+      overlayCvs.width = snap.w;
+      overlayCvs.height = snap.h;
+      overlayCtx = overlayCvs.getContext('2d');
+    }
+    document.getElementById('canvas-container').style.width = snap.w + 'px';
+    document.getElementById('canvas-container').style.height = snap.h + 'px';
+    document.getElementById('st-sz').textContent = `${snap.w}×${snap.h}`;
+    // Resize layers
+    layers.forEach(l => {
+      l.canvas.width = snap.w;
+      l.canvas.height = snap.h;
+      l.ctx = l.canvas.getContext('2d');
+    });
+    // Resize bg layer
+    const bg = document.getElementById('bg-layer');
+    bg.width = snap.w;
+    bg.height = snap.h;
+    updateBgDisplay();
+    syncViewportTransform();
   }
   while (layers.length < snap.layers.length) addLayer('Layer', false);
   while (layers.length > snap.layers.length) {
@@ -2093,9 +2133,9 @@ function quickMenuAction(action) {
   }
 }
 
-/* ── Pointer state ── */
 let drawing    = false;
 let lx=0, ly=0, lp=0.5;
+let strokePts  = [];
 let lineStart  = null;
 let lineSnap   = null;
 let shapeStart = null;
@@ -2351,11 +2391,13 @@ function pickColor(c, el) {
   currentH = hsl.h; currentS = hsl.s; currentL = hsl.l;
   if (colorSlot === 'secondary') {
     colorSecondary = c;
-    const ss = document.getElementById('sw-secondary');
-    if (ss) ss.style.background = c;
   } else {
     color = c;
   }
+  const sp = document.getElementById('sw-primary');
+  const ss = document.getElementById('sw-secondary');
+  if (sp) sp.style.background = color;
+  if (ss) ss.style.background = colorSecondary;
   updateCP(true);
   pushColorHistory(c);
 }
@@ -2372,12 +2414,14 @@ function updateCP(skipHistory) {
   const hex = hslToHex(currentH, currentS, currentL);
   if (colorSlot === 'secondary') {
     colorSecondary = hex;
-    const ss = document.getElementById('sw-secondary');
-    if (ss) ss.style.background = hex;
   } else {
     color = hex;
     document.getElementById('cp-swatch').style.background = hex;
   }
+  const sp = document.getElementById('sw-primary');
+  const ss = document.getElementById('sw-secondary');
+  if (sp) sp.style.background = color;
+  if (ss) ss.style.background = colorSecondary;
   document.getElementById('cp-hex').value = hex.toUpperCase();
   
   document.querySelectorAll('.sw').forEach(s => s.classList.toggle('on', s.title.toLowerCase() === hex.toLowerCase()));
@@ -2910,15 +2954,25 @@ function redrawOverlay() {
   overlayCtx.lineDashOffset = -dashOff;
   overlayCtx.strokeStyle = 'rgba(255,255,255,.85)';
   overlayCtx.lineWidth = 1;
-  if (selectionRect && selectionRect.w > 0 && selectionRect.h > 0) {
+  // Only draw rectangle for rectangular selections (marquee/crop)
+  if (selectionRect && selectionRect.w > 0 && selectionRect.h > 0 && !(lassoClosed && lassoPts.length > 1)) {
     const r = selectionRect;
     overlayCtx.strokeRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1);
   }
+  // Draw lasso marching ants if closed
   if (lassoPts.length > 1) {
-    overlayCtx.setLineDash([]);
-    overlayCtx.beginPath();
-    lassoPts.forEach((pt, i) => i === 0 ? overlayCtx.moveTo(pt.x, pt.y) : overlayCtx.lineTo(pt.x, pt.y));
-    overlayCtx.stroke();
+    if (lassoClosed) {
+      overlayCtx.setLineDash([6, 4]);
+      overlayCtx.beginPath();
+      lassoPts.forEach((pt, i) => i === 0 ? overlayCtx.moveTo(pt.x, pt.y) : overlayCtx.lineTo(pt.x, pt.y));
+      overlayCtx.closePath();
+      overlayCtx.stroke();
+      overlayCtx.setLineDash([]);
+      overlayCtx.setLineDash([]);
+      overlayCtx.beginPath();
+      lassoPts.forEach((pt, i) => i === 0 ? overlayCtx.moveTo(pt.x, pt.y) : overlayCtx.lineTo(pt.x, pt.y));
+      overlayCtx.stroke();
+    }
   }
   if (polygonPts.length > 1) {
     overlayCtx.setLineDash([4, 4]);
@@ -2994,7 +3048,9 @@ function doMagicWandSync(sx, sy) {
 }
 
 function closeLassoSelection() {
-  if (lassoPts.length < 3) return;
+  if (lassoPts.length < 2) return;
+  lassoClosed = true;
+  lassoActive = false;
   const W = cvs.width, H = cvs.height;
   const t = document.createElement('canvas');
   t.width = W;
@@ -3229,7 +3285,6 @@ function applyCrop(r) {
   document.getElementById('canvas-container').style.height = h + 'px';
   document.getElementById('st-sz').textContent = `${w}×${h}`;
   selectionRect = selectionMask = null;
-  hist = []; hIdx = -1;
   snapHistory();
   redrawOverlay();
   syncViewportTransform();
@@ -3314,7 +3369,14 @@ function setupPointer() {
   cvs.addEventListener('pointerup',   onUp);
   cvs.addEventListener('pointerout',  onUp);
   cvs.addEventListener('pointercancel', onUp);
-  cvs.addEventListener('contextmenu', e => openQuickMenuFromEvent(e));
+  // paintTools defined globally below
+  cvs.addEventListener('contextmenu', e => {
+    if (paintTools.includes(tool)) {
+      e.preventDefault();
+      return;
+    }
+    openQuickMenuFromEvent(e);
+  });
   cvs.addEventListener('touchstart', queueTouchLongPress, { passive: true });
   cvs.addEventListener('touchmove', updateTouchLongPress, { passive: true });
   cvs.addEventListener('touchend', cancelLongPress, { passive: true });
@@ -3339,13 +3401,22 @@ function onDown(e) {
   lastShiftKey = e.shiftKey;
   cvs.setPointerCapture(e.pointerId);
   const p = getPos(e);
-  if (e.button === 2) {
+  const rightClick = e.button === 2;
+  if (rightClick && !paintTools.includes(tool)) {
     openQuickMenuFromEvent(e, p);
     return;
   }
   queueLongPress(e, p);
-  useSecondaryColor = nextStrokeColor === 'secondary';
-  nextStrokeColor = null;
+  const oneShotSecondary = nextStrokeColor === 'secondary';
+  if (nextStrokeColor) {
+    useSecondaryColor = oneShotSecondary;
+    secondaryColorOnce = oneShotSecondary;
+    nextStrokeColor = null;
+  }
+  if (rightClick && paintTools.includes(tool) && !useSecondaryColor) {
+    useSecondaryColor = true;
+    secondaryColorOnce = true;
+  }
 
   if (tool === 'eye' && e.button === 0) {
     pickFromCanvas(Math.floor(p.x), Math.floor(p.y));
@@ -3366,7 +3437,10 @@ function onDown(e) {
   }
   if (tool === 'lasso') {
     lassoPts = [{ x: p.x, y: p.y }];
+    lassoActive = true;
+    lassoClosed = false;
     drawing = true;
+    redrawOverlay();
     return;
   }
   if (tool === 'polygon' && e.button === 0) {
@@ -3406,7 +3480,6 @@ function onDown(e) {
     return;
   }
 
-  const paintTools = ['brush', 'pencil', 'watercolor', 'chalk', 'spray', 'smudge', 'clone', 'eraser', 'fill', 'line', 'rect', 'ellipse', 'gradient'];
   if (activeLayer && activeLayer.locked && e.button === 0 && paintTools.includes(tool)) {
     status('Layer is locked');
     return;
@@ -3414,15 +3487,31 @@ function onDown(e) {
 
   if (e.button !== 0 && tool !== 'fill') return;
 
+// Global paintTools definition (move to top-level script scope)
+const paintTools = ['brush', 'pencil', 'watercolor', 'chalk', 'spray', 'smudge', 'clone', 'eraser', 'fill', 'line', 'rect', 'ellipse', 'gradient'];
+
   drawing = true;
   lx = p.x;
   ly = p.y;
   lp = p.p;
+  strokePts = [{x: p.x, y: p.y, p: p.p}];
+
+  if (paintTools.includes(tool) && (tool === 'brush' || tool === 'pencil')) {
+    isTempDrawing = true;
+    cvs.style.opacity = opacity;
+    if (brushHardness < 0.88) {
+      const b = (1 - brushHardness) * brushSz * 0.35;
+      cvs.style.filter = `blur(${b}px)`;
+    }
+  }
 
   if (tool === 'fill') {
     floodFill(Math.floor(p.x), Math.floor(p.y), brushHex());
     drawing = false;
-    useSecondaryColor = false;
+    if (secondaryColorOnce) {
+      useSecondaryColor = false;
+      secondaryColorOnce = false;
+    }
     snapHistory();
     return;
   }
@@ -3492,9 +3581,8 @@ function onMove(e) {
     redrawOverlay();
     return;
   }
-  if (tool === 'lasso' && drawing && lassoPts.length) {
-    const last = lassoPts[lassoPts.length - 1];
-    if (Math.hypot(p.x - last.x, p.y - last.y) > 2) lassoPts.push({ x: p.x, y: p.y });
+  if (tool === 'lasso' && drawing && lassoActive && !lassoClosed) {
+    lassoPts.push({ x: p.x, y: p.y });
     redrawOverlay();
     return;
   }
@@ -3528,7 +3616,34 @@ function onMove(e) {
   const t = 1 - smoothing * 0.78;
   const nx = lx + (p.x - lx) * t;
   const ny = ly + (p.y - ly) * t;
-  paintStroke(lx, ly, nx, ny, lp, p.p);
+  
+  strokePts.push({x: nx, y: ny, p: p.p});
+  if (strokePts.length === 2) {
+    const p0 = strokePts[0];
+    const p1 = strokePts[1];
+    paintStroke(p0.x, p0.y, (p0.x+p1.x)/2, (p0.y+p1.y)/2, p0.p, (p0.p+p1.p)/2);
+  } else if (strokePts.length >= 3) {
+    const p0 = strokePts[strokePts.length - 3];
+    const p1 = strokePts[strokePts.length - 2];
+    const p2 = strokePts[strokePts.length - 1];
+    const cp1x = (p0.x + p1.x) / 2, cp1y = (p0.y + p1.y) / 2;
+    const cp2x = (p1.x + p2.x) / 2, cp2y = (p1.y + p2.y) / 2;
+    
+    const dist = Math.hypot(cp2x - cp1x, cp2y - cp1y);
+    const steps = Math.max(2, Math.ceil(dist / 3));
+    let lastX = cp1x, lastY = cp1y, lastP = (p0.p + p1.p) / 2;
+    
+    for (let i = 1; i <= steps; i++) {
+      const u = i / steps;
+      const mu = 1 - u;
+      const bx = mu * mu * cp1x + 2 * mu * u * p1.x + u * u * cp2x;
+      const by = mu * mu * cp1y + 2 * mu * u * p1.y + u * u * cp2y;
+      const bp = mu * mu * lastP + 2 * mu * u * p1.p + u * u * ((p1.p + p2.p) / 2);
+      paintStroke(lastX, lastY, bx, by, lastP, bp);
+      lastX = bx; lastY = by; lastP = bp;
+    }
+  }
+
   lx = nx;
   ly = ny;
   lp = p.p;
@@ -3541,7 +3656,10 @@ function onUp(e) {
 
   if (tool === 'move' && layerMoveDrag) {
     layerMoveDrag = null;
-    useSecondaryColor = false;
+    if (secondaryColorOnce) {
+      useSecondaryColor = false;
+      secondaryColorOnce = false;
+    }
     snapHistory();
     return;
   }
@@ -3559,16 +3677,26 @@ function onUp(e) {
     const p = getPos(e);
     const r = normalizeRect(cropBegin.x, cropBegin.y, p.x, p.y);
     cropBegin = null;
-    useSecondaryColor = false;
+    if (secondaryColorOnce) {
+      useSecondaryColor = false;
+      secondaryColorOnce = false;
+    }
     selectionRect = null;
     redrawOverlay();
     applyCrop(r);
     return;
   }
 
-  if (tool === 'lasso' && wasDrawing && lassoPts.length > 2) {
-    closeLassoSelection();
-    useSecondaryColor = false;
+  if (tool === 'lasso' && lassoActive && !lassoClosed && drawing) {
+    if (lassoPts.length > 2) {
+      lassoClosed = true;
+      lassoActive = false;
+      closeLassoSelection();
+    } else {
+      clearSelection();
+    }
+    drawing = false;
+    redrawOverlay();
     return;
   }
 
@@ -3576,11 +3704,17 @@ function onUp(e) {
     const p = getPos(e);
     applyGradientLine(gradientA, { x: p.x, y: p.y });
     gradientA = null;
-    useSecondaryColor = false;
+    if (secondaryColorOnce) {
+      useSecondaryColor = false;
+      secondaryColorOnce = false;
+    }
     return;
   }
 
-  useSecondaryColor = false;
+  if (secondaryColorOnce) {
+    useSecondaryColor = false;
+    secondaryColorOnce = false;
+  }
 
   if (!wasDrawing) return;
 
@@ -3609,10 +3743,36 @@ function onUp(e) {
     shapeStart = null;
     shapeSnap = null;
   }
+
+  if (paintTools.includes(tool) && strokePts && strokePts.length >= 2) {
+    const p1 = strokePts[strokePts.length - 2];
+    const p2 = strokePts[strokePts.length - 1];
+    const mx = (p1.x + p2.x) / 2;
+    const my = (p1.y + p2.y) / 2;
+    paintStroke(mx, my, p2.x, p2.y, (p1.p + p2.p) / 2, p2.p);
+  }
+
+  strokePts = [];
   ctx.shadowBlur = 0;
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
   ctx.filter = 'none';
+
+  if (isTempDrawing) {
+    isTempDrawing = false;
+    ctx.save();
+    ctx.globalAlpha = opacity;
+    if (brushHardness < 0.88) {
+      const b = (1 - brushHardness) * brushSz * 0.35;
+      ctx.filter = `blur(${b}px)`;
+    }
+    ctx.drawImage(cvs, 0, 0);
+    ctx.restore();
+    interactionCtx.clearRect(0, 0, cvs.width, cvs.height);
+    cvs.style.opacity = 1;
+    cvs.style.filter = 'none';
+  }
+
   snapHistory();
 }
 
@@ -3623,7 +3783,7 @@ function effSz(p) {
   return brushSz*(0.5+p*.9);
 }
 
-function prepCtx(p, targetCtx) {
+function prepCtx(p, targetCtx, forceSolid) {
   const c = targetCtx || ctx;
   c.lineJoin = 'round';
   c.lineCap = 'round';
@@ -3637,17 +3797,17 @@ function prepCtx(p, targetCtx) {
   }
   switch (tool) {
     case 'brush':
-      c.globalAlpha = opacity;
+      c.globalAlpha = forceSolid ? 1 : opacity;
       c.strokeStyle = c.fillStyle = pc;
       c.shadowColor = pc;
-      if (brushHardness < 0.88) {
+      if (!forceSolid && brushHardness < 0.88) {
         c.shadowBlur = (1 - brushHardness) * brushSz * 0.75 + brushSz * 0.06;
       } else {
         c.shadowBlur = 0;
       }
       break;
     case 'pencil':
-      c.globalAlpha = opacity * (0.45 + Math.random() * 0.55) * (0.35 + p * 0.85);
+      c.globalAlpha = forceSolid ? 1 : opacity;
       c.strokeStyle = c.fillStyle = pc;
       break;
     case 'watercolor':
@@ -3742,7 +3902,7 @@ function renderRadial(x1, y1, x2, y2, p1, p2, isDot, targetCtx) {
 
 function stampBrushDot(c, x, y, pr) {
   const s = effSz(pr);
-  prepCtx(pr, c);
+  prepCtx(pr, c, isTempDrawing);
   c.lineWidth = s;
   const pc = brushHex();
   const draw = (ox, oy) => {
@@ -3763,15 +3923,17 @@ function stampBrushDot(c, x, y, pr) {
 }
 
 function paintDot(x, y, p) {
-  withSelectionClip(ctx, c => stampBrushDot(c, x, y, p));
+  const target = isTempDrawing ? interactionCtx : ctx;
+  withSelectionClip(target, c => stampBrushDot(c, x, y, p));
 }
 
 function paintStroke(x1, y1, x2, y2, p1, p2) {
+  const target = isTempDrawing ? interactionCtx : ctx;
   if (tool === 'clone') {
     if (!cloneSource || !cloneDragAnchor) return;
     const srcImg = cloneCompositeCanvas || activeLayer.canvas;
-    withSelectionClip(ctx, c => {
-      prepCtx(p2, c);
+    withSelectionClip(target, c => {
+      prepCtx(p2, c, isTempDrawing);
       const r = Math.ceil(effSz((p1 + p2) / 2));
       let sx, sy;
       if (cloneAligned) {
@@ -3808,18 +3970,18 @@ function paintStroke(x1, y1, x2, y2, p1, p2) {
     return;
   }
   if (tool === 'spray') {
-    withSelectionClip(ctx, c => {
-      prepCtx(p2, c);
+    withSelectionClip(target, c => {
+      prepCtx(p2, c, isTempDrawing);
       sprayAt(x2, y2, p2, c);
       cleanCtx(c);
     });
     return;
   }
-  const spacedTools = ['brush', 'pencil', 'watercolor', 'chalk'];
+  const spacedTools = ['watercolor', 'chalk'];
   if (spacedTools.includes(tool)) {
     const spacing = Math.max(0.8, brushSz * (0.08 + brushSpacing * 0.42));
     const d = Math.hypot(x2 - x1, y2 - y1);
-    withSelectionClip(ctx, c => {
+    withSelectionClip(target, c => {
       if (d < 0.15) {
         stampBrushDot(c, x2, y2, p2);
         return;
@@ -3835,8 +3997,8 @@ function paintStroke(x1, y1, x2, y2, p1, p2) {
     });
     return;
   }
-  withSelectionClip(ctx, c => {
-    prepCtx((p1 + p2) / 2, c);
+  withSelectionClip(target, c => {
+    prepCtx((p1 + p2) / 2, c, isTempDrawing);
     c.lineWidth = (effSz(p1) + effSz(p2)) / 2;
     const draw = (a1, b1, a2, b2) => {
       c.beginPath();
@@ -4448,6 +4610,38 @@ function setup() {
   }, 120);
 
   setTimeout(() => setInterval(autoSave, 15000), 500);
+
+  /* ── AUDIO ENGINE ── */
+  const AUDIO_SRCS = {
+    bg: "https://letrollologist.github.io/numa.github.io/forestnight.ogg"
+  };
+  let A = { bg: null, started: false, muted: true };
+
+  function initAudio() {
+    if (A.started) return;
+    A.started = true;
+    A.muted = false;
+    A.bg = new Audio(AUDIO_SRCS.bg);
+    A.bg.loop = true;
+    A.bg.volume = 0.25;
+    document.getElementById('audio-btn').innerText = '🎵 On';
+    document.getElementById('audio-btn').classList.add('gold');
+    A.bg.play().catch(() => { });
+  }
+
+  function toggleAudio() {
+    if (!A.started) { initAudio(); return; }
+    A.muted = !A.muted;
+    if (A.muted) {
+      if (A.bg) A.bg.pause();
+      document.getElementById('audio-btn').innerText = '🎵 Off';
+      document.getElementById('audio-btn').classList.remove('gold');
+    } else {
+      if (A.bg) A.bg.play().catch(() => { });
+      document.getElementById('audio-btn').innerText = '🎵 On';
+      document.getElementById('audio-btn').classList.add('gold');
+    }
+  }
 
   status('Ready · The Hollow');
   updatePill();
