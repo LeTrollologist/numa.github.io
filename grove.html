@@ -1061,6 +1061,12 @@
             color: #c4b5fd;
         }
 
+        .mkt-badge.mythic {
+            border-color: rgba(253, 224, 71, .5);
+            color: #fde047;
+            animation: warn-pulse 2.4s ease-in-out infinite;
+        }
+
         /* Inventory */
         .inv-grid {
             display: flex;
@@ -1968,25 +1974,28 @@
 
         /* ── SHOP ITEMS ── */
         const SHOP_ITEMS = [
-            { id: 'seed_moonflower', name: 'Moonflower Seed', icon: '🌙', desc: 'Plant a new Moonflower.', price: 5, type: 'consumable' },
-            { id: 'seed_starbloom', name: 'Starbloom Seed', icon: '✧', desc: 'Plant a new Starbloom.', price: 40, type: 'consumable' },
-            { id: 'seed_emberleaf', name: 'Emberleaf Seed', icon: '🔥', desc: 'Plant a new Emberleaf.', price: 65, type: 'consumable' },
+            // Seeds (shown first in market)
+            { id: 'seed_moonflower', name: 'Moonflower Seed', icon: '🌙', desc: 'Plant a new Moonflower in the grove.', price: 5, type: 'seed' },
+            { id: 'seed_starbloom', name: 'Starbloom Seed', icon: '✧', desc: 'Plant a new Starbloom in the grove.', price: 40, type: 'seed' },
+            { id: 'seed_emberleaf', name: 'Emberleaf Seed', icon: '🔥', desc: 'Plant a new Emberleaf in the grove.', price: 65, type: 'seed' },
+            // Supplies
             { id: 'moonwater', name: 'Moonwater', icon: '💧', desc: 'Instantly +50 hydration to all plants.', price: 8, type: 'consumable', badge: 'new' },
             { id: 'soulsoil', name: 'Soulsoil', icon: '🌱', desc: 'Instantly +50 nourishment to all plants.', price: 10, type: 'consumable' },
             { id: 'songcrystal', name: 'Song Crystal', icon: '🔮', desc: 'Instantly +50 happiness to all plants.', price: 10, type: 'consumable', badge: 'rare' },
             { id: 'sunvial', name: 'Sun Vial', icon: '☀️', desc: 'Halves all care cooldowns for 5 minutes.', price: 20, type: 'consumable', badge: 'rare' },
             { id: 'wiltward', name: 'Wilt Ward', icon: '🛡️', desc: 'Stops health decay for 10 minutes.', price: 18, type: 'consumable' },
+            { id: 'nightbloom', name: 'Nightbloom Dust', icon: '✨', desc: 'Rare: Double XP for next 3 care actions.', price: 55, type: 'consumable', badge: 'rare' },
+            // Upgrades
             { id: 'richsoil', name: 'Rich Soil', icon: '🌿', desc: 'Upgrade: +25% XP from all care. (Max 3)', price: 35, type: 'upgrade', maxLevel: 3 },
             { id: 'resonance', name: 'Resonance Bell', icon: '🔔', desc: 'Upgrade: +30% passive income. (Max 3)', price: 40, type: 'upgrade', maxLevel: 3 },
             { id: 'deeproots', name: 'Deep Roots', icon: '🌲', desc: 'Upgrade: Reduce health decay -20%. (Max 3)', price: 45, type: 'upgrade', maxLevel: 3 },
             { id: 'auraglow', name: 'Aura Glow', icon: '🌟', desc: 'Upgrade: +20% happiness gain. (Max 3)', price: 50, type: 'upgrade', maxLevel: 3 },
             { id: 'vitalbloom', name: 'Vital Bloom', icon: '🌸', desc: 'Upgrade: +15% hydration and nourishment. (Max 3)', price: 55, type: 'upgrade', maxLevel: 3 },
             { id: 'harmony', name: 'Harmony Crystal', icon: '💎', desc: 'Upgrade: +10% XP and income. (Max 3)', price: 60, type: 'upgrade', maxLevel: 3 },
-            { id: 'nightbloom', name: 'Nightbloom Dust', icon: '✨', desc: 'Rare: Double XP for next 3 care actions.', price: 55, type: 'consumable', badge: 'rare' },
             { id: 'growthspurt', name: 'Growth Spurt Elixir', icon: '🌱', desc: 'Upgrade: +20% XP gain. (Max 3)', price: 65, type: 'upgrade', maxLevel: 3 },
             { id: 'fertileground', name: 'Fertile Ground', icon: '🌾', desc: 'Upgrade: +25% nourishment gain. (Max 3)', price: 70, type: 'upgrade', maxLevel: 3 },
             { id: 'blessing', name: 'Divine Blessing', icon: '🙏', desc: 'Upgrade: +15% all health gains. (Max 3)', price: 75, type: 'upgrade', maxLevel: 3 },
-            { id: 'eternity_seed', name: 'Seed of Eternity', icon: '<svg viewBox="0 0 100 100" style="width:1.5rem;height:1.5rem;vertical-align:middle"><defs><radialGradient id="egg-glow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs><circle cx="50" cy="50" r="40" fill="url(#egg-glow)"/><path d="M50 15 C 65 35, 75 60, 50 85 C 25 60, 35 35, 50 15 Z" fill="#ec4899" /><circle cx="50" cy="45" r="10" fill="#fde047" /></svg>', desc: 'A mythical seed of pure light. What will grow from it?', price: 100000, type: 'consumable', badge: 'mythic' },
+            { id: 'eternity_seed', name: 'Seed of Eternity', icon: '<svg viewBox="0 0 100 100" style="width:1.5rem;height:1.5rem;vertical-align:middle"><defs><radialGradient id="egg-glow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs><circle cx="50" cy="50" r="40" fill="url(#egg-glow)"/><path d="M50 15 C 65 35, 75 60, 50 85 C 25 60, 35 35, 50 15 Z" fill="#ec4899" /><circle cx="50" cy="45" r="10" fill="#fde047" /></svg>', desc: 'A mythical seed of pure light. What will grow from it?', price: 100000, type: 'seed', badge: 'mythic' },
         ];
 
         /* ── RANDOM EVENTS ── */
@@ -2440,15 +2449,11 @@
             }
             // Shop
             const grid = document.getElementById('mkt-grid');
-            const types = ['consumable', 'seed', 'upgrade'];
-            const typeLabels = { consumable: 'Supplies', seed: 'Seeds', upgrade: 'Upgrades' };
+            const types = ['seed', 'consumable', 'upgrade'];
+            const typeLabels = { seed: 'Seeds', consumable: 'Supplies', upgrade: 'Upgrades' };
             let shopHTML = '';
             types.forEach(t => {
-                const itemsOfType = SHOP_ITEMS.filter(i => {
-                    if (t === 'seed') return i.id.startsWith('seed_') || i.id === 'eternity_seed';
-                    if (t === 'consumable') return i.type === 'consumable' && !i.id.startsWith('seed_') && i.id !== 'eternity_seed';
-                    return i.type === t;
-                });
+                const itemsOfType = SHOP_ITEMS.filter(i => i.type === t);
                 if (itemsOfType.length > 0) {
                     shopHTML += `<div style="grid-column: 1 / -1; font-family: 'Cinzel', serif; font-size: 0.9rem; letter-spacing: 0.1em; color: var(--accent); margin-top: 14px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">${typeLabels[t]}</div>`;
                     shopHTML += itemsOfType.map(item => {
