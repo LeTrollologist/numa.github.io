@@ -1968,6 +1968,9 @@
 
         /* ── SHOP ITEMS ── */
         const SHOP_ITEMS = [
+            { id: 'seed_moonflower', name: 'Moonflower Seed', icon: '🌙', desc: 'Plant a new Moonflower.', price: 5, type: 'consumable' },
+            { id: 'seed_starbloom', name: 'Starbloom Seed', icon: '✧', desc: 'Plant a new Starbloom.', price: 40, type: 'consumable' },
+            { id: 'seed_emberleaf', name: 'Emberleaf Seed', icon: '🔥', desc: 'Plant a new Emberleaf.', price: 65, type: 'consumable' },
             { id: 'moonwater', name: 'Moonwater', icon: '💧', desc: 'Instantly +50 hydration to all plants.', price: 8, type: 'consumable', badge: 'new' },
             { id: 'soulsoil', name: 'Soulsoil', icon: '🌱', desc: 'Instantly +50 nourishment to all plants.', price: 10, type: 'consumable' },
             { id: 'songcrystal', name: 'Song Crystal', icon: '🔮', desc: 'Instantly +50 happiness to all plants.', price: 10, type: 'consumable', badge: 'rare' },
@@ -2250,13 +2253,14 @@
             const fx = CARE_EFFECTS[action];
             const xpMult = 1 + (G.upgrades.richsoil || 0) * 0.25 + (G.upgrades.harmony || 0) * 0.1 + (G.upgrades.growthspurt || 0) * 0.2;
             const happyMult = 1 + (G.upgrades.auraglow || 0) * 0.2 + (G.upgrades.blessing || 0) * 0.15;
-            const vitalMult = 1 + (G.upgrades.vitalbloom || 0) * 0.15 + (G.upgrades.fertileground || 0) * 0.25 + (G.upgrades.blessing || 0) * 0.15;
+            const hydraMult = 1 + (G.upgrades.vitalbloom || 0) * 0.15 + (G.upgrades.blessing || 0) * 0.15;
+            const nourishMult = 1 + (G.upgrades.vitalbloom || 0) * 0.15 + (G.upgrades.fertileground || 0) * 0.25 + (G.upgrades.blessing || 0) * 0.15;
             let anyBloomed = false;
 
             G.plants.forEach((p, i) => {
                 // Apply health
-                p.health.hydration = Math.min(100, p.health.hydration + fx.hydration * vitalMult);
-                p.health.nourishment = Math.min(100, p.health.nourishment + fx.nourishment * vitalMult);
+                p.health.hydration = Math.min(100, p.health.hydration + fx.hydration * hydraMult);
+                p.health.nourishment = Math.min(100, p.health.nourishment + fx.nourishment * nourishMult);
                 p.health.happiness = Math.min(100, p.health.happiness + fx.happiness * happyMult);
 
                 // XP
@@ -2436,14 +2440,25 @@
             }
             // Shop
             const grid = document.getElementById('mkt-grid');
-            grid.innerHTML = SHOP_ITEMS.map(item => {
-                const upgLvl = G.upgrades[item.id] || 0;
-                const maxed = item.type === 'upgrade' && upgLvl >= (item.maxLevel || 3);
-                const canAfford = !maxed && G.coins >= item.price;
-                const cls = maxed ? 'mkt-item cant-afford' : canAfford ? 'mkt-item can-afford' : 'mkt-item cant-afford';
-                const badge = item.badge ? `<div class="mkt-badge ${item.badge}">${item.badge}</div>` : '';
-                const lvlInfo = item.type === 'upgrade' ? ` (Lv${upgLvl}/${item.maxLevel})` : '';
-                return `<div class="${cls}" onclick="buyItem('${item.id}')">
+            const types = ['consumable', 'seed', 'upgrade'];
+            const typeLabels = { consumable: 'Supplies', seed: 'Seeds', upgrade: 'Upgrades' };
+            let shopHTML = '';
+            types.forEach(t => {
+                const itemsOfType = SHOP_ITEMS.filter(i => {
+                    if (t === 'seed') return i.id.startsWith('seed_') || i.id === 'eternity_seed';
+                    if (t === 'consumable') return i.type === 'consumable' && !i.id.startsWith('seed_') && i.id !== 'eternity_seed';
+                    return i.type === t;
+                });
+                if (itemsOfType.length > 0) {
+                    shopHTML += `<div style="grid-column: 1 / -1; font-family: 'Cinzel', serif; font-size: 0.9rem; letter-spacing: 0.1em; color: var(--accent); margin-top: 14px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">${typeLabels[t]}</div>`;
+                    shopHTML += itemsOfType.map(item => {
+                        const upgLvl = G.upgrades[item.id] || 0;
+                        const maxed = item.type === 'upgrade' && upgLvl >= (item.maxLevel || 3);
+                        const canAfford = !maxed && G.coins >= item.price;
+                        const cls = maxed ? 'mkt-item cant-afford' : canAfford ? 'mkt-item can-afford' : 'mkt-item cant-afford';
+                        const badge = item.badge ? `<div class="mkt-badge ${item.badge}">${item.badge}</div>` : '';
+                        const lvlInfo = item.type === 'upgrade' ? ` (Lv${upgLvl}/${item.maxLevel})` : '';
+                        return `<div class="${cls}" onclick="buyItem('${item.id}')">
       ${badge}
       <div class="mkt-icon">${item.icon}</div>
       <div class="mkt-info">
@@ -2452,7 +2467,10 @@
         <div class="mkt-price">${maxed ? 'MAXED' : item.price + ' coins'}</div>
       </div>
     </div>`;
-            }).join('');
+                    }).join('');
+                }
+            });
+            grid.innerHTML = shopHTML;
         }
         function buyItem(id) {
             const item = SHOP_ITEMS.find(i => i.id === id);
@@ -2478,17 +2496,28 @@
                 case 'moonwater': healAll('hydration', 50); toast('All plants +50 Hydration!'); break;
                 case 'soulsoil': healAll('nourishment', 50); toast('All plants +50 Nourishment!'); break;
                 case 'songcrystal': healAll('happiness', 50); toast('All plants +50 Happiness!'); break;
-                case 'sunvial': G.cooldownHalf = now + 300000; toast('Cooldowns halved for 5 minutes!'); break;
+                case 'sunvial': 
+                    G.cooldownHalf = now + 300000; 
+                    Object.keys(G.cd).forEach(k => {
+                        if (G.cd[k] > now) G.cd[k] = now + ((G.cd[k] - now) / 2);
+                    });
+                    toast('Cooldowns halved for 5 minutes!'); 
+                    break;
                 case 'wiltward': G.wiltWardUntil = now + 600000; toast('Wilt Ward active for 10 minutes!'); break;
-                case 'nightbloom': G.nightbloomLeft = 3; toast('Next 3 care actions give double XP!'); break;
+                case 'nightbloom': G.nightbloomLeft = (G.nightbloomLeft || 0) + 3; toast(`Double XP for next ${G.nightbloomLeft} care actions!`); break;
+                case 'seed_moonflower':
+                case 'seed_starbloom':
+                case 'seed_emberleaf':
                 case 'eternity_seed': 
                     if (G.plants.length >= 7) { toast("The Grove is full. No more plots are available."); G.inventory[id]++; return; }
+                    let type = id === 'eternity_seed' ? 'eternity' : id.split('_')[1];
+                    let defaultName = id === 'eternity_seed' ? 'Eternity Seedling' : (PLANT_META[type].label || (type.charAt(0).toUpperCase() + type.slice(1)));
                     G.plants.push({
                         id: 'p' + Date.now(),
-                        type: 'eternity', name: 'Eternity Seedling', stage: 1, xp: 0, totalXp: 0,
+                        type: type, name: defaultName, stage: 1, xp: 0, totalXp: 0,
                         health: { hydration: 100, nourishment: 100, happiness: 100 }
                     });
-                    toast('The Eternity Seed has been planted!'); 
+                    toast('A new seed has been planted!'); 
                     break;
                 default: toast('Item has no effect.'); return;
             }
