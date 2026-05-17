@@ -2360,7 +2360,9 @@ function initAIAuth() {
 
   // Set Discord login link href
   const loginBtn = document.getElementById('discordLoginBtn');
-  if (loginBtn) loginBtn.href = AI_WORKER_URL + '/auth/discord';
+  if (loginBtn) {
+    loginBtn.href = AI_WORKER_URL + '/auth/discord?redirect=' + encodeURIComponent(window.location.href);
+  }
 
   // Load memories from localStorage into the editor
   const memoriesEditor = document.getElementById('memoriesEditor');
