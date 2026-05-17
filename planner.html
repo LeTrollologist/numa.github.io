@@ -730,6 +730,17 @@ textarea {
 /* ── Staggered task entrance ── */
 @keyframes taskIn { from { opacity:0; transform:translateX(-6px); } to { opacity:1; transform:none; } }
 .task-item { animation: taskIn 0.22s ease both; }
+/* ── Skill pills ── */
+.skill-pill { padding: 6px 14px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; border: 1px solid rgba(255,111,171,0.25); background: rgba(255,111,171,0.07); color: rgba(255,255,255,0.7); cursor: pointer; transition: all 0.18s; }
+.skill-pill:hover { background: rgba(255,111,171,0.18); color: white; }
+.skill-pill.active { background: rgba(255,111,171,0.25); border-color: rgba(255,111,171,0.6); color: white; box-shadow: 0 0 8px rgba(255,111,171,0.25); }
+
+/* ── Archive items ── */
+.archive-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; background:rgba(255,255,255,0.04); border:1px solid var(--border); cursor:pointer; transition:background 0.15s; }
+.archive-item:hover { background:rgba(255,111,171,0.1); }
+
+/* ── Memory update toast ── */
+.memory-update-notice { font-size:0.72rem; color:rgba(255,200,130,0.9); background:rgba(255,159,67,0.1); border:1px solid rgba(255,159,67,0.3); border-radius:8px; padding:6px 10px; margin-top:6px; }
 </style>
 </head>
 <body>
@@ -807,8 +818,15 @@ textarea {
     </div>
 
     <div class="glass card">
-      <div class="section-title">📝 Daily Reflection</div>
-      <textarea id="dailyNote" placeholder="How did the day go? What are you proud of?" style="width: 100%; min-height: 90px;" onblur="saveDailyNote()"></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="section-title" style="margin-bottom:0;">📝 Daily Reflection</div>
+        <div style="display:flex;gap:6px;">
+          <button id="dailyNoteEditBtn" onclick="toggleDailyNoteMode('edit')" class="btn btn-secondary" style="font-size:0.7rem;padding:4px 10px;display:none;">Edit</button>
+          <button id="dailyNotePrevBtn" onclick="toggleDailyNoteMode('preview')" class="btn btn-secondary" style="font-size:0.7rem;padding:4px 10px;">Preview</button>
+        </div>
+      </div>
+      <textarea id="dailyNote" placeholder="How did the day go? What are you proud of? (Supports Markdown!)" style="width: 100%; min-height: 90px;" onblur="saveDailyNote()"></textarea>
+      <div id="dailyNotePreview" style="display:none;min-height:90px;padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;font-size:0.92rem;line-height:1.6;cursor:pointer;" onclick="toggleDailyNoteMode('edit')" title="Click to edit"></div>
     </div>
   </div>
 
@@ -962,6 +980,7 @@ textarea {
 
   <!-- AI VIEW -->
   <div id="view-ai" class="view">
+
     <!-- Not logged in -->
     <div id="aiLoginWall" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:340px;gap:18px;">
       <div style="font-size:3rem;">&#128274;</div>
@@ -978,23 +997,74 @@ textarea {
     </div>
 
     <!-- Logged in -->
-    <div id="aiChatWall" style="display:none;flex-direction:column;gap:0;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+    <div id="aiChatWall" style="display:none;flex-direction:column;gap:14px;">
+
+      <!-- Header row -->
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
         <div class="section-title" style="margin-bottom:0;">&#129302; Ask Mistral AI</div>
-        <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
           <div id="aiUserBadge" style="display:flex;align-items:center;gap:7px;font-size:0.82rem;background:rgba(88,101,242,0.15);border:1px solid rgba(88,101,242,0.35);padding:5px 12px;border-radius:999px;color:rgba(255,255,255,0.8);"></div>
-          <button onclick="aiLogout()" class="btn btn-secondary" style="font-size:0.78rem;padding:6px 12px;">Logout</button>
+          <button onclick="toggleMemoriesPanel()" class="btn btn-secondary" style="font-size:0.75rem;padding:6px 11px;" title="Memories">&#129504; Memories</button>
+          <button onclick="toggleArchivesPanel()" class="btn btn-secondary" style="font-size:0.75rem;padding:6px 11px;" title="Chat Archives">&#128193; Archives</button>
+          <button onclick="aiLogout()" class="btn btn-secondary" style="font-size:0.75rem;padding:6px 10px;">Logout</button>
         </div>
       </div>
+
+      <!-- Skills bar -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="skill-pill active" data-skill="default" onclick="setSkill('default',this)">&#10024; General</button>
+        <button class="skill-pill" data-skill="plan" onclick="setSkill('plan',this)">&#128197; Plan Week</button>
+        <button class="skill-pill" data-skill="prioritize" onclick="setSkill('prioritize',this)">&#127919; Prioritize</button>
+        <button class="skill-pill" data-skill="reflect" onclick="setSkill('reflect',this)">&#128173; Reflect</button>
+        <button class="skill-pill" data-skill="motivate" onclick="setSkill('motivate',this)">&#128293; Motivate</button>
+      </div>
+
+      <!-- Memories panel (collapsible) -->
+      <div id="memoriesPanel" style="display:none;" class="glass card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:0.85rem;font-weight:600;color:var(--pink-s);">&#129504; Long-term Memories</div>
+          <div style="display:flex;gap:8px;">
+            <button onclick="saveMemories()" class="btn btn-primary" style="font-size:0.72rem;padding:4px 12px;">Save</button>
+            <button onclick="clearMemories()" class="btn btn-secondary" style="font-size:0.72rem;padding:4px 10px;">Clear</button>
+          </div>
+        </div>
+        <textarea id="memoriesEditor" rows="5"
+          placeholder="The AI will remember things here automatically. You can also edit this directly.
+Example:
+- Prefers morning for deep work
+- Working on a research paper
+- Struggles with starting tasks"
+          style="width:100%;font-size:0.83rem;font-family:var(--fm);resize:vertical;"></textarea>
+        <div style="font-size:0.65rem;color:rgba(255,255,255,0.3);margin-top:6px;">Saved locally in your browser. Sent to the AI as context every message.</div>
+      </div>
+
+      <!-- Archives panel (collapsible) -->
+      <div id="archivesPanel" style="display:none;" class="glass card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:0.85rem;font-weight:600;color:var(--pink-s);">&#128193; Chat Archives</div>
+          <button onclick="toggleArchivesPanel()" class="btn btn-secondary" style="font-size:0.72rem;padding:4px 10px;">Close</button>
+        </div>
+        <div id="archivesList" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;"></div>
+        <div style="font-size:0.65rem;color:rgba(255,255,255,0.3);margin-top:8px;">Archived chats are stored in your browser.</div>
+      </div>
+
+      <!-- Chat area -->
       <div class="glass card" style="display:flex;flex-direction:column;gap:0;min-height:360px;">
-        <div id="aiChatLog" style="flex:1;overflow-y:auto;max-height:440px;padding-bottom:4px;display:flex;flex-direction:column;"></div>
+        <div id="aiChatLog" style="flex:1;overflow-y:auto;max-height:400px;padding-bottom:4px;display:flex;flex-direction:column;"></div>
         <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
-          <input id="aiPromptInput" type="text" placeholder="Ask about your tasks, get suggestions, summarise your week&#8230;" style="flex:1;"
+          <input id="aiPromptInput" type="text" placeholder="Ask me anything&#8230;" style="flex:1;"
             onkeydown="if(event.key==='Enter'){event.preventDefault();sendAIMessage();}">
-          <button onclick="sendAIMessage()" class="btn btn-primary" style="padding:10px 20px;">Send</button>
+          <button onclick="sendAIMessage()" class="btn btn-primary" style="padding:10px 18px;">Send</button>
         </div>
-        <div style="font-size:0.68rem;color:rgba(255,255,255,0.28);margin-top:6px;text-align:center;font-family:var(--fm);">Your tasks are sent as context. Messages are not stored.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+          <div style="font-size:0.65rem;color:rgba(255,255,255,0.25);font-family:var(--fm);">Context &amp; memories sent each message. Not stored on server.</div>
+          <div style="display:flex;gap:6px;">
+            <button onclick="saveCurrentChat()" class="btn btn-secondary" style="font-size:0.7rem;padding:4px 10px;">&#128190; Save Chat</button>
+            <button onclick="clearChat()" class="btn btn-secondary" style="font-size:0.7rem;padding:4px 10px;">Clear</button>
+          </div>
+        </div>
       </div>
+
     </div>
   </div>
 
@@ -1085,10 +1155,10 @@ textarea {
 
     <div class="input-group">
       <label class="input-label">Content</label>
-      <div id="noteContent" contenteditable="true"
-        style="min-height: 160px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 10px; padding: 14px; line-height: 1.6; outline: none; font-family: var(--fb); font-size: 1rem;"
+      <textarea id="noteContent" placeholder="Write your note here... (supports Markdown!)"
+        style="width: 100%; min-height: 160px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 10px; padding: 14px; line-height: 1.6; outline: none; font-family: var(--fb); font-size: 1rem; color: white; resize: vertical;"
         onfocus="this.style.borderColor='rgba(255,111,171,0.5)'"
-        onblur="this.style.borderColor='rgba(255,255,255,0.11)'"></div>
+        onblur="this.style.borderColor='rgba(255,255,255,0.11)'"></textarea>
     </div>
 
     <div class="input-group">
@@ -1432,6 +1502,7 @@ function createTaskElement(task) {
         ${task.timeBlock ? `<span class="tag" style="background:rgba(100,181,246,0.15);color:#64b5f6">${escapeHtml(task.timeBlock)}</span>` : ''}
         ${task.status === 'in-progress' ? `<span class="tag" style="background:rgba(255,159,67,0.15);color:#ff9f43">In Progress</span>` : ''}
       </div>
+      ${task.notes ? `<div class="task-notes-preview" style="font-size:0.75rem;color:rgba(255,255,255,0.45);margin-top:6px;line-height:1.4;word-break:break-word;text-align:left;">${parseMarkdown(task.notes)}</div>` : ''}
     </div>
     <div style="display:flex;align-items:center;gap:6px;">
       <div class="priority-dot" style="background:${getPriorityColor(task.priority)}"></div>
@@ -1712,6 +1783,37 @@ function saveWeeklyFocus() {
   saveData();
 }
 
+function saveDailyNote() {
+  const el = document.getElementById('dailyNote');
+  if (el) {
+    plannerData.dailyNotes[todayStr()] = el.value;
+    saveData();
+  }
+}
+
+function toggleDailyNoteMode(mode) {
+  const editBtn = document.getElementById('dailyNoteEditBtn');
+  const prevBtn = document.getElementById('dailyNotePrevBtn');
+  const ta = document.getElementById('dailyNote');
+  const preview = document.getElementById('dailyNotePreview');
+  if (!editBtn || !prevBtn || !ta || !preview) return;
+
+  if (mode === 'preview') {
+    saveDailyNote();
+    preview.innerHTML = parseMarkdown(ta.value) || '<em style="opacity:0.4;">No reflection written yet.</em>';
+    ta.style.display = 'none';
+    preview.style.display = 'block';
+    editBtn.style.display = 'inline-block';
+    prevBtn.style.display = 'none';
+  } else {
+    ta.style.display = 'block';
+    preview.style.display = 'none';
+    editBtn.style.display = 'none';
+    prevBtn.style.display = 'inline-block';
+    ta.focus();
+  }
+}
+
 // ==================== CALENDAR ====================
 function renderCalendar() {
   const grid = document.getElementById('calendarGrid');
@@ -1865,7 +1967,7 @@ function showAddNoteModal() {
   document.getElementById('noteModalTitle').textContent = 'New Note';
   document.getElementById('deleteNoteBtn').style.display = 'none';
   document.getElementById('noteTitle').value = '';
-  document.getElementById('noteContent').innerHTML = '';
+  document.getElementById('noteContent').value = '';
   document.querySelectorAll('.note-hl-swatch').forEach((s,i) => s.classList.toggle('active', i === 0));
   document.getElementById('noteModal').classList.add('active');
   setTimeout(() => document.getElementById('noteTitle').focus(), 100);
@@ -1879,7 +1981,7 @@ function editNote(id) {
   document.getElementById('noteModalTitle').textContent = 'Edit Note';
   document.getElementById('deleteNoteBtn').style.display = 'inline-flex';
   document.getElementById('noteTitle').value = note.title || '';
-  document.getElementById('noteContent').innerHTML = note.content || '';
+  document.getElementById('noteContent').value = note.content || '';
   // Set highlight swatch
   document.querySelectorAll('.note-hl-swatch').forEach(s => {
     s.classList.toggle('active', s.dataset.hl === currentNoteHL);
@@ -1889,7 +1991,7 @@ function editNote(id) {
 
 function saveNote() {
   const title   = document.getElementById('noteTitle').value.trim();
-  const content = document.getElementById('noteContent').innerHTML.trim();
+  const content = document.getElementById('noteContent').value.trim();
   if (!title && !content) { showToast('Add some content first'); return; }
 
   const activeHL = document.querySelector('.note-hl-swatch.active');
@@ -2119,6 +2221,7 @@ function initPlanner() {
   // Load today's note & mood
   const dn = plannerData.dailyNotes[todayStr()];
   if (dn) document.getElementById('dailyNote').value = dn;
+  toggleDailyNoteMode('edit');
 
   const mood = plannerData.moodLog[todayStr()];
   if (mood) renderMoodButtons(mood);
@@ -2206,6 +2309,17 @@ const AI_WORKER_URL = 'https://ai-proxy-4lt3.onrender.com';
 
 let aiSession = null; // { token, id, username, exp }
 let aiHistory = [];
+let currentSkill = 'default';
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.toString()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
 function initAIAuth() {
   // Check if we're returning from Discord OAuth (token in URL fragment)
@@ -2227,7 +2341,7 @@ function initAIAuth() {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('auth') === 'denied') {
     const err = document.getElementById('aiAuthError');
-    if (err) { err.textContent = '\u26a0\ufe0f Your Discord account is not on the approved list.'; err.style.display = 'block'; }
+    if (err) { err.textContent = '⚠️ Your Discord account is not on the approved list.'; err.style.display = 'block'; }
     history.replaceState(null, '', window.location.pathname);
   }
 
@@ -2246,6 +2360,12 @@ function initAIAuth() {
   // Set Discord login link href
   const loginBtn = document.getElementById('discordLoginBtn');
   if (loginBtn) loginBtn.href = AI_WORKER_URL + '/auth/discord';
+
+  // Load memories from localStorage into the editor
+  const memoriesEditor = document.getElementById('memoriesEditor');
+  if (memoriesEditor) {
+    memoriesEditor.value = localStorage.getItem('aiMemories') || '';
+  }
 }
 
 function renderAIView() {
@@ -2258,14 +2378,34 @@ function renderAIView() {
     chatWall.style.display  = 'flex';
     const badge = document.getElementById('aiUserBadge');
     if (badge) badge.innerHTML = `<svg width="16" height="12" viewBox="0 0 71 55" fill="#5865F2"><path d="M60.1 4.9A58.5 58.5 0 0 0 45.5.4a40.7 40.7 0 0 0-1.8 3.7 54.1 54.1 0 0 0-16.3 0A40 40 0 0 0 25.6.4 58.4 58.4 0 0 0 11 4.9C1.6 19-1 32.8.3 46.4a59 59 0 0 0 18 9.1 43.8 43.8 0 0 0 3.8-6.2 38.4 38.4 0 0 1-6-2.9l1.4-1.1a42 42 0 0 0 36.1 0l1.5 1.1a38.3 38.3 0 0 1-6 2.9 43.6 43.6 0 0 0 3.8 6.2 58.7 58.7 0 0 0 18-9.1C72 30.6 68.3 16.9 60.1 4.9Z"/></svg> ${escapeHtml(aiSession.username)}`;
-    if (aiHistory.length === 0) {
-      const log = document.getElementById('aiChatLog');
-      if (log) log.innerHTML = '<div class="empty-state" style="padding:48px 0;margin:auto;">Hi ' + escapeHtml(aiSession.username) + '! \u2728<br><span style="font-size:0.8rem;opacity:0.6;">Ask me about your tasks, deadlines, or weekly focus.</span></div>';
-    }
+    renderChatLog();
   } else {
     loginWall.style.display = 'flex';
     chatWall.style.display  = 'none';
   }
+}
+
+function renderChatLog() {
+  const log = document.getElementById('aiChatLog');
+  if (!log) return;
+  log.innerHTML = '';
+
+  if (aiHistory.length === 0) {
+    log.innerHTML = '<div class="empty-state" style="padding:48px 0;margin:auto;">Hi ' + escapeHtml(aiSession?.username || '') + '! ✨<br><span style="font-size:0.8rem;opacity:0.6;">Ask me about your tasks, deadlines, or weekly focus.</span></div>';
+    return;
+  }
+
+  aiHistory.forEach(m => {
+    const b = document.createElement('div');
+    b.className = 'ai-bubble ' + m.role;
+    if (m.role === 'assistant') {
+      b.innerHTML = parseMarkdown(m.content);
+    } else {
+      b.textContent = m.content;
+    }
+    log.appendChild(b);
+  });
+  log.scrollTop = log.scrollHeight;
 }
 
 function aiLogout() {
@@ -2276,6 +2416,181 @@ function aiLogout() {
   showToast('Logged out of AI');
 }
 
+function setSkill(skill, btn) {
+  currentSkill = skill;
+  document.querySelectorAll('.skill-pill').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  showToast(`Skill set to: ${skill.charAt(0).toUpperCase() + skill.slice(1)}`);
+}
+
+function toggleMemoriesPanel() {
+  const panel = document.getElementById('memoriesPanel');
+  if (!panel) return;
+  const isHidden = panel.style.display === 'none';
+  panel.style.display = isHidden ? 'block' : 'none';
+  if (isHidden) {
+    const editor = document.getElementById('memoriesEditor');
+    if (editor) editor.value = localStorage.getItem('aiMemories') || '';
+  }
+}
+
+function saveMemories() {
+  const editor = document.getElementById('memoriesEditor');
+  if (!editor) return;
+  localStorage.setItem('aiMemories', editor.value);
+  showToast('Long-term memories saved');
+}
+
+function clearMemories() {
+  if (confirm('Are you sure you want to clear all long-term memories? This cannot be undone.')) {
+    localStorage.removeItem('aiMemories');
+    const editor = document.getElementById('memoriesEditor');
+    if (editor) editor.value = '';
+    showToast('Long-term memories cleared');
+  }
+}
+
+function toggleArchivesPanel() {
+  const panel = document.getElementById('archivesPanel');
+  if (!panel) return;
+  const isHidden = panel.style.display === 'none';
+  panel.style.display = isHidden ? 'block' : 'none';
+  if (isHidden) {
+    loadArchives();
+  }
+}
+
+function loadArchives() {
+  const list = document.getElementById('archivesList');
+  if (!list) return;
+  list.innerHTML = '';
+
+  let archives = [];
+  try {
+    archives = JSON.parse(localStorage.getItem('aiArchives') || '[]');
+  } catch {
+    archives = [];
+  }
+
+  if (archives.length === 0) {
+    list.innerHTML = '<div class="empty-state" style="padding: 10px 0; font-size: 0.8rem;">No archived chats yet.</div>';
+    return;
+  }
+
+  archives.sort((a, b) => b.timestamp - a.timestamp);
+
+  archives.forEach(arc => {
+    const item = document.createElement('div');
+    item.className = 'archive-item';
+    item.style.display = 'flex';
+    item.style.justifyContent = 'space-between';
+    item.style.alignItems = 'center';
+    item.style.width = '100%';
+    item.style.marginBottom = '6px';
+    item.onclick = () => loadArchiveChat(arc.id);
+
+    const info = document.createElement('div');
+    info.style.display = 'flex';
+    info.style.flexDirection = 'column';
+    info.style.gap = '2px';
+
+    const title = document.createElement('div');
+    title.style.fontWeight = '600';
+    title.style.fontSize = '0.85rem';
+    title.textContent = arc.title;
+
+    const date = document.createElement('div');
+    date.style.fontSize = '0.7rem';
+    date.style.color = 'rgba(255,255,255,0.4)';
+    date.textContent = new Date(arc.timestamp).toLocaleString();
+
+    info.appendChild(title);
+    info.appendChild(date);
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-secondary';
+    delBtn.style.padding = '4px 8px';
+    delBtn.style.fontSize = '0.7rem';
+    delBtn.innerHTML = '🗑️';
+    delBtn.onclick = (e) => deleteArchive(arc.id, e);
+
+    item.appendChild(info);
+    item.appendChild(delBtn);
+    list.appendChild(item);
+  });
+}
+
+function saveCurrentChat() {
+  if (aiHistory.length === 0) {
+    showToast('Cannot archive an empty chat.');
+    return;
+  }
+
+  let archives = [];
+  try {
+    archives = JSON.parse(localStorage.getItem('aiArchives') || '[]');
+  } catch {
+    archives = [];
+  }
+
+  const firstUserMsg = aiHistory.find(m => m.role === 'user')?.content || 'Saved Chat';
+  const title = firstUserMsg.length > 25 ? firstUserMsg.slice(0, 25) + '...' : firstUserMsg;
+
+  const newArchive = {
+    id: 'arch_' + Date.now(),
+    title: title,
+    history: JSON.parse(JSON.stringify(aiHistory)),
+    timestamp: Date.now()
+  };
+
+  archives.push(newArchive);
+  localStorage.setItem('aiArchives', JSON.stringify(archives));
+  showToast('Chat archived successfully!');
+  loadArchives();
+}
+
+function loadArchiveChat(id) {
+  let archives = [];
+  try {
+    archives = JSON.parse(localStorage.getItem('aiArchives') || '[]');
+  } catch {
+    return;
+  }
+
+  const arc = archives.find(a => a.id === id);
+  if (!arc) {
+    showToast('Chat archive not found.');
+    return;
+  }
+
+  aiHistory = JSON.parse(JSON.stringify(arc.history));
+  renderChatLog();
+  showToast('Archived chat loaded.');
+}
+
+function deleteArchive(id, e) {
+  if (e) e.stopPropagation();
+  if (confirm('Are you sure you want to delete this chat archive?')) {
+    let archives = [];
+    try {
+      archives = JSON.parse(localStorage.getItem('aiArchives') || '[]');
+    } catch {
+      archives = [];
+    }
+
+    archives = archives.filter(a => a.id !== id);
+    localStorage.setItem('aiArchives', JSON.stringify(archives));
+    showToast('Archive deleted.');
+    loadArchives();
+  }
+}
+
+function clearChat() {
+  aiHistory = [];
+  renderChatLog();
+  showToast('Chat cleared.');
+}
+
 async function sendAIMessage() {
   if (!aiSession) return;
   const input = document.getElementById('aiPromptInput');
@@ -2283,27 +2598,30 @@ async function sendAIMessage() {
   if (!msg) return;
 
   input.value = '';
-  const log = document.getElementById('aiChatLog');
-  log.innerHTML = '';
   aiHistory.push({ role: 'user', content: msg });
-  aiHistory.forEach(m => {
-    const b = document.createElement('div');
-    b.className = 'ai-bubble ' + m.role;
-    b.textContent = m.content;
-    log.appendChild(b);
-  });
+  renderChatLog();
+
+  const log = document.getElementById('aiChatLog');
+  if (!log) return;
   const thinking = document.createElement('div');
   thinking.className = 'ai-bubble assistant thinking';
-  thinking.textContent = 'Thinking\u2026';
+  thinking.textContent = 'Thinking…';
   log.appendChild(thinking);
   log.scrollTop = log.scrollHeight;
 
   // Build context for system prompt
   const doneTasks    = plannerData.tasks.filter(t => t.status === 'done').length;
   const overdueList  = plannerData.tasks.filter(isOverdue).map(t => t.title).slice(0, 5).join(', ') || 'none';
-  const todayList    = plannerData.tasks.filter(t => t.dueDate && t.dueDate.startsWith(todayStr())).map(t => `${t.title}(${t.status})`).join(', ') || 'none';
-  const dayStr       = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
-  const sys = `You are ${escapeHtml(aiSession.username)}'s warm, concise productivity assistant. Today: ${dayStr}. Tasks: ${plannerData.tasks.length} total, ${doneTasks} done. Overdue: ${overdueList}. Today's tasks: ${todayList}. Streak: ${plannerData.settings.streak} days. Weekly focus: ${plannerData.weeklyFocus || 'not set'}. Be encouraging and brief.`;
+  const todayList    = plannerData.tasks.filter(t => t.dueDate && t.dueDate.startsWith(todayStr())).map(t => `${t.title} (${t.status})`).join(', ') || 'none';
+  const dayStr       = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const plannerContext = `Today: ${dayStr}
+Tasks: ${plannerData.tasks.length} total, ${doneTasks} done.
+Overdue tasks: ${overdueList}
+Today's tasks: ${todayList}
+Streak: ${plannerData.settings.streak} days
+Weekly focus: ${plannerData.weeklyFocus || 'not set'}`;
+
+  const currentMemories = localStorage.getItem('aiMemories') || '';
 
   try {
     const resp = await fetch(AI_WORKER_URL + '/api/ai', {
@@ -2313,29 +2631,56 @@ async function sendAIMessage() {
         'Authorization': 'Bearer ' + aiSession.token,
       },
       body: JSON.stringify({
-        messages: [{ role: 'system', content: sys }, ...aiHistory],
-        max_tokens: 512,
+        messages: aiHistory,
+        memories: currentMemories,
+        skill: currentSkill,
+        plannerContext: plannerContext
       }),
     });
     const data = await resp.json();
     if (!resp.ok) throw new Error(data.error || 'API error');
 
+    thinking.remove();
+
     const reply = data.choices[0].message.content;
     aiHistory.push({ role: 'assistant', content: reply });
-    thinking.remove();
-    const b = document.createElement('div');
-    b.className = 'ai-bubble assistant';
-    b.textContent = reply;
-    log.appendChild(b);
+
+    // Render updated chat log
+    renderChatLog();
+
+    // Handle memory updates if any
+    if (data.memoryUpdate) {
+      let updatedMemories = currentMemories.trim();
+      if (updatedMemories && !updatedMemories.endsWith('\n')) {
+        updatedMemories += '\n';
+      }
+      updatedMemories += data.memoryUpdate;
+      localStorage.setItem('aiMemories', updatedMemories);
+
+      const memoriesEditor = document.getElementById('memoriesEditor');
+      if (memoriesEditor) {
+        memoriesEditor.value = updatedMemories;
+      }
+
+      // Add a nice inline banner to notify the user
+      const notice = document.createElement('div');
+      notice.className = 'memory-update-notice';
+      notice.innerHTML = `<strong>🧠 Long-term Memory Updated:</strong><br>${escapeHtml(data.memoryUpdate).replace(/\n/g, '<br>')}`;
+      log.appendChild(notice);
+
+      showToast('🧠 AI updated your memories!');
+    }
+
     log.scrollTop = log.scrollHeight;
   } catch (e) {
     thinking.remove();
     const b = document.createElement('div');
     b.className = 'ai-bubble assistant error';
-    b.textContent = '\u274c ' + (e.message || 'Something went wrong.');
+    b.textContent = '❌ ' + (e.message || 'Something went wrong.');
     if (e.message && e.message.includes('expired')) {
       b.textContent += ' Click Logout and log in again.';
-      aiSession = null; sessionStorage.removeItem('aiSession');
+      aiSession = null;
+      sessionStorage.removeItem('aiSession');
       setTimeout(renderAIView, 2000);
     }
     log.appendChild(b);
@@ -2346,8 +2691,41 @@ async function sendAIMessage() {
 // ==================== PARSEMARKDOWN ====================
 function parseMarkdown(text) {
   if (!text) return '';
-  return text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>')
-    .replace(/`(.*?)`/g,'<code style="background:rgba(255,255,255,0.1);padding:1px 4px;border-radius:3px;">$1</code>').replace(/\n/g,'<br>');
+  // Escape HTML tags to prevent XSS except the ones we explicitly generate
+  let safe = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
+  // Markdown translation:
+  // Headers (### and ####)
+  safe = safe.replace(/^###\s+(.*)$/gm, '<h3 style="font-family:var(--fb);font-weight:700;font-size:1.15rem;margin-top:12px;margin-bottom:6px;color:var(--pink-s);">$1</h3>');
+  safe = safe.replace(/^####\s+(.*)$/gm, '<h4 style="font-family:var(--fb);font-weight:600;font-size:1rem;margin-top:8px;margin-bottom:4px;color:rgba(255,255,255,0.85);">$1</h4>');
+
+  // Blockquotes (>)
+  safe = safe.replace(/^&gt;\s+(.*)$/gm, '<div style="border-left:2px solid var(--pink);padding-left:10px;color:rgba(255,255,255,0.6);font-style:italic;margin:8px 0;">$1</div>');
+
+  // Lists (- )
+  safe = safe.replace(/^-\s+(.*)$/gm, '<div style="display:flex;gap:6px;margin:4px 0 4px 10px;align-items:flex-start;"><span style="color:var(--pink);">•</span><span>$1</span></div>');
+
+  // Bold (**text**)
+  safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+  // Italics (*text*)
+  safe = safe.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+  // Inline code (`code`)
+  safe = safe.replace(/`(.*?)`/g, '<code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:4px;font-family:var(--fm);font-size:0.85em;color:#ffb3d1;">$1</code>');
+
+  // Links ([text](url))
+  safe = safe.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" style="color:var(--pink);text-decoration:none;border-bottom:1px dashed var(--pink-g);">$1</a>');
+
+  // Newlines to br
+  safe = safe.replace(/\n/g, '<br>');
+
+  return safe;
 }
 
 // ==================== DRAG-DROP IMPORT ====================
