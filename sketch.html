@@ -2950,36 +2950,62 @@ function redrawOverlay() {
   overlayCtx.clearRect(0, 0, cvs.width, cvs.height);
   overlayCtx.save();
   const dashOff = (performance.now() / 50) % 20;
-  overlayCtx.setLineDash([6, 4]);
-  overlayCtx.lineDashOffset = -dashOff;
-  overlayCtx.strokeStyle = 'rgba(255,255,255,.85)';
+  
   overlayCtx.lineWidth = 1;
-  // Only draw rectangle for rectangular selections (marquee/crop)
-  if (selectionRect && selectionRect.w > 0 && selectionRect.h > 0 && !(lassoClosed && lassoPts.length > 1)) {
-    const r = selectionRect;
-    overlayCtx.strokeRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1);
-  }
-  // Draw lasso marching ants if closed
+
+  // 1. Draw lasso path (either active drawing or closed marching ants)
   if (lassoPts.length > 1) {
+    overlayCtx.save();
     if (lassoClosed) {
+      // Draw standard marching ants for closed selection
       overlayCtx.setLineDash([6, 4]);
+      overlayCtx.lineDashOffset = -dashOff;
+      overlayCtx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
       overlayCtx.beginPath();
       lassoPts.forEach((pt, i) => i === 0 ? overlayCtx.moveTo(pt.x, pt.y) : overlayCtx.lineTo(pt.x, pt.y));
       overlayCtx.closePath();
       overlayCtx.stroke();
-      overlayCtx.setLineDash([]);
-      overlayCtx.setLineDash([]);
+
+      overlayCtx.setLineDash([6, 4]);
+      overlayCtx.lineDashOffset = -dashOff + 6; // alternate contrast dash!
+      overlayCtx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+      overlayCtx.beginPath();
+      lassoPts.forEach((pt, i) => i === 0 ? overlayCtx.moveTo(pt.x, pt.y) : overlayCtx.lineTo(pt.x, pt.y));
+      overlayCtx.closePath();
+      overlayCtx.stroke();
+    } else {
+      // Actively drawing the lasso path - high-contrast colored glow
+      overlayCtx.strokeStyle = 'rgba(255, 111, 171, 0.9)';
+      overlayCtx.lineWidth = 1.8;
       overlayCtx.beginPath();
       lassoPts.forEach((pt, i) => i === 0 ? overlayCtx.moveTo(pt.x, pt.y) : overlayCtx.lineTo(pt.x, pt.y));
       overlayCtx.stroke();
     }
+    overlayCtx.restore();
   }
+
+  // 2. Draw rectangular selection ONLY if it's NOT a lasso selection
+  if (selectionRect && selectionRect.w > 0 && selectionRect.h > 0 && lassoPts.length === 0) {
+    overlayCtx.setLineDash([6, 4]);
+    overlayCtx.lineDashOffset = -dashOff;
+    overlayCtx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+    overlayCtx.strokeRect(selectionRect.x + 0.5, selectionRect.y + 0.5, selectionRect.w - 1, selectionRect.h - 1);
+
+    overlayCtx.setLineDash([6, 4]);
+    overlayCtx.lineDashOffset = -dashOff + 6;
+    overlayCtx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+    overlayCtx.strokeRect(selectionRect.x + 0.5, selectionRect.y + 0.5, selectionRect.w - 1, selectionRect.h - 1);
+  }
+
+  // 3. Draw polygon selection helper lines
   if (polygonPts.length > 1) {
     overlayCtx.setLineDash([4, 4]);
+    overlayCtx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
     overlayCtx.beginPath();
     polygonPts.forEach((pt, i) => i === 0 ? overlayCtx.moveTo(pt.x, pt.y) : overlayCtx.lineTo(pt.x, pt.y));
     overlayCtx.stroke();
   }
+  
   overlayCtx.restore();
 }
 
@@ -3073,7 +3099,6 @@ function closeLassoSelection() {
     }
   }
   selectionRect = { x: minx, y: miny, w: maxx - minx + 1, h: maxy - miny + 1 };
-  lassoPts = [];
   redrawOverlay();
 }
 
