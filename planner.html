@@ -4102,8 +4102,21 @@ function loadStudyBuddyData() {
   document.getElementById('goalNum').textContent = dailyGoal;
 
   // Restore streak
-  const savedStreak = localStorage.getItem(SB_STRK);
-  studyStreak = savedStreak ? parseInt(savedStreak, 10) : 0;
+  let streakObj = { date: '', count: 0 };
+  try {
+    const savedStreak = localStorage.getItem(SB_STRK);
+    if (savedStreak) {
+      if (savedStreak.trim().startsWith('{')) {
+        streakObj = JSON.parse(savedStreak);
+      } else {
+        const count = parseInt(savedStreak, 10);
+        streakObj = { date: '', count: isNaN(count) ? 0 : count };
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to parse saved study streak', e);
+  }
+  studyStreak = streakObj.count || 0;
   document.getElementById('sbStreak').textContent = `🔥 ${studyStreak} day streak`;
 
   // Restore subject
@@ -4429,8 +4442,27 @@ function completeSession() {
     
     // Increase streak if goal is met
     if (sessCount === dailyGoal) {
-      studyStreak++;
-      localStorage.setItem(SB_STRK, studyStreak);
+      const today = new Date().toDateString();
+      const yest = new Date(Date.now() - 86400000).toDateString();
+      let streakObj = { date: '', count: 0 };
+      try {
+        const savedStreak = localStorage.getItem(SB_STRK);
+        if (savedStreak && savedStreak.trim().startsWith('{')) {
+          streakObj = JSON.parse(savedStreak);
+        } else if (savedStreak) {
+          const count = parseInt(savedStreak, 10);
+          streakObj = { date: '', count: isNaN(count) ? 0 : count };
+        }
+      } catch (e) {}
+
+      // Update count only if not already studied today
+      if (streakObj.date !== today) {
+        streakObj.count = (streakObj.date === yest) ? (streakObj.count || 0) + 1 : 1;
+        streakObj.date = today;
+        localStorage.setItem(SB_STRK, JSON.stringify(streakObj));
+        studyStreak = streakObj.count;
+      }
+
       document.getElementById('sbStreak').textContent = `🔥 ${studyStreak} day streak`;
       showToast(`🎉 Congratulations Numa! Daily study goal of ${dailyGoal} sessions completed! Streak is now ${studyStreak} days!`);
     } else {
