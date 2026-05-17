@@ -97,10 +97,10 @@
             position: fixed;
             transform: translate(-50%, -50%);
             z-index: 2;
-            pointer-events: none;
             transition: opacity .8s
         }
 
+        #sunSvg,
         #moonSvg {
             pointer-events: auto;
             cursor: pointer
@@ -2866,7 +2866,7 @@
 <body>
 
     <canvas id="stars"></canvas>
-    <svg id="sunSvg" width="128" height="128" viewBox="0 0 128 128" style="overflow:visible">
+    <svg id="sunSvg" width="128" height="128" viewBox="0 0 128 128" style="overflow:visible" onclick="openSunCalc()">
         <defs>
             <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stop-color="#fffde4" />
@@ -3272,7 +3272,7 @@
 
 
         // Sky
-        var LAT = 21.1702, LNG = 72.8311; // Surat, Gujarat
+        var LAT = 28.6139, LNG = 77.2090; // New Delhi
         var sc, sx, stars = [];
 
         // Music
@@ -3444,16 +3444,16 @@
             var termRx = Math.abs(Math.cos(Math.PI * 2 * phase)) * r;
             if (phase < 0.5) {
                 // Waxing — right side lit
-                // Crescent (0–0.25): terminator sweeps counterclockwise back to top (curves left)
-                // Gibbous  (0.25–0.5): terminator sweeps clockwise (curves right)
+                // Crescent (0–0.25): terminator sweeps counterclockwise back to top (curves left, leaving a thin crescent)
+                // Gibbous  (0.25–0.5): terminator sweeps clockwise (curves right, lighting most of the moon)
                 var ts = phase < 0.25 ? 0 : 1;
                 return 'M ' + top + ' A ' + r + ' ' + r + ' 0 0 1 ' + bot +
                     ' A ' + termRx + ' ' + r + ' 0 0 ' + ts + ' ' + top + ' Z';
             } else {
                 // Waning — left side lit
-                // Gibbous  (0.5–0.75): terminator sweeps clockwise (small shadow on right)
-                // Crescent (0.75–1):   terminator sweeps counterclockwise (curves left)
-                var ts = phase < 0.75 ? 1 : 0;
+                // Gibbous  (0.5–0.75): terminator sweeps counterclockwise back to top (curves right, leaving most of the moon lit)
+                // Crescent (0.75–1):   terminator sweeps clockwise (curves left, leaving a thin crescent)
+                var ts = phase < 0.75 ? 0 : 1;
                 return 'M ' + top + ' A ' + r + ' ' + r + ' 0 0 0 ' + bot +
                     ' A ' + termRx + ' ' + r + ' 0 0 ' + ts + ' ' + top + ' Z';
             }
@@ -3499,13 +3499,21 @@
             document.body.style.background = 'linear-gradient(to bottom,rgb(' +
                 Math.round(25 + 205 * t) + ',' + Math.round(50 + 130 * t) + ',' + Math.round(80 + 175 * t) + '),rgb(15,25,50))';
         }
+        // Open suncalc.org for the site's location + current date/time
+        function openSunCalc() {
+            var n = new Date();
+            var pad = function (v) { return String(v).padStart(2, '0'); };
+            var date = n.getFullYear() + '.' + pad(n.getMonth() + 1) + '.' + pad(n.getDate());
+            var time = pad(n.getHours()) + ':' + pad(n.getMinutes()) + ':' + pad(n.getSeconds());
+            window.open('https://www.suncalc.org/#/' + LAT + ',' + LNG + ',7/' + date + '/' + time, '_blank');
+        }
         // Open mooncalc.org for the site's location + current date/time
         function openMoonCalc() {
             var n = new Date();
             var pad = function (v) { return String(v).padStart(2, '0'); };
             var date = n.getFullYear() + '.' + pad(n.getMonth() + 1) + '.' + pad(n.getDate());
             var time = pad(n.getHours()) + ':' + pad(n.getMinutes()) + ':' + pad(n.getSeconds());
-            window.open('https://www.mooncalc.org/#' + LAT + ',' + LNG + ',7/' + date + '/' + time, '_blank');
+            window.open('https://www.mooncalc.org/#/' + LAT + ',' + LNG + ',7/' + date + '/' + time, '_blank');
         }
 
         // Format a Date as "h:mm AM/PM"
@@ -3536,7 +3544,24 @@
                 skyCache.sp = SunCalc.getPosition(now, LAT, LNG);
                 skyCache.mp = SunCalc.getMoonPosition(now, LAT, LNG);
                 skyCache.mil = SunCalc.getMoonIllumination(now);
-                skyCache.mt = SunCalc.getMoonTimes(now, LAT, LNG);  // rise, set, alwaysUp/Down
+                var mt = SunCalc.getMoonTimes(now, LAT, LNG);
+                if (mt && !mt.rise) {
+                    var mtPrev = SunCalc.getMoonTimes(new Date(nowMs - 86400000), LAT, LNG);
+                    if (mtPrev && mtPrev.rise) mt.rise = mtPrev.rise;
+                    else {
+                        var mtNext = SunCalc.getMoonTimes(new Date(nowMs + 86400000), LAT, LNG);
+                        if (mtNext && mtNext.rise) mt.rise = mtNext.rise;
+                    }
+                }
+                if (mt && !mt.set) {
+                    var mtPrev = SunCalc.getMoonTimes(new Date(nowMs - 86400000), LAT, LNG);
+                    if (mtPrev && mtPrev.set) mt.set = mtPrev.set;
+                    else {
+                        var mtNext = SunCalc.getMoonTimes(new Date(nowMs + 86400000), LAT, LNG);
+                        if (mtNext && mtNext.set) mt.set = mtNext.set;
+                    }
+                }
+                skyCache.mt = mt;
                 skyCache.lastCalc = nowMs;
             }
             var sp = skyCache.sp, mp = skyCache.mp, mil = skyCache.mil, mt = skyCache.mt;
