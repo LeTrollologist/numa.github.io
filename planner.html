@@ -1051,6 +1051,7 @@ Example:
       <!-- Chat area -->
       <div class="glass card" style="display:flex;flex-direction:column;gap:0;min-height:360px;">
         <div id="aiChatLog" style="flex:1;overflow-y:auto;max-height:400px;padding-bottom:4px;display:flex;flex-direction:column;"></div>
+        <div id="aiSuggestionsRow" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);"></div>
         <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
           <input id="aiPromptInput" type="text" placeholder="Ask me anything&#8230;" style="flex:1;"
             onkeydown="if(event.key==='Enter'){event.preventDefault();sendAIMessage();}">
@@ -2379,6 +2380,7 @@ function renderAIView() {
     const badge = document.getElementById('aiUserBadge');
     if (badge) badge.innerHTML = `<svg width="16" height="12" viewBox="0 0 71 55" fill="#5865F2"><path d="M60.1 4.9A58.5 58.5 0 0 0 45.5.4a40.7 40.7 0 0 0-1.8 3.7 54.1 54.1 0 0 0-16.3 0A40 40 0 0 0 25.6.4 58.4 58.4 0 0 0 11 4.9C1.6 19-1 32.8.3 46.4a59 59 0 0 0 18 9.1 43.8 43.8 0 0 0 3.8-6.2 38.4 38.4 0 0 1-6-2.9l1.4-1.1a42 42 0 0 0 36.1 0l1.5 1.1a38.3 38.3 0 0 1-6 2.9 43.6 43.6 0 0 0 3.8 6.2 58.7 58.7 0 0 0 18-9.1C72 30.6 68.3 16.9 60.1 4.9Z"/></svg> ${escapeHtml(aiSession.username)}`;
     renderChatLog();
+    renderAISuggestions(currentSkill);
   } else {
     loginWall.style.display = 'flex';
     chatWall.style.display  = 'none';
@@ -2421,6 +2423,7 @@ function setSkill(skill, btn) {
   document.querySelectorAll('.skill-pill').forEach(p => p.classList.remove('active'));
   if (btn) btn.classList.add('active');
   showToast(`Skill set to: ${skill.charAt(0).toUpperCase() + skill.slice(1)}`);
+  renderAISuggestions(skill);
 }
 
 function toggleMemoriesPanel() {
@@ -2686,6 +2689,135 @@ Weekly focus: ${plannerData.weeklyFocus || 'not set'}`;
     log.appendChild(b);
     log.scrollTop = log.scrollHeight;
   }
+}
+
+const AI_SUGGESTIONS = {
+  default: [
+    "Explain quantum computing in simple terms",
+    "Help me draft a professional email to my supervisor",
+    "Give me ideas for healthy, fast lunch options",
+    "Summarize the key events of the French Revolution",
+    "Draft a quick study schedule for a biology exam",
+    "Brainstorm a catchy name for a startup about task planning",
+    "How do I format a bibliography in MLA style?",
+    "Write a polite letter asking for a deadline extension",
+    "Suggest five morning mindfulness practices for focus",
+    "Help me practice conversational Spanish",
+    "Draft an outline for a 5-page history research paper",
+    "What are some highly effective note-taking frameworks?"
+  ],
+  plan: [
+    "Plan my study schedule for this week's exams",
+    "Plan a balanced study schedule for this week",
+    "Create a daily theme breakdown for a 5-day cycle",
+    "How should I structure study sprints for heavy workload?",
+    "Design a focus block system to prepare for my exam",
+    "Create a weekly plan focusing on deep creative projects",
+    "How can I allocate study vs resting times this week?",
+    "Help me schedule three separate group project tasks",
+    "Outline a daily study program for a computer science track",
+    "Create a weekly schedule for creative coding sprints",
+    "Suggest a structure to divide my week's homework",
+    "Plan study sessions to balance work and creative sketch projects"
+  ],
+  prioritize: [
+    "Apply the Eisenhower Matrix to prioritize today's tasks",
+    "Find my 'One Thing' that makes everything else easier today",
+    "Rank my pending tasks by urgent vs important criteria",
+    "Analyze my overdue tasks to identify what to tackle first",
+    "Create an energy-aligned priority task list for today",
+    "Which of my project research tasks has the highest payoff?",
+    "Identify the single biggest bottleneck in my daily tasks",
+    "How to prioritize five different homework deadlines?",
+    "Group today's tasks into low, medium, and high-impact actions",
+    "Help me cut two tasks that don't deserve my time today",
+    "Help me choose my top 3 non-negotiable study objectives",
+    "Prioritize my schedule to reduce feeling overwhelmed"
+  ],
+  reflect: [
+    "Guide me through a 5-minute evening reflection check-in",
+    "Synthesize my daily notes for key patterns and lessons",
+    "Let's review my streak metrics and how to stay consistent",
+    "Why am I feeling mentally blocked on my active project?",
+    "Reflect on how my sleep and mood relate to my productivity",
+    "What did I learn from my most successful day this week?",
+    "Walk me through a gratitude check-in to clear my head",
+    "Review my recent productivity blocks and how to beat them",
+    "Help me log a detailed reflection about today's main task",
+    "Reflect on how I handled distraction today",
+    "Analyze my completion rate vs mood patterns",
+    "Draft a list of questions to audit my monthly progress"
+  ],
+  motivate: [
+    "Give me a high-energy, 2-minute motivational pep talk",
+    "Help me beat severe procrastination on my first task",
+    "Celebrate my task completed streak with a customized badge",
+    "Help me reset and rebuild momentum after a low-productivity day",
+    "Give me a supportive boost because I am feeling exhausted today",
+    "Remind me why my active project matters in the long run",
+    "Inspire me with a quote and breakdown on deliberate practice",
+    "Pep talk to help me start on an intimidating study task",
+    "Let's celebrate a small victory from my notes list",
+    "How to stay motivated when a project gets tedious?",
+    "A short mindfulness exercise to rebuild my focus energy",
+    "Help me transition from passive scrolling to active deep focus"
+  ]
+};
+
+function renderAISuggestions(skill) {
+  const row = document.getElementById('aiSuggestionsRow');
+  if (!row) return;
+  row.innerHTML = '';
+
+  const options = AI_SUGGESTIONS[skill] || AI_SUGGESTIONS.default;
+  // Shuffled copy to select 6 random items
+  const shuffled = [...options].sort(() => 0.5 - Math.random());
+  const selected = shuffled.slice(0, 6);
+
+  selected.forEach(sug => {
+    const pill = document.createElement('button');
+    pill.className = 'suggestion-pill';
+    pill.style.cssText = `
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 999px;
+      padding: 6px 13px;
+      font-size: 0.73rem;
+      color: rgba(255, 255, 255, 0.72);
+      cursor: pointer;
+      transition: all 0.18s ease-in-out;
+      font-family: var(--fb);
+      line-height: 1.2;
+    `;
+    pill.textContent = sug;
+
+    // Hover effects
+    pill.onmouseover = () => {
+      pill.style.background = 'rgba(255, 111, 171, 0.16)';
+      pill.style.borderColor = 'rgba(255, 111, 171, 0.4)';
+      pill.style.color = 'var(--pink-s)';
+      pill.style.transform = 'translateY(-1px)';
+    };
+    pill.onmouseout = () => {
+      pill.style.background = 'rgba(255, 255, 255, 0.04)';
+      pill.style.borderColor = 'rgba(255, 255, 255, 0.09)';
+      pill.style.color = 'rgba(255, 255, 255, 0.72)';
+      pill.style.transform = '';
+    };
+
+    pill.onclick = () => {
+      useSuggestion(sug);
+    };
+
+    row.appendChild(pill);
+  });
+}
+
+function useSuggestion(text) {
+  const input = document.getElementById('aiPromptInput');
+  if (!input) return;
+  input.value = text;
+  input.focus();
 }
 
 // ==================== PARSEMARKDOWN ====================
