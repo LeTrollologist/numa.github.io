@@ -2955,7 +2955,7 @@
         <span id="nav-title" onclick="navigate('home')">✦ Numa</span>
         <div class="nd"></div>
         <a class="nl active" data-page="home" onclick="navigate('home')">Home</a>
-        <span class="ni" id="studyToggle" title="StudyBuddy" onclick="toggleStudyMode()">📚</span>
+
         <a class="nl" data-page="minigame" onclick="navigate('minigame')">Minigame</a>
         <a class="nl" data-page="dreamland" onclick="navigate('dreamland')">Dreamland</a>
         <a class="nl" data-page="stargazer" onclick="navigate('stargazer')">Stars</a>
@@ -2973,7 +2973,7 @@
     <div id="mob-overlay" role="dialog" aria-modal="true">
         <button class="mob-close" onclick="closeMob()">✕ Close</button>
         <a class="mob-link active" data-page="home" onclick="navigate('home');closeMob()">🏠 Home</a>
-        <a class="mob-link" onclick="toggleStudyMode();closeMob()">📚 StudyBuddy</a>
+
         <a class="mob-link" data-page="minigame" onclick="navigate('minigame');closeMob()">🏓 Minigame</a>
         <a class="mob-link" data-page="dreamland" onclick="navigate('dreamland');closeMob()">🌙 Dreamland</a>
         <a class="mob-link" data-page="stargazer" onclick="navigate('stargazer');closeMob()">🌌 Stargazer</a>
@@ -3240,219 +3240,7 @@
         </div>
     </div>
 
-    <!-- ══ STUDYBUDDY ══ -->
-    <div id="studyPanel">
-        <div class="study-shell">
 
-            <!-- ── HEADER ── -->
-            <div class="sb-hdr">
-                <div class="sb-brand">📚 StudyBuddy</div>
-                <div class="sb-hdr-right">
-                    <div id="sbDate" class="sb-date"></div>
-                    <div id="sbStreak" class="sb-streak">🔥 0 day streak</div>
-                    <button class="sb-exit-btn" onclick="exitStudyMode()">✕ Exit</button>
-                </div>
-            </div>
-
-            <!-- ── SUBJECT ── -->
-            <div class="sb-subject-row">
-                <span class="sb-subj-ico">✏️</span>
-                <input id="studySubject" class="sb-subject-input" placeholder="What are you studying today?"
-                    maxlength="80" oninput="saveStudySubject()" onkeypress="if(event.key==='Enter')this.blur()">
-            </div>
-
-            <!-- ── DAILY GOAL + STREAK PIPS ── -->
-            <div class="sb-goal-row">
-                <div class="sb-goal-ctrl">
-                    <span class="sb-goal-lbl">GOAL</span>
-                    <button class="sb-goal-btn" onclick="changeGoal(-1)">−</button>
-                    <span id="goalNum">4</span>
-                    <button class="sb-goal-btn" onclick="changeGoal(1)">+</button>
-                    <span class="sb-goal-unit">sessions today</span>
-                </div>
-                <div id="goalPips" class="sb-goal-pips"></div>
-            </div>
-
-            <!-- ── 2-COL BODY ── -->
-            <div class="sb-body">
-
-                <!-- LEFT: Timer column -->
-                <div class="sb-left">
-
-                    <!-- Mode tabs -->
-                    <div class="study-tabs">
-                        <button class="study-tab active"
-                            onclick="setPreset(25,this,'POMODORO','focus')">Pomodoro</button>
-                        <button class="study-tab" onclick="setPreset(5,this,'SHORT BREAK','break')">Short Break</button>
-                        <button class="study-tab" onclick="setPreset(15,this,'LONG BREAK','break')">Long Break</button>
-                        <button class="study-tab" onclick="setPreset(45,this,'DEEP WORK','focus')">Deep Work</button>
-                    </div>
-
-                    <!-- Custom timer -->
-                    <div class="sb-custom-row">
-                        <span class="sb-custom-lbl">Custom</span>
-                        <input type="number" id="customMinInput" class="custom-min-input" min="1" max="999"
-                            placeholder="min" onkeydown="if(event.key==='Enter')setCustomTimer()" />
-                        <select id="customTypeSelect" class="custom-type-sel">
-                            <option value="focus">Focus</option>
-                            <option value="break">Break</option>
-                        </select>
-                        <button class="custom-set-btn" onclick="setCustomTimer()">Set ▶</button>
-                    </div>
-
-                    <!-- Timer ring -->
-                    <div class="progress-ring">
-                        <svg viewBox="0 0 160 160">
-                            <circle class="progress-ring__track" stroke="rgba(255,255,255,.07)" stroke-width="9"
-                                fill="transparent" r="70" cx="80" cy="80" />
-                            <circle class="progress-ring__circle" stroke="rgba(255,105,180,.85)" stroke-width="9"
-                                fill="transparent" r="70" cx="80" cy="80" />
-                        </svg>
-                        <div class="ring-inner">
-                            <div id="timerDisplay">25:00</div>
-                            <div id="timerPhase">POMODORO</div>
-                        </div>
-                    </div>
-
-                    <!-- Controls -->
-                    <div class="study-controls">
-                        <button class="scb scb-start" id="btnToggle" onclick="toggleTimer()">▶ Start</button>
-                        <button class="scb scb-icon" id="btnReset" onclick="resetTimer()" title="Reset (R)">↺</button>
-                        <button class="scb scb-icon" id="btnSkip" onclick="skipSession()"
-                            title="Skip session">⏭</button>
-                    </div>
-
-                    <!-- Auto-advance + keyboard hint -->
-                    <div class="sb-opts-row">
-                        <label class="sb-auto-lbl">
-                            <input type="checkbox" id="autoNext">
-                            <span>Auto-advance</span>
-                        </label>
-                        <span class="sb-kbd-hint">Space · R</span>
-                    </div>
-
-                    <!-- Motivation -->
-                    <div id="motivation" class="sb-motiv">Focus now, freedom later.</div>
-
-                    <!-- Ambient -->
-                    <div class="sb-ambient">
-                        <div class="sb-ambient-hdr">
-                            <span class="amb-lbl">AMBIENT</span>
-                            <div class="amb-vol-row">
-                                <span class="vol-ico">🔈</span>
-                                <input type="range" id="ambVolume" min="0" max="100" value="40"
-                                    oninput="setAmbientVolume(this.value)">
-                                <span class="vol-ico">🔊</span>
-                            </div>
-                        </div>
-                        <div class="amb-grid">
-                            <button class="amb-btn active" id="ambNone" onclick="setAmbient('none',this)">🔇
-                                None</button>
-                            <button class="amb-btn" id="ambRain" onclick="setAmbient('rain',this)">🌧 Rain</button>
-                            <button class="amb-btn" id="ambWhite" onclick="setAmbient('white',this)">📻 White</button>
-                            <button class="amb-btn" id="ambLofi" onclick="setAmbient('lofi',this)">🎵 Lo-fi</button>
-                            <button class="amb-btn" id="ambCafe" onclick="setAmbient('cafe',this)">☕ Cafe</button>
-                            <button class="amb-btn" id="ambOcean" onclick="setAmbient('ocean',this)">🌊 Ocean</button>
-                        </div>
-                    </div>
-
-                    <!-- Session log (collapsible) -->
-                    <div class="sb-log-wrap">
-                        <button class="sb-log-toggle" id="logToggleBtn" onclick="toggleSessionLog(this)">
-                            📋 Session Log <span class="log-arrow">▸</span>
-                        </button>
-                        <div id="sessionLog" style="display:none">
-                            <ul id="sessionLogList"></ul>
-                        </div>
-                    </div>
-
-                </div><!-- /sb-left -->
-
-                <!-- RIGHT: Stats + Tasks + Notes -->
-                <div class="sb-right">
-
-                    <!-- Today stats -->
-                    <div class="sb-section">
-                        <div class="sb-section-title">TODAY</div>
-                        <div class="study-stats">
-                            <div class="stat-badge">
-                                <div class="stat-num" id="statSessions">0</div>
-                                <div class="stat-lbl">Sessions</div>
-                            </div>
-                            <div class="stat-badge">
-                                <div class="stat-num" id="statMinutes">0</div>
-                                <div class="stat-lbl">Focus min</div>
-                            </div>
-                            <div class="stat-badge">
-                                <div class="stat-num" id="statBreaks">0</div>
-                                <div class="stat-lbl">Break min</div>
-                            </div>
-                            <div class="stat-badge">
-                                <div class="stat-num" id="statTasks">0</div>
-                                <div class="stat-lbl">Tasks done</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- All-time stats -->
-                    <div class="sb-section">
-                        <div class="sb-section-title">ALL TIME</div>
-                        <div class="study-stats">
-                            <div class="stat-badge">
-                                <div class="stat-num" id="ltSessions">0</div>
-                                <div class="stat-lbl">Sessions</div>
-                            </div>
-                            <div class="stat-badge">
-                                <div class="stat-num" id="ltHours">0.0</div>
-                                <div class="stat-lbl">Hours</div>
-                            </div>
-                            <div class="stat-badge">
-                                <div class="stat-num" id="ltTasks">0</div>
-                                <div class="stat-lbl">Tasks</div>
-                            </div>
-                            <div class="stat-badge">
-                                <div class="stat-num" id="ltDays">0</div>
-                                <div class="stat-lbl">Days studied</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tasks -->
-                    <div class="sb-section todo-container">
-                        <div class="sb-section-hdr">
-                            <div class="sb-section-title">TASKS</div>
-                            <span id="taskCount" class="sb-task-count"></span>
-                        </div>
-                        <div class="todo-ig">
-                            <input type="text" id="taskInput" placeholder="Add a task…"
-                                onkeypress="if(event.key==='Enter')addTask()">
-                            <button class="task-pri-btn" id="taskPriBtn" onclick="toggleTaskPriority()"
-                                title="Toggle priority">!</button>
-                            <button class="task-add-btn" onclick="addTask()">+</button>
-                        </div>
-                        <ul id="todoList"></ul>
-                        <div class="todo-filters">
-                            <button class="tf-btn active" onclick="filterTasks('all',this)">All</button>
-                            <button class="tf-btn" onclick="filterTasks('active',this)">Active</button>
-                            <button class="tf-btn" onclick="filterTasks('done',this)">Done</button>
-                            <button class="tf-btn tf-clear" onclick="clearDoneTasks()">Clear done</button>
-                        </div>
-                    </div>
-
-                    <!-- Quick notes -->
-                    <div class="sb-section sb-notes-section">
-                        <div class="sb-section-hdr">
-                            <div class="sb-section-title">NOTES</div>
-                            <span id="notesSavedLbl" class="sb-saved-lbl"></span>
-                        </div>
-                        <textarea id="studyNotes" placeholder="Quick notes, formulas, ideas, references…"
-                            oninput="scheduleNoteSave()"></textarea>
-                    </div>
-
-                </div><!-- /sb-right -->
-            </div><!-- /sb-body -->
-        </div><!-- /study-shell -->
-    </div>
 
     <!-- Alarm audio + UI -->
     <audio id="alarmAudio" loop
@@ -3481,7 +3269,7 @@
     <script>
         // ══ SHARED STATE ══
         var currentPage = 'home';
-        var studyMode = false;
+
 
         // Sky
         var LAT = 21.1702, LNG = 72.8311; // Surat, Gujarat
@@ -3493,37 +3281,7 @@
         // Proposal
         var propTick;
 
-        // StudyBuddy
-        var timerInt2, isRun = false, defMins = 25, totSec = 1500, remSec = 1500;
-        var phase = 'POMODORO', sessionType = 'focus';
-        var sessCount = 0, focMins = 0, breakMins = 0, taskDone = 0;
-        var ring, CIRC = 2 * Math.PI * 70;
-        var ambAud = null, ambVolPct = 0.4;
-        var newTaskPriority = false, notesSaveTimer = null, dailyGoal = 4;
-        // localStorage keys
-        var SB_LT = 'sb_lt_v1', SB_TASK = 'sb_tasks_v1', SB_NOTE = 'sb_notes_v1',
-            SB_GOAL = 'sb_goal_v1', SB_STRK = 'sb_streak_v1', SB_SUBJ = 'sb_subj_v1';
-        var ambSrc = {
-            rain: 'https://assets.mixkit.co/sfx/preview/mixkit-rain-and-thunder-storm-2390.mp3',
-            white: 'https://assets.mixkit.co/sfx/preview/mixkit-white-noise-ambience-2358.mp3',
-            lofi: 'https://res.cloudinary.com/dwpisauuy/video/upload/v1772744236/Interstellar-Space-Sounds_ux8nf2.mp3',
-            cafe: 'https://assets.mixkit.co/sfx/preview/mixkit-restaurant-crowd-talking-ambience-444.mp3',
-            ocean: 'https://assets.mixkit.co/sfx/preview/mixkit-beach-waves-loop-1196.mp3'
-        };
-        var motivFocus = [
-            'Focus now, freedom later.', 'Your future self is proud.', 'Stay steady. Stay calm.',
-            'Small steps, big futures.', 'You can do this. 💪', 'Deep breaths. Then deep work.',
-            'Progress, not perfection.', 'You are doing amazing. Keep going.',
-            'One task at a time.', 'Excellence is built in small moments.',
-            'Stay curious. Stay focused.', 'Each session is an investment in your future.',
-            'Consistency beats intensity.', 'You\'ve got this.', 'Lock in. 🔒', 'Make it count.'
-        ];
-        var motivBreak = [
-            'Breathe. You earned this.', 'Rest is productive.', 'Hydrate and recharge. 💧',
-            'Stretch your body. Clear your mind.', 'Breaks make the work better.',
-            'Step back. Come back stronger.', 'A rested mind is a sharp mind.',
-            'You\'re allowed to rest.', 'Enjoy every second.', 'You\'re doing great.'
-        ];
+
 
         // Dreamland
         var ytPlayer = null, sleepTmr = null, cntIntDL = null, alarmTarget = null;
@@ -3620,7 +3378,6 @@
             if (pageId === 'dreamland' && !ytPlayer && window.YT && window.YT.Player) initYTPlayer();
             if (pageId === 'minigame') setTimeout(resizePong, 60);
             if (pageId === 'stargazer') setTimeout(initStargazer, 80);
-            if (studyMode && pageId !== 'home') exitStudyMode();
         }
 
         // ══════════════════════════════════════════════════════════
@@ -3737,7 +3494,7 @@
             });
         }
         function updateBg(alt) {
-            if (studyMode || currentPage === 'dreamland' || currentPage === 'stargazer') return;
+            if (currentPage === 'dreamland' || currentPage === 'stargazer') return;
             var t = Math.max(0, Math.min(1, (alt + Math.PI / 2) / Math.PI));
             document.body.style.background = 'linear-gradient(to bottom,rgb(' +
                 Math.round(25 + 205 * t) + ',' + Math.round(50 + 130 * t) + ',' + Math.round(80 + 175 * t) + '),rgb(15,25,50))';
@@ -3784,7 +3541,7 @@
             }
             var sp = skyCache.sp, mp = skyCache.mp, mil = skyCache.mil, mt = skyCache.mt;
             updateBg(sp.altitude);
-            var show = !studyMode && currentPage !== 'dreamland' && currentPage !== 'stargazer';
+            var show = currentPage !== 'dreamland' && currentPage !== 'stargazer';
             var sun = document.getElementById('sunSvg');
             var moon = document.getElementById('moonSvg');
             var moonLabel = document.getElementById('moonLabel');
@@ -3843,7 +3600,6 @@
                 if (moonLabel) moonLabel.style.display = 'none';
                 if (currentPage === 'dreamland') document.body.style.background = '#020205';
                 if (currentPage === 'stargazer') document.body.style.background = '#020210';
-                if (studyMode) document.body.style.background = 'linear-gradient(160deg,#0a1020,#111830,#060c18)';
             }
             requestAnimationFrame(drawSky);
         }
@@ -3880,322 +3636,7 @@
 
         function openProposal() { } function closeProposal() { } function sayYes() { } function sayNo() { }
 
-        // ══════════════════════════════════════════════════════════
-        // STUDYBUDDY
-        // ══════════════════════════════════════════════════════════
 
-        // ── Ring ──
-        function setRing(pct) {
-            if (ring) ring.style.strokeDashoffset = CIRC - (pct / 100) * CIRC;
-        }
-        function refreshDisp() {
-            var m = Math.floor(remSec / 60), s = remSec % 60;
-            var td = document.getElementById('timerDisplay');
-            var tp = document.getElementById('timerPhase');
-            if (td) td.innerText = m + ':' + (s < 10 ? '0' : '') + s;
-            if (tp) tp.innerText = phase;
-            setRing((remSec / totSec) * 100);
-        }
-
-        // ── Today stats ──
-        function updateStats() {
-            var ids = { statSessions: sessCount, statMinutes: focMins, statBreaks: breakMins, statTasks: taskDone };
-            Object.keys(ids).forEach(function (id) { var el = document.getElementById(id); if (el) el.textContent = ids[id]; });
-        }
-
-        // ── Lifetime stats (localStorage) ──
-        function getLT() { return JSON.parse(localStorage.getItem(SB_LT) || '{"sessions":0,"focusMins":0,"tasks":0,"days":[]}'); }
-        function saveLT(d) { localStorage.setItem(SB_LT, JSON.stringify(d)); }
-        function addLTSession() {
-            var d = getLT(); d.sessions++; d.focusMins += defMins;
-            var today = new Date().toDateString();
-            if (d.days.indexOf(today) < 0) d.days.push(today);
-            saveLT(d); updateLTStats();
-        }
-        function addLTTask() { var d = getLT(); d.tasks++; saveLT(d); updateLTStats(); }
-        function updateLTStats() {
-            var d = getLT();
-            var ids = { ltSessions: d.sessions, ltHours: (d.focusMins / 60).toFixed(1), ltTasks: d.tasks, ltDays: d.days.length };
-            Object.keys(ids).forEach(function (id) { var el = document.getElementById(id); if (el) el.textContent = ids[id]; });
-        }
-
-        // ── Streak ──
-        function getStreak() { return JSON.parse(localStorage.getItem(SB_STRK) || '{"date":"","count":0}'); }
-        function markStudiedToday() {
-            var s = getStreak(), today = new Date().toDateString(), yest = new Date(Date.now() - 86400000).toDateString();
-            if (s.date === today) return;
-            s.count = (s.date === yest) ? s.count + 1 : 1;
-            s.date = today; localStorage.setItem(SB_STRK, JSON.stringify(s));
-            var el = document.getElementById('sbStreak'); if (el) el.textContent = '🔥 ' + s.count + ' day streak';
-        }
-        function loadStreak() {
-            var s = getStreak(), el = document.getElementById('sbStreak');
-            if (el) el.textContent = '🔥 ' + s.count + ' day streak';
-        }
-
-        // ── Daily goal ──
-        function loadGoal() {
-            dailyGoal = parseInt(localStorage.getItem(SB_GOAL) || '4', 10);
-            var el = document.getElementById('goalNum'); if (el) el.textContent = dailyGoal;
-            updateGoalPips();
-        }
-        function changeGoal(delta) {
-            dailyGoal = Math.max(1, Math.min(12, dailyGoal + delta));
-            localStorage.setItem(SB_GOAL, dailyGoal);
-            var el = document.getElementById('goalNum'); if (el) el.textContent = dailyGoal;
-            updateGoalPips();
-        }
-        function updateGoalPips() {
-            var pips = document.getElementById('goalPips'); if (!pips) return;
-            pips.innerHTML = '';
-            for (var i = 0; i < dailyGoal; i++) {
-                var s = document.createElement('span');
-                s.className = 'goal-pip' + (i < sessCount ? ' filled' : '');
-                pips.appendChild(s);
-            }
-        }
-
-        // ── Date display ──
-        function updateSBDate() {
-            var el = document.getElementById('sbDate'); if (!el) return;
-            el.textContent = new Date().toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
-        }
-
-        // ── Subject ──
-        function saveStudySubject() {
-            var inp = document.getElementById('studySubject'); if (inp) localStorage.setItem(SB_SUBJ, inp.value);
-        }
-        function loadStudySubject() {
-            var inp = document.getElementById('studySubject'); if (inp) inp.value = localStorage.getItem(SB_SUBJ) || '';
-        }
-
-        // ── Notes ──
-        function scheduleNoteSave() {
-            clearTimeout(notesSaveTimer);
-            notesSaveTimer = setTimeout(function () {
-                var el = document.getElementById('studyNotes'); if (el) localStorage.setItem(SB_NOTE, el.value);
-                var lbl = document.getElementById('notesSavedLbl');
-                if (lbl) { lbl.textContent = 'Saved ✓'; setTimeout(function () { lbl.textContent = ''; }, 2000); }
-            }, 800);
-        }
-        function loadNotes() {
-            var el = document.getElementById('studyNotes'); if (el) el.value = localStorage.getItem(SB_NOTE) || '';
-        }
-
-        // ── Tasks ──
-        function renderTask(text, priority, done) {
-            var li = document.createElement('li');
-            if (priority) li.classList.add('priority');
-            if (done) li.classList.add('done');
-            li.innerHTML = '<span class="task-text">' + text + '</span>'
-                + '<div class="task-btns">'
-                + '<button class="task-done-btn" onclick="markDone(this.closest(\'li\'))" title="Mark done">✔</button>'
-                + '<button class="task-del-btn" onclick="deleteTask(this.closest(\'li\'))" title="Delete">✕</button>'
-                + '</div>';
-            document.getElementById('todoList').appendChild(li);
-        }
-        function saveTasks() {
-            var tasks = [];
-            document.querySelectorAll('#todoList li').forEach(function (li) {
-                tasks.push({ text: li.querySelector('.task-text').textContent, priority: li.classList.contains('priority'), done: li.classList.contains('done') });
-            });
-            localStorage.setItem(SB_TASK, JSON.stringify(tasks));
-        }
-        function loadSavedTasks() {
-            var tasks = JSON.parse(localStorage.getItem(SB_TASK) || '[]');
-            var list = document.getElementById('todoList'); if (!list) return;
-            list.innerHTML = '';
-            tasks.forEach(function (t) { renderTask(t.text, t.priority, t.done); });
-            updateTaskCount();
-        }
-        function addTask() {
-            var inp = document.getElementById('taskInput');
-            if (!inp || !inp.value.trim()) return;
-            renderTask(inp.value.trim(), newTaskPriority, false);
-            inp.value = ''; saveTasks(); updateTaskCount();
-            // Reset priority toggle after adding
-            newTaskPriority = false;
-            var pb = document.getElementById('taskPriBtn'); if (pb) pb.classList.remove('active');
-        }
-        function markDone(li) {
-            li.classList.toggle('done');
-            if (li.classList.contains('done')) { taskDone++; addLTTask(); }
-            else { taskDone = Math.max(0, taskDone - 1); }
-            updateStats(); saveTasks(); updateTaskCount();
-        }
-        function deleteTask(li) { li.remove(); saveTasks(); updateTaskCount(); }
-        function updateTaskCount() {
-            var all = document.querySelectorAll('#todoList li').length;
-            var done = document.querySelectorAll('#todoList li.done').length;
-            var el = document.getElementById('taskCount'); if (el) el.textContent = (all - done) + ' left';
-        }
-        function filterTasks(f, btn) {
-            document.querySelectorAll('.tf-btn').forEach(function (b) { b.classList.remove('active'); }); btn.classList.add('active');
-            document.querySelectorAll('#todoList li').forEach(function (li) {
-                li.style.display = (f === 'all') ? '' : (f === 'active' && !li.classList.contains('done')) ? '' : (f === 'done' && li.classList.contains('done')) ? '' : 'none';
-            });
-        }
-        function clearDoneTasks() {
-            document.querySelectorAll('#todoList li.done').forEach(function (li) { li.remove(); }); saveTasks(); updateTaskCount();
-        }
-        function toggleTaskPriority() {
-            newTaskPriority = !newTaskPriority;
-            var btn = document.getElementById('taskPriBtn'); if (btn) btn.classList.toggle('active', newTaskPriority);
-        }
-
-        // ── Timer preset ──
-        function setPreset(mins, btn, ph, type) {
-            document.querySelectorAll('.study-tab').forEach(function (b) { b.classList.remove('active'); }); btn.classList.add('active');
-            defMins = mins; phase = ph; sessionType = type || 'focus';
-            resetTimer();
-            var msgs = sessionType === 'focus' ? motivFocus : motivBreak;
-            var mot = document.getElementById('motivation'); if (mot) mot.textContent = msgs[0];
-            if (ring) ring.style.stroke = sessionType === 'break' ? 'rgba(100,200,255,.85)' : 'rgba(255,105,180,.85)';
-        }
-
-        // ── Custom timer ──
-        function setCustomTimer() {
-            var inp = document.getElementById('customMinInput');
-            var sel = document.getElementById('customTypeSelect');
-            var mins = parseInt(inp.value, 10);
-            if (!mins || mins < 1 || mins > 999) {
-                inp.focus(); inp.select(); return;
-            }
-            var type = sel.value;
-            var ph = mins + ' MIN ' + (type === 'focus' ? 'FOCUS' : 'BREAK');
-            document.querySelectorAll('.study-tab').forEach(function (b) { b.classList.remove('active'); });
-            defMins = mins; phase = ph; sessionType = type;
-            resetTimer();
-            var msgs = sessionType === 'focus' ? motivFocus : motivBreak;
-            var mot = document.getElementById('motivation');
-            if (mot) mot.textContent = msgs[Math.floor(Math.random() * msgs.length)];
-            if (ring) ring.style.stroke = type === 'break' ? 'rgba(100,200,255,.85)' : 'rgba(255,105,180,.85)';
-            inp.blur();
-        }
-
-        // ── Timer controls ──
-        function toggleTimer() {
-            var btn = document.getElementById('btnToggle');
-            if (isRun) {
-                clearInterval(timerInt2); isRun = false;
-                if (btn) { btn.innerHTML = '▶ Resume'; btn.style.background = 'rgba(255,105,180,.4)'; }
-            } else {
-                if (remSec <= 0) resetTimer();
-                isRun = true; timerInt2 = setInterval(timerTick, 1000);
-                if (btn) { btn.innerHTML = '⏸ Pause'; btn.style.background = 'var(--pink)'; }
-            }
-        }
-        function resetTimer() {
-            clearInterval(timerInt2); isRun = false;
-            totSec = remSec = defMins * 60;
-            var btn = document.getElementById('btnToggle');
-            if (btn) { btn.innerHTML = '▶ Start'; btn.style.background = 'var(--pink)'; }
-            refreshDisp();
-        }
-        function skipSession() {
-            if (remSec === totSec && !isRun) return;
-            clearInterval(timerInt2); isRun = false;
-            if (remSec < totSec) { // timer had started — count it
-                if (sessionType === 'focus') { sessCount++; markStudiedToday(); addLTSession(); addSessionLog('focus', defMins); }
-                else { addSessionLog('break', defMins); }
-                updateStats(); updateGoalPips();
-            }
-            resetTimer();
-            var an = document.getElementById('autoNext');
-            if (an && an.checked) setTimeout(autoAdvance, 350);
-        }
-        function autoAdvance() {
-            var tabs = document.querySelectorAll('.study-tab');
-            if (sessionType === 'focus') {
-                (sessCount % 4 === 0 ? tabs[2] : tabs[1]).click(); // every 4th → long break
-            } else { tabs[0].click(); }
-            setTimeout(toggleTimer, 300);
-        }
-
-        // ── Timer tick ──
-        function timerTick() {
-            remSec--;
-            if (remSec % 60 === 0 && remSec < totSec) {
-                if (sessionType === 'focus') focMins++; else breakMins++;
-                updateStats();
-            }
-            refreshDisp();
-            if (remSec <= 0) {
-                clearInterval(timerInt2); isRun = false;
-                var btn = document.getElementById('btnToggle'); if (btn) btn.innerHTML = '▶ Start';
-                var mot = document.getElementById('motivation');
-                if (sessionType === 'focus') {
-                    sessCount++; markStudiedToday(); addLTSession(); updateGoalPips();
-                    if (mot) mot.textContent = '✅ Focus session done! Take a break. 💖';
-                    addSessionLog('focus', defMins);
-                } else {
-                    if (mot) mot.textContent = '😌 Break over — back to it!';
-                    addSessionLog('break', defMins);
-                }
-                triggerStudyAlarm(); updateStats();
-                var an = document.getElementById('autoNext'); if (an && an.checked) setTimeout(autoAdvance, 1500);
-            }
-        }
-
-        // ── Study alarm ──
-        function triggerStudyAlarm() {
-            var ringEl = document.getElementById('alarm-ring');
-            var h3 = ringEl.querySelector('h3'), orig = h3.innerText;
-            h3.innerText = '📚 Session complete! Take a break 💖';
-            triggerAlarm();
-            var rr = setInterval(function () { if (!ringEl.classList.contains('active')) { h3.innerText = orig; clearInterval(rr); } }, 500);
-        }
-
-        // ── Session log ──
-        function addSessionLog(type, mins) {
-            var timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            var list = document.getElementById('sessionLogList'); if (!list) return;
-            var li = document.createElement('li');
-            li.innerHTML = '<span class="log-icon">' + (type === 'focus' ? '🎯' : '☕') + '</span>'
-                + '<span class="log-time">' + timeStr + '</span>'
-                + '<span class="log-desc">' + (type === 'focus' ? 'Focus' : 'Break') + ' · ' + mins + 'm</span>';
-            list.prepend(li);
-        }
-        function toggleSessionLog(btn) {
-            var log = document.getElementById('sessionLog'); if (!log) return;
-            var open = log.style.display === 'none'; log.style.display = open ? 'block' : 'none';
-            var arrow = btn ? btn.querySelector('.log-arrow') : null;
-            if (arrow) arrow.textContent = open ? '▾' : '▸';
-        }
-
-        // ── Ambient ──
-        function setAmbient(type, btn) {
-            document.querySelectorAll('.amb-btn').forEach(function (b) { b.classList.remove('active'); }); btn.classList.add('active');
-            if (ambAud) { ambAud.pause(); ambAud = null; }
-            if (type !== 'none') { ambAud = new Audio(ambSrc[type]); ambAud.loop = true; ambAud.volume = ambVolPct; ambAud.play().catch(function () { }); }
-        }
-        function setAmbientVolume(val) {
-            ambVolPct = val / 100; if (ambAud) ambAud.volume = ambVolPct;
-        }
-
-        // ── Mode toggle ──
-        function toggleStudyMode() { studyMode ? exitStudyMode() : enterStudyMode(); }
-        function enterStudyMode() {
-            studyMode = true;
-            document.body.classList.add('studyMode');
-            document.querySelectorAll('.page-section').forEach(function (el) { el.style.display = 'none'; });
-            document.getElementById('studyPanel').style.display = 'block';
-            var tog = document.getElementById('studyToggle'); tog.innerText = '✕'; tog.title = 'Exit StudyBuddy';
-            // Load all persisted data
-            updateSBDate(); loadStreak(); loadGoal(); loadStudySubject(); loadNotes(); loadSavedTasks(); updateLTStats(); updateStats();
-        }
-        function exitStudyMode() {
-            studyMode = false;
-            document.body.classList.remove('studyMode');
-            clearInterval(timerInt2); isRun = false;
-            if (ambAud) { ambAud.pause(); ambAud = null; }
-            document.querySelectorAll('.amb-btn').forEach(function (b) { b.classList.remove('active'); });
-            var an = document.getElementById('ambNone'); if (an) an.classList.add('active');
-            document.getElementById('studyPanel').style.display = 'none';
-            var tog = document.getElementById('studyToggle'); tog.innerText = '📚'; tog.title = 'StudyBuddy';
-            document.querySelectorAll('.page-section').forEach(function (el) { el.style.display = ''; });
-            navigate('home');
-        }
 
         // ══════════════════════════════════════════════════════════
         // CONTACT
@@ -27963,28 +27404,7 @@
             vinylEl = document.getElementById('vinyl');
             mLabel = document.getElementById('musicStatus');
 
-            // StudyBuddy ring
-            ring = document.querySelector('.progress-ring__circle');
-            ring.style.strokeDasharray = CIRC;
-            ring.style.strokeDashoffset = 0;
-            refreshDisp();
 
-            // Rotate motivation message every 25s, split by focus vs break mode
-            setInterval(function () {
-                if (studyMode && isRun) {
-                    var msgs = sessionType === 'focus' ? motivFocus : motivBreak;
-                    var mot = document.getElementById('motivation');
-                    if (mot) { mot.style.opacity = '0'; setTimeout(function () { mot.textContent = msgs[Math.floor(Math.random() * msgs.length)]; mot.style.opacity = '1'; }, 400); }
-                }
-            }, 25000);
-
-            // StudyBuddy keyboard shortcuts
-            document.addEventListener('keydown', function (e) {
-                if (!studyMode) return;
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-                if (e.code === 'Space') { e.preventDefault(); toggleTimer(); }
-                if (e.key === 'r' || e.key === 'R') { e.preventDefault(); resetTimer(); }
-            });
 
             // Clocks
             function tick2() {
