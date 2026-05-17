@@ -3350,7 +3350,7 @@ function symmetricParticlePositions(px, py) {
   }
   return out;
 }
-
+const paintTools = ['brush', 'pencil', 'watercolor', 'chalk', 'spray', 'smudge', 'clone', 'eraser', 'fill', 'line', 'rect', 'ellipse', 'gradient'];
 
 /* ════════ POINTER EVENTS ════════════════════════════ */
 function getPos(e) {
@@ -3486,9 +3486,6 @@ function onDown(e) {
   }
 
   if (e.button !== 0 && tool !== 'fill') return;
-
-// Global paintTools definition (move to top-level script scope)
-const paintTools = ['brush', 'pencil', 'watercolor', 'chalk', 'spray', 'smudge', 'clone', 'eraser', 'fill', 'line', 'rect', 'ellipse', 'gradient'];
 
   drawing = true;
   lx = p.x;
