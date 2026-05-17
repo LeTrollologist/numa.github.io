@@ -694,6 +694,42 @@ textarea {
   color: #ff8080;
   font-family: var(--fm);
 }
+/* ── Custom Scrollbars ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(255,111,171,0.35); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,111,171,0.6); }
+* { scrollbar-width: thin; scrollbar-color: rgba(255,111,171,0.35) rgba(255,255,255,0.03); }
+
+/* ── Heatmap ── */
+.heatmap-outer { display: flex; gap: 3px; overflow-x: auto; padding-bottom: 4px; }
+.heatmap-week { display: flex; flex-direction: column; gap: 3px; }
+.heatmap-cell { width: 13px; height: 13px; border-radius: 2px; flex-shrink: 0; position: relative; cursor: default; transition: transform 0.12s; }
+.heatmap-cell:hover { transform: scale(1.4); z-index: 2; }
+.heatmap-cell[data-tip]:hover::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 5px); left: 50%; transform: translateX(-50%); white-space: nowrap; background: #1a2238; border: 1px solid var(--border-p); padding: 3px 8px; border-radius: 6px; font-size: 0.62rem; color: white; z-index: 10; pointer-events: none; }
+.heatmap-month-labels { display: flex; gap: 3px; margin-bottom: 3px; overflow: hidden; }
+.heatmap-month-label { font-size: 0.6rem; color: rgba(255,255,255,0.35); font-family: var(--fm); min-width: 13px; }
+
+/* ── AI Chat ── */
+.ai-bubble { padding: 12px 16px; border-radius: 12px; margin-bottom: 8px; line-height: 1.6; font-size: 0.93rem; max-width: 88%; }
+.ai-bubble.user { background: rgba(255,111,171,0.15); border: 1px solid rgba(255,111,171,0.28); margin-left: auto; }
+.ai-bubble.assistant { background: rgba(255,255,255,0.05); border: 1px solid var(--border); margin-right: auto; }
+.ai-bubble.thinking { opacity: 0.5; font-style: italic; }
+.ai-bubble.error { border-color: rgba(255,80,80,0.35); }
+
+/* ── Task card left stripe ── */
+.task-item { border-left: 3px solid transparent; transition: all 0.2s ease, border-left-color 0s; }
+
+/* ── Drag-drop overlay ── */
+#dropOverlay { position: fixed; inset: 0; background: rgba(10,6,24,0.8); border: 3px dashed rgba(255,111,171,0.6); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
+#dropOverlay.active { display: flex; }
+
+/* ── FAB hint ── */
+.fab-hint { position: fixed; bottom: 38px; right: 100px; font-size: 0.68rem; color: rgba(255,255,255,0.3); font-family: var(--fm); background: rgba(0,0,0,0.45); padding: 3px 8px; border-radius: 999px; pointer-events: none; z-index: 199; }
+
+/* ── Staggered task entrance ── */
+@keyframes taskIn { from { opacity:0; transform:translateX(-6px); } to { opacity:1; transform:none; } }
+.task-item { animation: taskIn 0.22s ease both; }
 </style>
 </head>
 <body>
@@ -712,12 +748,14 @@ textarea {
     <div class="nav-tab" data-view="assignments">Tasks</div>
     <div class="nav-tab" data-view="notes">Notes</div>
     <div class="nav-tab" data-view="insights">Insights</div>
+    <div class="nav-tab" data-view="ai">✨ Ask AI</div>
   </div>
 
   <div style="display: flex; align-items: center; gap: 12px; flex-shrink: 0;">
     <div id="streakDisplay" style="font-family: var(--fm); font-size: 0.85rem; background: rgba(255,159,67,0.1); padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(255,159,67,0.3); color: #ff9f43;">
       🔥 <span id="streakCount">0</span> day streak
     </div>
+    <button onclick="showImportSection()" class="btn btn-secondary" style="padding: 8px 14px; font-size: 0.8rem;">Import</button>
     <button onclick="showExportModal()" class="btn btn-secondary" style="padding: 8px 14px; font-size: 0.8rem;">Export</button>
     <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="padding: 8px 14px; font-size: 0.8rem;">Home</button>
   </div>
@@ -834,6 +872,10 @@ textarea {
           <option value="done">Done</option>
           <option value="overdue">Overdue</option>
         </select>
+        <select id="assignmentSort" onchange="renderAssignments()" style="max-width: 160px;">
+          <option value="date">Sort by Date</option>
+          <option value="energy">Energy Sync ✨</option>
+        </select>
         <select id="categoryFilter" onchange="renderAssignments()" style="max-width: 160px;">
           <option value="">All Categories</option>
         </select>
@@ -866,6 +908,21 @@ textarea {
   <div id="view-insights" class="view">
     <div class="section-title">🌌 Your Progress</div>
 
+    <div class="glass card" style="margin-bottom:18px;">
+      <div class="section-title" style="margin-bottom:8px;">🗓️ Activity Heatmap <span style="font-size:0.75rem;color:rgba(255,255,255,0.4);font-family:var(--fm);">last 16 weeks</span></div>
+      <div id="heatmapMonths" class="heatmap-month-labels"></div>
+      <div id="heatmapGrid" class="heatmap-outer"></div>
+      <div style="display:flex;gap:6px;align-items:center;margin-top:8px;">
+        <span style="font-size:0.65rem;color:rgba(255,255,255,0.35);font-family:var(--fm);">Less</span>
+        <div style="width:10px;height:10px;border-radius:2px;background:rgba(255,111,171,0.06);"></div>
+        <div style="width:10px;height:10px;border-radius:2px;background:rgba(255,111,171,0.25);"></div>
+        <div style="width:10px;height:10px;border-radius:2px;background:rgba(255,111,171,0.5);"></div>
+        <div style="width:10px;height:10px;border-radius:2px;background:rgba(255,111,171,0.8);"></div>
+        <div style="width:10px;height:10px;border-radius:2px;background:rgba(255,111,171,1);"></div>
+        <span style="font-size:0.65rem;color:rgba(255,255,255,0.35);font-family:var(--fm);">More</span>
+      </div>
+    </div>
+
     <div class="stats-grid">
       <div class="stat-card glass">
         <div class="stat-number" id="totalDone">0</div>
@@ -893,13 +950,47 @@ textarea {
     </div>
 
     <div class="glass card" style="margin-top: 18px;">
-      <div class="section-title">Upcoming Deadlines</div>
-      <div id="upcomingList"></div>
-    </div>
-
     <div class="glass card" style="margin-top: 18px;">
       <div class="section-title">Tasks by Category</div>
       <div id="categoryBreakdown"></div>
+    </div>
+  </div>
+
+  <!-- AI VIEW -->
+  <div id="view-ai" class="view">
+    <!-- Not logged in -->
+    <div id="aiLoginWall" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:340px;gap:18px;">
+      <div style="font-size:3rem;">&#128274;</div>
+      <div style="font-size:1.4rem;font-family:var(--fd);color:var(--pink-s);">Login required</div>
+      <div style="font-size:0.9rem;color:rgba(255,255,255,0.55);text-align:center;max-width:320px;line-height:1.6;">This feature is restricted to approved users. Log in with your Discord account to continue.</div>
+      <a id="discordLoginBtn" href="https://analytics-server-bdrm.onrender.com/auth/discord"
+        style="display:inline-flex;align-items:center;gap:10px;padding:13px 26px;border-radius:999px;background:#5865F2;color:white;text-decoration:none;font-weight:700;font-size:1rem;box-shadow:0 4px 18px rgba(88,101,242,0.4);transition:transform 0.18s,box-shadow 0.18s;"
+        onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 6px 24px rgba(88,101,242,0.55)'"
+        onmouseout="this.style.transform='';this.style.boxShadow='0 4px 18px rgba(88,101,242,0.4)'">
+        <svg width="22" height="17" viewBox="0 0 71 55" fill="white" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0)"><path d="M60.1 4.9A58.5 58.5 0 0 0 45.5.4a40.7 40.7 0 0 0-1.8 3.7 54.1 54.1 0 0 0-16.3 0A40 40 0 0 0 25.6.4 58.4 58.4 0 0 0 11 4.9C1.6 19 -1 32.8.3 46.4a59 59 0 0 0 18 9.1 43.8 43.8 0 0 0 3.8-6.2 38.4 38.4 0 0 1-6-2.9l1.4-1.1a42 42 0 0 0 36.1 0l1.5 1.1a38.3 38.3 0 0 1-6 2.9 43.6 43.6 0 0 0 3.8 6.2 58.7 58.7 0 0 0 18-9.1C72 30.6 68.3 16.9 60.1 4.9ZM23.7 38.1c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.5 0 6.4 3.2 6.3 7.2 0 4-2.8 7.2-6.3 7.2Zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.5 0 6.4 3.2 6.3 7.2 0 4-2.8 7.2-6.3 7.2Z"/></g></svg>
+        Login with Discord
+      </a>
+      <div id="aiAuthError" style="font-size:0.8rem;color:#ff8080;display:none;"></div>
+    </div>
+
+    <!-- Logged in -->
+    <div id="aiChatWall" style="display:none;flex-direction:column;gap:0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div class="section-title" style="margin-bottom:0;">&#129302; Ask Mistral AI</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div id="aiUserBadge" style="display:flex;align-items:center;gap:7px;font-size:0.82rem;background:rgba(88,101,242,0.15);border:1px solid rgba(88,101,242,0.35);padding:5px 12px;border-radius:999px;color:rgba(255,255,255,0.8);"></div>
+          <button onclick="aiLogout()" class="btn btn-secondary" style="font-size:0.78rem;padding:6px 12px;">Logout</button>
+        </div>
+      </div>
+      <div class="glass card" style="display:flex;flex-direction:column;gap:0;min-height:360px;">
+        <div id="aiChatLog" style="flex:1;overflow-y:auto;max-height:440px;padding-bottom:4px;display:flex;flex-direction:column;"></div>
+        <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+          <input id="aiPromptInput" type="text" placeholder="Ask about your tasks, get suggestions, summarise your week&#8230;" style="flex:1;"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();sendAIMessage();}">
+          <button onclick="sendAIMessage()" class="btn btn-primary" style="padding:10px 20px;">Send</button>
+        </div>
+        <div style="font-size:0.68rem;color:rgba(255,255,255,0.28);margin-top:6px;text-align:center;font-family:var(--fm);">Your tasks are sent as context. Messages are not stored.</div>
+      </div>
     </div>
   </div>
 
@@ -907,6 +998,7 @@ textarea {
 
 <!-- FLOATING ACTION BUTTON -->
 <button class="fab" onclick="showAddTaskModal()" title="New task (Cmd+K)">+</button>
+<div class="fab-hint">⌘K</div>
 
 <!-- TASK MODAL -->
 <div id="taskModal" class="modal">
@@ -1029,10 +1121,12 @@ textarea {
       <button onclick="exportToICS()" class="btn btn-secondary" style="flex: 1;">Export to Calendar (.ics)</button>
     </div>
 
-    <div style="margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border);">
-      <label class="input-label">Import from JSON</label>
-      <input type="file" id="importFile" accept=".json" style="margin-top: 8px; padding: 8px;">
-      <button onclick="importFromJSON()" class="btn btn-secondary" style="margin-top: 10px; width: 100%;">Import & Merge</button>
+    <div style="margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border);" id="importSection">
+      <label class="input-label">Import from JSON Backup or CSV</label>
+      <input type="file" id="importFile" accept=".json,.csv" style="margin-top: 8px; padding: 8px; width:100%;">
+      <div style="font-size:0.72rem;color:rgba(255,255,255,0.38);margin:6px 0;">CSV format: title, due_date, priority, category (header row required)</div>
+      <button onclick="importFromFile()" class="btn btn-secondary" style="margin-top: 6px; width: 100%;">&#8679; Import &amp; Merge</button>
+      <div style="margin-top:10px;font-size:0.72rem;color:rgba(255,255,255,0.35);text-align:center;">Tip: Drag &amp; drop a file anywhere on the page</div>
     </div>
   </div>
 </div>
@@ -1045,6 +1139,15 @@ textarea {
       <button class="close-btn" onclick="closeDayModal()">×</button>
     </div>
     <div id="dayModalBody"></div>
+  </div>
+</div>
+
+<!-- DRAG-DROP OVERLAY -->
+<div id="dropOverlay">
+  <div style="text-align:center;color:white;">
+    <div style="font-size:3.5rem;margin-bottom:10px;">&#128229;</div>
+    <div style="font-size:1.15rem;font-weight:600;">Drop your JSON backup here</div>
+    <div style="font-size:0.85rem;opacity:0.6;margin-top:4px;">or a .csv file (title,due_date,priority,category)</div>
   </div>
 </div>
 
@@ -1189,6 +1292,7 @@ function switchView(view) {
   if (view === 'assignments') { refreshCategoryFilter(); renderAssignments(); }
   if (view === 'notes')       renderNotes();
   if (view === 'insights')    renderInsights();
+  if (view === 'ai')          renderAIView();
 }
 
 function refreshAllViews() {
@@ -1305,6 +1409,8 @@ function createTaskElement(task) {
   el.className = 'task-item' + (task.status === 'done' ? ' completed' : '');
   el.dataset.id = task.id;
   el.draggable = true;
+  el.style.borderLeftColor = task.color || 'transparent';
+  el.style.animationDelay = '0ms';
 
   const due = task.dueDate ? new Date(task.dueDate) : null;
   const overdue = isOverdue(task);
@@ -1365,6 +1471,7 @@ function refreshCurrentView() {
   if (active) switchView(active.dataset.view);
   renderTodayTasks();
   renderTodayProgress();
+  renderHeatmap();
 }
 
 // ==================== TASK MODAL ====================
@@ -1740,7 +1847,7 @@ function renderNotes() {
           <button title="Delete" onclick="deleteNote('${note.id}')">🗑</button>
         </div>
         ${note.title ? `<div style="font-weight:700;margin-bottom:6px;padding-right:50px;">${escapeHtml(note.title)}</div>` : ''}
-        <div class="note-content">${note.content || ''}</div>
+        <div class="note-content">${parseMarkdown(note.content || '')}</div>
         <div style="font-size:0.65rem;color:rgba(255,255,255,0.3);margin-top:10px;font-family:var(--fm);">
           ${new Date(note.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
         </div>`;
@@ -1950,38 +2057,52 @@ function exportToICS() {
   showToast('Calendar file ready — import into Google Calendar or Apple Calendar');
 }
 
-function importFromJSON() {
+function importFromFile() {
   const fi = document.getElementById('importFile');
-  if (!fi.files.length) { showToast('Select a JSON file first'); return; }
+  if (!fi || !fi.files.length) { showToast('Select a file first'); return; }
+  const file = fi.files[0];
+  if (file.name.endsWith('.csv')) { importCSVFile(file); }
+  else { importJSONFile(file); }
+}
+
+function importJSONFile(file) {
   const reader = new FileReader();
   reader.onload = e => {
     try {
       const imp = JSON.parse(e.target.result);
-      const merge = confirm('Merge with current data?\n\nOK = merge (keeps existing)\nCancel = replace everything');
-      if (merge) {
-        if (imp.tasks) {
-          const existing = new Set(plannerData.tasks.map(t => t.id));
-          imp.tasks.forEach(t => { if (!existing.has(t.id)) plannerData.tasks.push(t); });
-        }
-        if (imp.notes) {
-          const existing = new Set(plannerData.notes.map(n => n.id));
-          imp.notes.forEach(n => { if (!existing.has(n.id)) plannerData.notes.push(n); });
-        }
-        if (imp.dailyNotes) Object.assign(plannerData.dailyNotes, imp.dailyNotes);
-        if (imp.moodLog)    Object.assign(plannerData.moodLog,    imp.moodLog);
-        if (imp.weeklyFocus) plannerData.weeklyFocus = imp.weeklyFocus;
-      } else {
-        plannerData = Object.assign(JSON.parse(JSON.stringify(DEFAULT_DATA)), imp);
-      }
-      saveData();
-      closeExportModal();
-      refreshCurrentView();
-      showToast('Import successful');
-    } catch(err) {
-      alert('Could not read this file. Make sure it\'s a valid backup.');
-    }
+      const existT = new Set(plannerData.tasks.map(t => t.id));
+      const existN = new Set(plannerData.notes.map(n => n.id));
+      let addedT = 0, addedN = 0;
+      if (imp.tasks) imp.tasks.forEach(t => { if (!existT.has(t.id)) { plannerData.tasks.push(t); addedT++; } });
+      if (imp.notes) imp.notes.forEach(n => { if (!existN.has(n.id)) { plannerData.notes.push(n); addedN++; } });
+      if (imp.dailyNotes) Object.assign(plannerData.dailyNotes, imp.dailyNotes);
+      if (imp.moodLog)    Object.assign(plannerData.moodLog,    imp.moodLog);
+      if (imp.weeklyFocus) plannerData.weeklyFocus = imp.weeklyFocus;
+      saveData(); closeExportModal(); refreshCurrentView();
+      showToast(`✓ Imported ${addedT} task${addedT!==1?'s':''}, ${addedN} note${addedN!==1?'s':''}`);
+    } catch(err) { showToast('❌ Invalid backup file'); }
   };
-  reader.readAsText(fi.files[0]);
+  reader.readAsText(file);
+}
+
+function importCSVFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split('\n').filter(l => l.trim());
+    let added = 0;
+    lines.slice(1).forEach(line => {
+      const [title, dueDate, priority, category] = line.split(',').map(s => (s||'').trim().replace(/^"|"$/g,''));
+      if (!title) return;
+      plannerData.tasks.push({ id:'t_'+Date.now()+Math.random(), title, dueDate:dueDate||null,
+        priority:['low','medium','high','urgent'].includes(priority)?priority:'medium',
+        status:'pending', color:'#ff6fab', category:category||'', timeBlock:'', notes:'',
+        createdAt:new Date().toISOString() });
+      added++;
+    });
+    saveData(); closeExportModal(); refreshCurrentView();
+    showToast(`✓ Imported ${added} task${added!==1?'s':''} from CSV`);
+  };
+  reader.readAsText(file);
 }
 
 // ==================== INIT ====================
@@ -2032,6 +2153,212 @@ function initPlanner() {
   }, 30000);
 
   console.log('%c[Numa Planner] Ready', 'color:#ff6fab;font-weight:bold');
+  initDragDrop();
+  initAIAuth();
+}
+
+// ==================== HEATMAP ====================
+function renderHeatmap() {
+  const grid = document.getElementById('heatmapGrid');
+  const months = document.getElementById('heatmapMonths');
+  if (!grid) return;
+  grid.innerHTML = ''; if (months) months.innerHTML = '';
+  const today = new Date();
+  const start = new Date(today);
+  start.setDate(today.getDate() - today.getDay() - 15*7);
+  const counts = {};
+  plannerData.tasks.forEach(t => {
+    if (t.dueDate && t.status === 'done') { const d = t.dueDate.split('T')[0]; counts[d]=(counts[d]||0)+1; }
+  });
+  const maxC = Math.max(1, ...Object.values(counts).concat([1]));
+  let lastMonth = -1;
+  for (let w = 0; w < 16; w++) {
+    const week = document.createElement('div'); week.className='heatmap-week';
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(start); date.setDate(start.getDate() + w*7 + d);
+      const ds = date.toISOString().split('T')[0];
+      const count = counts[ds] || 0;
+      const future = date > today;
+      const alpha = future ? 0.03 : count === 0 ? 0.06 : Math.min(1, 0.18 + (count/maxC)*0.82);
+      const cell = document.createElement('div'); cell.className = 'heatmap-cell';
+      cell.style.background = `rgba(255,111,171,${alpha.toFixed(2)})`;
+      if (!future) { const lbl = date.toLocaleDateString('en-US',{month:'short',day:'numeric'}); cell.setAttribute('data-tip', `${lbl}: ${count} done`); }
+      week.appendChild(cell);
+    }
+    grid.appendChild(week);
+    // Month label on first week of month
+    if (months) {
+      const d0 = new Date(start); d0.setDate(start.getDate() + w*7);
+      if (d0.getMonth() !== lastMonth) { lastMonth = d0.getMonth(); const ml = document.createElement('div'); ml.className='heatmap-month-label'; ml.textContent = d0.toLocaleDateString('en-US',{month:'short'}); months.appendChild(ml); }
+      else { const ml=document.createElement('div'); ml.className='heatmap-month-label'; months.appendChild(ml); }
+    }
+  }
+}
+
+// ==================== MISTRAL AI (Discord-gated) ====================
+// Replace with your actual Render service URL after deploying ai-proxy/server.js
+const AI_WORKER_URL = 'https://numa-ai-proxy.onrender.com';
+
+let aiSession = null; // { token, id, username, exp }
+let aiHistory = [];
+
+function initAIAuth() {
+  // Check if we're returning from Discord OAuth (token in URL fragment)
+  if (window.location.hash.startsWith('#session=')) {
+    const token = window.location.hash.slice('#session='.length);
+    // Decode payload (first segment before the dot)
+    try {
+      const payload = JSON.parse(atob(token.split('.')[0]));
+      if (payload.exp > Date.now()) {
+        aiSession = { token, ...payload };
+        sessionStorage.setItem('aiSession', JSON.stringify(aiSession));
+      }
+    } catch { /* malformed token */ }
+    // Clean the fragment from the URL
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
+
+  // Check URL error params
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('auth') === 'denied') {
+    const err = document.getElementById('aiAuthError');
+    if (err) { err.textContent = '\u26a0\ufe0f Your Discord account is not on the approved list.'; err.style.display = 'block'; }
+    history.replaceState(null, '', window.location.pathname);
+  }
+
+  // Restore session from sessionStorage
+  if (!aiSession) {
+    try {
+      const saved = sessionStorage.getItem('aiSession');
+      if (saved) {
+        const s = JSON.parse(saved);
+        if (s.exp > Date.now()) aiSession = s;
+        else sessionStorage.removeItem('aiSession');
+      }
+    } catch { /* ignore */ }
+  }
+
+  // Set Discord login link href
+  const loginBtn = document.getElementById('discordLoginBtn');
+  if (loginBtn) loginBtn.href = AI_WORKER_URL + '/auth/discord';
+}
+
+function renderAIView() {
+  const loginWall = document.getElementById('aiLoginWall');
+  const chatWall  = document.getElementById('aiChatWall');
+  if (!loginWall || !chatWall) return;
+
+  if (aiSession) {
+    loginWall.style.display = 'none';
+    chatWall.style.display  = 'flex';
+    const badge = document.getElementById('aiUserBadge');
+    if (badge) badge.innerHTML = `<svg width="16" height="12" viewBox="0 0 71 55" fill="#5865F2"><path d="M60.1 4.9A58.5 58.5 0 0 0 45.5.4a40.7 40.7 0 0 0-1.8 3.7 54.1 54.1 0 0 0-16.3 0A40 40 0 0 0 25.6.4 58.4 58.4 0 0 0 11 4.9C1.6 19-1 32.8.3 46.4a59 59 0 0 0 18 9.1 43.8 43.8 0 0 0 3.8-6.2 38.4 38.4 0 0 1-6-2.9l1.4-1.1a42 42 0 0 0 36.1 0l1.5 1.1a38.3 38.3 0 0 1-6 2.9 43.6 43.6 0 0 0 3.8 6.2 58.7 58.7 0 0 0 18-9.1C72 30.6 68.3 16.9 60.1 4.9Z"/></svg> ${escapeHtml(aiSession.username)}`;
+    if (aiHistory.length === 0) {
+      const log = document.getElementById('aiChatLog');
+      if (log) log.innerHTML = '<div class="empty-state" style="padding:48px 0;margin:auto;">Hi ' + escapeHtml(aiSession.username) + '! \u2728<br><span style="font-size:0.8rem;opacity:0.6;">Ask me about your tasks, deadlines, or weekly focus.</span></div>';
+    }
+  } else {
+    loginWall.style.display = 'flex';
+    chatWall.style.display  = 'none';
+  }
+}
+
+function aiLogout() {
+  aiSession = null;
+  aiHistory = [];
+  sessionStorage.removeItem('aiSession');
+  renderAIView();
+  showToast('Logged out of AI');
+}
+
+async function sendAIMessage() {
+  if (!aiSession) return;
+  const input = document.getElementById('aiPromptInput');
+  const msg = (input.value || '').trim();
+  if (!msg) return;
+
+  input.value = '';
+  const log = document.getElementById('aiChatLog');
+  log.innerHTML = '';
+  aiHistory.push({ role: 'user', content: msg });
+  aiHistory.forEach(m => {
+    const b = document.createElement('div');
+    b.className = 'ai-bubble ' + m.role;
+    b.textContent = m.content;
+    log.appendChild(b);
+  });
+  const thinking = document.createElement('div');
+  thinking.className = 'ai-bubble assistant thinking';
+  thinking.textContent = 'Thinking\u2026';
+  log.appendChild(thinking);
+  log.scrollTop = log.scrollHeight;
+
+  // Build context for system prompt
+  const doneTasks    = plannerData.tasks.filter(t => t.status === 'done').length;
+  const overdueList  = plannerData.tasks.filter(isOverdue).map(t => t.title).slice(0, 5).join(', ') || 'none';
+  const todayList    = plannerData.tasks.filter(t => t.dueDate && t.dueDate.startsWith(todayStr())).map(t => `${t.title}(${t.status})`).join(', ') || 'none';
+  const dayStr       = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+  const sys = `You are ${escapeHtml(aiSession.username)}'s warm, concise productivity assistant. Today: ${dayStr}. Tasks: ${plannerData.tasks.length} total, ${doneTasks} done. Overdue: ${overdueList}. Today's tasks: ${todayList}. Streak: ${plannerData.settings.streak} days. Weekly focus: ${plannerData.weeklyFocus || 'not set'}. Be encouraging and brief.`;
+
+  try {
+    const resp = await fetch(AI_WORKER_URL + '/api/ai', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + aiSession.token,
+      },
+      body: JSON.stringify({
+        messages: [{ role: 'system', content: sys }, ...aiHistory],
+        max_tokens: 512,
+      }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'API error');
+
+    const reply = data.choices[0].message.content;
+    aiHistory.push({ role: 'assistant', content: reply });
+    thinking.remove();
+    const b = document.createElement('div');
+    b.className = 'ai-bubble assistant';
+    b.textContent = reply;
+    log.appendChild(b);
+    log.scrollTop = log.scrollHeight;
+  } catch (e) {
+    thinking.remove();
+    const b = document.createElement('div');
+    b.className = 'ai-bubble assistant error';
+    b.textContent = '\u274c ' + (e.message || 'Something went wrong.');
+    if (e.message && e.message.includes('expired')) {
+      b.textContent += ' Click Logout and log in again.';
+      aiSession = null; sessionStorage.removeItem('aiSession');
+      setTimeout(renderAIView, 2000);
+    }
+    log.appendChild(b);
+    log.scrollTop = log.scrollHeight;
+  }
+}
+
+// ==================== PARSEMARKDOWN ====================
+function parseMarkdown(text) {
+  if (!text) return '';
+  return text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/`(.*?)`/g,'<code style="background:rgba(255,255,255,0.1);padding:1px 4px;border-radius:3px;">$1</code>').replace(/\n/g,'<br>');
+}
+
+// ==================== DRAG-DROP IMPORT ====================
+function initDragDrop() {
+  const overlay = document.getElementById('dropOverlay');
+  let cnt = 0;
+  document.addEventListener('dragenter', e => { if(e.dataTransfer.types.includes('Files')){ cnt++; overlay.classList.add('active'); } });
+  document.addEventListener('dragleave', () => { cnt--; if(cnt<=0){cnt=0;overlay.classList.remove('active');} });
+  document.addEventListener('dragover', e => e.preventDefault());
+  document.addEventListener('drop', e => {
+    e.preventDefault(); cnt=0; overlay.classList.remove('active');
+    const file = e.dataTransfer.files[0]; if(!file) return;
+    if (file.name.endsWith('.json')) importJSONFile(file);
+    else if (file.name.endsWith('.csv')) importCSVFile(file);
+    else showToast('Please drop a .json or .csv file');
+  });
 }
 
 window.addEventListener('load', initPlanner);
