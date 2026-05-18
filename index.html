@@ -3934,6 +3934,12 @@
                 targetId = 'NUMA-' + targetId;
             }
 
+            // Check if the user is attempting to join their own host session in the same browser tab
+            if (peer && targetId === myPeerId) {
+                alert("You cannot join your own room in the same tab! To test multiplayer locally on one computer, please open a second, separate browser tab and enter the code there.");
+                return;
+            }
+
             isMultiplayer = true;
             isHost = false;
 
@@ -3947,7 +3953,7 @@
         function setupPeerConnection() {
             document.getElementById('multiStatus').innerText = 'Initializing handshake...';
             
-            peerConn.on('open', function () {
+            function handleConnectSuccess() {
                 document.getElementById('multiStatus').innerText = 'Connected! Telemetry synced. 💖';
                 document.getElementById('multiStatus').style.color = '#00ff88';
                 
@@ -3965,7 +3971,13 @@
                     lastTime = 0;
                     resizePong();
                 }, 1200);
-            });
+            }
+
+            if (peerConn.open) {
+                handleConnectSuccess();
+            } else {
+                peerConn.on('open', handleConnectSuccess);
+            }
 
             peerConn.on('data', function (data) {
                 handleIncomingData(data);
