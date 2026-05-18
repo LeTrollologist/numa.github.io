@@ -3131,16 +3131,57 @@
         <div id="gameContainer">
             <canvas id="pongCanvas"></canvas>
             <div id="startOverlay" class="overlay active">
-                <h1>Pong</h1>
-                <p>First to 7 wins.</p>
-                <div id="diffButtons"
-                    style="display:flex;gap:8px;margin:10px 0 14px;flex-wrap:wrap;justify-content:center">
-                    <button class="diff-btn" onclick="setDiff('easy')" id="diff-easy">Easy</button>
-                    <button class="diff-btn" onclick="setDiff('medium')" id="diff-medium">Medium</button>
-                    <button class="diff-btn active" onclick="setDiff('numa')" id="diff-numa">Numa</button>
-                    <button class="diff-btn" onclick="setDiff('hard')" id="diff-hard">Hard</button>
+                <!-- Main Menu Screen -->
+                <div id="pongMainMenu" style="display: flex; flex-direction: column; align-items: center;">
+                    <h1>Pong</h1>
+                    <p>Connect and play across the miles. 🌸</p>
+                    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px; width: 220px;">
+                        <button onclick="showSubMenu('solo')" style="font-size: 1.2rem; padding: 10px 20px;">Solo vs AI 🤖</button>
+                        <button onclick="showSubMenu('multi')" style="font-size: 1.2rem; padding: 10px 20px;">Play Online 🌌</button>
+                    </div>
                 </div>
-                <button onclick="startGame()">Start Game</button>
+
+                <!-- Sub-Menu: Solo Mode Config -->
+                <div id="pongSoloMenu" style="display: none; flex-direction: column; align-items: center;">
+                    <h1>Solo Mode</h1>
+                    <p>Select AI Difficulty</p>
+                    <div id="diffButtons" style="display:flex; gap:8px; margin:10px 0 18px; flex-wrap:wrap; justify-content:center">
+                        <button class="diff-btn" onclick="setDiff('easy')" id="diff-easy">Easy</button>
+                        <button class="diff-btn" onclick="setDiff('medium')" id="diff-medium">Medium</button>
+                        <button class="diff-btn active" onclick="setDiff('numa')" id="diff-numa">Numa</button>
+                        <button class="diff-btn" onclick="setDiff('hard')" id="diff-hard">Hard</button>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="showSubMenu('main')" class="diff-btn" style="opacity:0.8;">❮ Back</button>
+                        <button onclick="startSoloGame()" style="font-size:1.25rem;">Start Game</button>
+                    </div>
+                </div>
+
+                <!-- Sub-Menu: Online Multiplayer Lobby -->
+                <div id="pongMultiMenu" style="display: none; flex-direction: column; align-items: center; width: 100%; max-width: 320px;">
+                    <h1>Play Online</h1>
+                    <p id="multiStatus" style="color: gold; margin-bottom: 12px; font-size: 0.9rem;">Connecting to cosmic network...</p>
+                    
+                    <!-- Action Buttons -->
+                    <div id="lobbyActions" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+                        <!-- Host Card -->
+                        <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-p); padding: 12px; border-radius: var(--rp); text-align: center;">
+                            <button id="btnHost" onclick="initHost()" style="font-size: 1rem; padding: 8px 16px; width: 80%;">Create a Room</button>
+                            <div id="hostCodeDisplay" style="display: none; margin-top: 10px; font-family: monospace; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; border: 1px solid var(--pink-g);">
+                                Room Code: <span id="lblRoomCode" style="color: var(--pink); font-weight: bold; font-size: 1.1rem; letter-spacing: 1px;">...</span>
+                                <div style="font-size: 0.68rem; opacity: 0.6; margin-top: 4px;">Share this code with Numa</div>
+                            </div>
+                        </div>
+
+                        <!-- Join Card -->
+                        <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-p); padding: 12px; border-radius: var(--rp); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                            <input type="text" id="txtJoinCode" placeholder="Enter Room Code" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-p); background: rgba(0,0,0,0.5); color: white; font-family: monospace; text-align: center; font-size: 1rem; width: 80%;">
+                            <button id="btnJoin" onclick="initJoin()" style="font-size: 1rem; padding: 8px 16px; width: 80%;">Join Room</button>
+                        </div>
+                    </div>
+
+                    <button onclick="showSubMenu('main')" class="diff-btn" style="margin-top: 18px; opacity:0.8;">❮ Back to Menu</button>
+                </div>
             </div>
             <div id="gameOverOverlay" class="overlay">
                 <h1 id="gameOverTitle">You Won!</h1>
@@ -3275,6 +3316,7 @@
         </div>
     </footer>
 
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
     <script defer src="https://www.youtube.com/iframe_api"></script>
     <script>
@@ -3305,7 +3347,9 @@
         var gState = 'START', pScore = 0, aScore = 0, shk = 0;
         var WIN = 7, PW = 14, PH = 100;
         var pY, aY, ball, trails = [], parts = [];
-        var upP = false, dnP = false;
+        var upP = false, dnP = false; // backward compatibility fallback
+        var upP1 = false, dnP1 = false; // P1 Keyboard (W/S)
+        var upP2 = false, dnP2 = false; // P2 Keyboard (Arrows)
         var combo = 0;          // consecutive rally hits
         var aiTarget = 300;     // AI predicted interception y
         var aiReactTime = 0;    // throttle AI recalculation
@@ -3313,6 +3357,13 @@
         var BASE_SP = 9;      // starting ball speed (logical px/frame @60fps)
         var MAX_SP = 22;     // hard cap on ball speed
         var pongDiff = 'numa'; // current difficulty
+        
+        // PeerJS P2P Online State
+        var peer = null;
+        var peerConn = null;
+        var isMultiplayer = false;
+        var isHost = false;
+        var myPeerId = '';
 
         // Stargazer
         var sgCanvas, sgCtx, sgStars = [], sgNamed = {}, sgShowLines = false;
@@ -3804,6 +3855,160 @@
             if (btn) btn.classList.add('active');
         }
 
+        // ── PeerJS Online Multiplayer Helpers ──
+        function showSubMenu(menu) {
+            document.getElementById('pongMainMenu').style.display = menu === 'main' ? 'flex' : 'none';
+            document.getElementById('pongSoloMenu').style.display = menu === 'solo' ? 'flex' : 'none';
+            document.getElementById('pongMultiMenu').style.display = menu === 'multi' ? 'flex' : 'none';
+            if (menu === 'multi') {
+                document.getElementById('multiStatus').innerText = 'Ready to connect... 🌌';
+                document.getElementById('multiStatus').style.color = 'gold';
+            }
+        }
+
+        function startSoloGame() {
+            isMultiplayer = false;
+            isHost = false;
+            startGame();
+        }
+
+        function initPeer(callback) {
+            if (peer) {
+                if (callback) callback();
+                return;
+            }
+            document.getElementById('multiStatus').innerText = 'Linking to PeerJS cluster...';
+            
+            // Alphanumeric room code helper: e.g. NUMA-XXXX
+            // Generate a secure 4-digit code to keep room joining simple.
+            var roomNum = Math.floor(1000 + Math.random() * 9000);
+            var generatedId = 'NUMA-' + roomNum;
+            
+            peer = new Peer(generatedId, {
+                debug: 1
+            });
+
+            peer.on('open', function (id) {
+                myPeerId = id;
+                document.getElementById('multiStatus').innerText = 'System online. Ready to create/join rooms.';
+                document.getElementById('multiStatus').style.color = '#00ff88';
+                if (callback) callback();
+            });
+
+            peer.on('error', function (err) {
+                console.error('PeerJS error:', err);
+                document.getElementById('multiStatus').innerText = 'Network error: ' + err.type;
+                document.getElementById('multiStatus').style.color = '#ff4040';
+            });
+
+            peer.on('connection', function (conn) {
+                // Incoming guest connection (runs on host)
+                if (isHost) {
+                    peerConn = conn;
+                    setupPeerConnection();
+                }
+            });
+        }
+
+        function initHost() {
+            isMultiplayer = true;
+            isHost = true;
+            initPeer(function () {
+                document.getElementById('lblRoomCode').innerText = myPeerId;
+                document.getElementById('hostCodeDisplay').style.display = 'block';
+                document.getElementById('multiStatus').innerText = 'Awaiting Numa... 🌸';
+                document.getElementById('multiStatus').style.color = 'gold';
+                document.getElementById('btnHost').disabled = true;
+                document.getElementById('btnJoin').disabled = true;
+            });
+        }
+
+        function initJoin() {
+            var rawCode = document.getElementById('txtJoinCode').value.trim();
+            if (!rawCode) {
+                alert('Please enter a room code.');
+                return;
+            }
+            var targetId = rawCode.toUpperCase();
+            if (!targetId.startsWith('NUMA-')) {
+                targetId = 'NUMA-' + targetId;
+            }
+
+            isMultiplayer = true;
+            isHost = false;
+
+            initPeer(function () {
+                document.getElementById('multiStatus').innerText = 'Connecting to room ' + targetId + '...';
+                peerConn = peer.connect(targetId, { reliable: true });
+                setupPeerConnection();
+            });
+        }
+
+        function setupPeerConnection() {
+            document.getElementById('multiStatus').innerText = 'Initializing handshake...';
+            
+            peerConn.on('open', function () {
+                document.getElementById('multiStatus').innerText = 'Connected! Telemetry synced. 💖';
+                document.getElementById('multiStatus').style.color = '#00ff88';
+                
+                setTimeout(function () {
+                    // Hide overlay and launch gameplay loop
+                    document.getElementById('startOverlay').classList.remove('active');
+                    gState = 'PLAYING';
+                    pScore = 0;
+                    aScore = 0;
+                    updScore();
+                    ball = null;
+                    if (isHost) {
+                        resetBall(true);
+                    }
+                    lastTime = 0;
+                    resizePong();
+                }, 1200);
+            });
+
+            peerConn.on('data', function (data) {
+                handleIncomingData(data);
+            });
+
+            peerConn.on('close', function () {
+                document.getElementById('multiStatus').innerText = 'Partner disconnected. 🌸';
+                document.getElementById('multiStatus').style.color = '#ff4040';
+                gState = 'START';
+                document.getElementById('startOverlay').classList.add('active');
+                showSubMenu('main');
+                document.getElementById('btnHost').disabled = false;
+                document.getElementById('btnJoin').disabled = false;
+                document.getElementById('hostCodeDisplay').style.display = 'none';
+            });
+        }
+
+        function handleIncomingData(data) {
+            if (!data) return;
+
+            if (isHost) {
+                // Host receives input telemetry (Paddle Y) from the guest client
+                if (data.type === 'INPUT') {
+                    if (typeof data.aY === 'number') {
+                        aY = data.aY;
+                    }
+                }
+            } else {
+                // Guest receives full authoritive game state from the host
+                if (data.type === 'STATE') {
+                    if (data.ball) ball = data.ball;
+                    if (typeof data.pY === 'number') pY = data.pY;
+                    if (typeof data.aY === 'number') aY = data.aY;
+                    if (typeof data.pScore === 'number') pScore = data.pScore;
+                    if (typeof data.aScore === 'number') aScore = data.aScore;
+                    if (typeof data.combo === 'number') combo = data.combo;
+                    if (typeof data.shk === 'number') shk = data.shk;
+                    if (Array.isArray(data.parts)) parts = data.parts;
+                    updScore();
+                }
+            }
+        }
+
         function resizePong() {
             if (!canvas) return;
             var c = document.getElementById('gameContainer');
@@ -3817,16 +4022,37 @@
             var hist = JSON.parse(localStorage.getItem('pong_history_numa') || '[]');
             var list = document.getElementById('historyList');
             list.innerHTML = '<div class="history-item mbm"><div><div class="mbm-title">Match History</div></div>'
-                + '<div style="color:gold;font-weight:600">You vs AI</div></div>';
+                + '<div style="color:gold;font-weight:600">Global Records</div></div>';
             hist.slice().reverse().forEach(function (m) {
-                list.innerHTML += '<div class="history-item"><div><strong>' + m.winner + ' Won</strong>'
+                var modeLabel = m.mode ? ' [' + m.mode + ']' : '';
+                var oppLabel = m.mode === 'Online P2P' ? 'Host ' + m.pScore + ' — ' + m.aScore + ' Guest' : 'numa ' + m.pScore + ' — ' + m.aScore + ' AI';
+                list.innerHTML += '<div class="history-item"><div><strong>' + m.winner + ' Won' + modeLabel + '</strong>'
                     + '<br><span style="font-size:.72rem;opacity:.6">' + m.date + '</span></div>'
-                    + '<div>numa ' + m.pScore + ' — ' + m.aScore + ' AI</div></div>';
+                    + '<div>' + oppLabel + '</div></div>';
             });
         }
         function saveMatch() {
             var hist = JSON.parse(localStorage.getItem('pong_history_numa') || '[]');
-            hist.push({ pScore: pScore, aScore: aScore, winner: pScore >= WIN ? 'Numa 🌸' : 'AI 🤖', date: new Date().toLocaleDateString() });
+            var matchData;
+            if (isMultiplayer) {
+                var winnerLabel = pScore >= WIN ? 'Host' : 'Guest';
+                matchData = {
+                    pScore: pScore,
+                    aScore: aScore,
+                    winner: winnerLabel,
+                    mode: 'Online P2P',
+                    date: new Date().toLocaleDateString()
+                };
+            } else {
+                matchData = {
+                    pScore: pScore,
+                    aScore: aScore,
+                    winner: pScore >= WIN ? 'Numa 🌸' : 'AI 🤖',
+                    mode: 'Solo vs AI',
+                    date: new Date().toLocaleDateString()
+                };
+            }
+            hist.push(matchData);
             localStorage.setItem('pong_history_numa', JSON.stringify(hist));
             loadHistory();
         }
@@ -3857,7 +4083,9 @@
             MAX_SP = pongDiff === 'hard' ? 22 : 18;
             gState = 'PLAYING'; pScore = 0; aScore = 0; updScore();
             ball = null;
-            resetBall(true);
+            if (!isMultiplayer || isHost) {
+                resetBall(true);
+            }
             lastTime = 0;
             resizePong();
         }
@@ -3866,24 +4094,41 @@
             document.getElementById('startOverlay').classList.add('active');
         }
         function endGame(won) {
-            gState = 'GAMEOVER'; saveMatch();
+            gState = 'GAMEOVER';
+            saveMatch();
             var o = document.getElementById('gameOverOverlay');
-            document.getElementById('gameOverTitle').innerText = won ? 'You Won! 🎉' : 'Good Try! 🌸';
-            document.getElementById('gameOverTitle').style.color = won ? 'var(--pink)' : 'white';
-            document.getElementById('gameOverText').innerText = won ? "Well played, lovely." : "Better luck next time.";
-            if (won) for (var i = 0; i < 50; i++) pImpact(GW / 2, GH / 2, 'pink');
+            var title = 'Good Try! 🌸';
+            var desc = 'Better luck next time.';
+            
+            if (isMultiplayer) {
+                var hostWon = pScore >= WIN;
+                var iAmHost = isHost;
+                if ((iAmHost && hostWon) || (!iAmHost && !hostWon)) {
+                    title = 'Victory! 🎉';
+                    desc = 'You won the cosmic match.';
+                    for (var i = 0; i < 50; i++) pImpact(GW / 2, GH / 2, 'pink');
+                } else {
+                    title = 'Defeat! 🌸';
+                    desc = 'Numa played exceptionally well.';
+                }
+            } else {
+                title = won ? 'You Won! 🎉' : 'Good Try! 🌸';
+                desc = won ? "Well played, lovely." : "Better luck next time.";
+                if (won) { for (var i = 0; i < 50; i++) pImpact(GW / 2, GH / 2, 'pink'); }
+            }
+            
+            document.getElementById('gameOverTitle').innerText = title;
+            document.getElementById('gameOverTitle').style.color = (title.indexOf('Victory') >= 0 || title.indexOf('Won') >= 0) ? 'var(--pink)' : 'white';
+            document.getElementById('gameOverText').innerText = desc;
             o.classList.add('active');
         }
         function updScore() { document.getElementById('score').innerHTML = pScore + ' 💖 : 💖 ' + aScore; }
         function resetBall(fullReset) {
             combo = 0;
-            // Carry 62% of previous speed into the next serve so it never feels sluggish,
-            // but clamp so it can't snowball past 65% of the hard cap.
             var sp = (fullReset || !ball)
                 ? BASE_SP
                 : Math.min(MAX_SP * 0.65, Math.max(BASE_SP, ball.sp * 0.62));
             var dx = (Math.random() > 0.5 ? 1 : -1) * sp;
-            // Keep dy ratio ≤ 0.75 so the ball never goes nearly-horizontal
             var dy = (Math.random() * 1.4 - 0.7) * sp;
             ball = { x: GW / 2, y: GH / 2, r: 11, sp: sp, dx: dx, dy: dy };
             trails = [];
@@ -3895,62 +4140,75 @@
             if (dx <= 0) return GH / 2; // ball going away, default to center
             var t = (targetX - fromX) / dx;
             var y = fromY + dy * t;
-            // Fold reflections: y outside [0,GH] reflect back
             y = ((y % (2 * GH)) + 2 * GH) % (2 * GH);
             if (y > GH) y = 2 * GH - y;
             return y;
         }
 
-        // dt = elapsed ms normalised to 60 fps (1.0 = 60 Hz, 0.5 = 120 Hz, 2.0 = 30 Hz).
-        // All per-frame movements are multiplied by dt so the game runs identically
-        // regardless of refresh rate — fixes the "too fast on mobile 120 Hz" issue.
         function updatePong(dt) {
             if (gState !== 'PLAYING') return;
 
-            // Player keyboard paddle (mouse/touch set pY directly so no dt needed there)
-            if (upP) pY -= 10 * dt;
-            if (dnP) pY += 10 * dt;
+            // 1. Guest Remote Bypass
+            if (isMultiplayer && !isHost) {
+                var guestMoved = false;
+                if (upP2) { aY -= 10 * dt; guestMoved = true; }
+                if (dnP2) { aY += 10 * dt; guestMoved = true; }
+                if (guestMoved) {
+                    aY = Math.max(0, Math.min(GH - PH, aY));
+                    if (peerConn && peerConn.open) {
+                        peerConn.send({ type: 'INPUT', aY: aY });
+                    }
+                }
+                return; // Guest relies entirely on Host authoritative STATE packets
+            }
+
+            // 2. Paddle 1 Movements (Host or Solo player)
+            if (isMultiplayer && isHost) {
+                if (upP1) pY -= 10 * dt;
+                if (dnP1) pY += 10 * dt;
+            } else {
+                if (upP) pY -= 10 * dt;
+                if (dnP) pY += 10 * dt;
+            }
             pY = Math.max(0, Math.min(GH - PH, pY));
 
-            // AI — predict ball landing position, throttled to simulate reaction lag.
-            // Difficulty controls reaction time, error magnitude, and paddle speed.
-            var diffCfg = {
-                easy: { react: 320, errBase: 90, errMin: 50, spdBase: 2.0, spdScale: 0.15, spdMax: 1.5 },
-                medium: { react: 200, errBase: 65, errMin: 25, spdBase: 2.8, spdScale: 0.25, spdMax: 3.0 },
-                numa: { react: 400, errBase: 115, errMin: 70, spdBase: 1.8, spdScale: 0.10, spdMax: 1.2 },
-                hard: { react: 130, errBase: 60, errMin: 10, spdBase: 3.8, spdScale: 0.40, spdMax: 5.0 }
-            };
-            var dc = diffCfg[pongDiff] || diffCfg.hard;
-            var now = Date.now();
-            if (now > aiReactTime) {
-                aiReactTime = now + dc.react;
-                var aiX = GW - 10 - PW;
-                if (ball.dx > 0 && ball.x < aiX - 30) {
-                    var pred = predictBallY(ball.x, ball.y, ball.dx, ball.dy, aiX - ball.r);
-                    var errMag = Math.max(dc.errMin, dc.errBase - aScore * 8 - pScore * 2);
-                    aiTarget = pred + (Math.random() - 0.5) * errMag;
-                } else {
-                    aiTarget = GH / 2;
+            // 3. AI Paddle (Only in Solo mode)
+            if (!isMultiplayer) {
+                var diffCfg = {
+                    easy: { react: 320, errBase: 90, errMin: 50, spdBase: 2.0, spdScale: 0.15, spdMax: 1.5 },
+                    medium: { react: 200, errBase: 65, errMin: 25, spdBase: 2.8, spdScale: 0.25, spdMax: 3.0 },
+                    numa: { react: 400, errBase: 115, errMin: 70, spdBase: 1.8, spdScale: 0.10, spdMax: 1.2 },
+                    hard: { react: 130, errBase: 60, errMin: 10, spdBase: 3.8, spdScale: 0.40, spdMax: 5.0 }
+                };
+                var dc = diffCfg[pongDiff] || diffCfg.hard;
+                var now = Date.now();
+                if (now > aiReactTime) {
+                    aiReactTime = now + dc.react;
+                    var aiX = GW - 10 - PW;
+                    if (ball.dx > 0 && ball.x < aiX - 30) {
+                        var pred = predictBallY(ball.x, ball.y, ball.dx, ball.dy, aiX - ball.r);
+                        var errMag = Math.max(dc.errMin, dc.errBase - aScore * 8 - pScore * 2);
+                        aiTarget = pred + (Math.random() - 0.5) * errMag;
+                    } else {
+                        aiTarget = GH / 2;
+                    }
+                    aiTarget = Math.max(PH / 2, Math.min(GH - PH / 2, aiTarget));
                 }
-                aiTarget = Math.max(PH / 2, Math.min(GH - PH / 2, aiTarget));
+                var aiSpd = (dc.spdBase + Math.min(dc.spdMax, (pScore + aScore) * dc.spdScale)) * dt;
+                var aiCenter = aY + PH / 2;
+                var diff = aiTarget - aiCenter;
+                var move = Math.min(Math.abs(diff), aiSpd) * (diff < 0 ? -1 : 1);
+                aY = Math.max(0, Math.min(GH - PH, aY + move));
             }
-            // AI paddle speed; dt-scaled for frame-rate independence
-            var aiSpd = (dc.spdBase + Math.min(dc.spdMax, (pScore + aScore) * dc.spdScale)) * dt;
-            var aiCenter = aY + PH / 2;
-            var diff = aiTarget - aiCenter;
-            var move = Math.min(Math.abs(diff), aiSpd) * (diff < 0 ? -1 : 1);
-            aY = Math.max(0, Math.min(GH - PH, aY + move));
 
-            // Ball movement — dt-scaled so 120 Hz phones run the same speed as 60 Hz desktop
+            // 4. Ball physics & boundaries (Host or Solo is the authority)
             ball.x += ball.dx * dt;
             ball.y += ball.dy * dt;
             trails.push({ x: ball.x, y: ball.y }); if (trails.length > 13) trails.shift();
 
-            // Wall bounces
             if (ball.y - ball.r < 0) { ball.y = ball.r; ball.dy = Math.abs(ball.dy); shk = 3; }
             if (ball.y + ball.r > GH) { ball.y = GH - ball.r; ball.dy = -Math.abs(ball.dy); shk = 3; }
 
-            // Paddle collisions — position-based, not per-frame, so no dt needed
             function hit(px, py, isP) {
                 if (ball.y + ball.r > py && ball.y - ball.r < py + PH) {
                     if ((isP && ball.x - ball.r < px + PW) || (!isP && ball.x + ball.r > px)) {
@@ -3961,7 +4219,6 @@
                         var dir = isP ? 1 : -1;
                         ball.dx = dir * ball.sp * Math.cos(ang);
                         ball.dy = ball.sp * Math.sin(ang);
-                        // Push ball clear of paddle to prevent double-hit
                         ball.x = isP ? px + PW + ball.r : px - ball.r;
                         shk = 7;
                         pImpact(ball.x, ball.y, isP ? '#ffb6d9' : '#ff6fab');
@@ -3972,8 +4229,34 @@
             hit(10, pY, true);
             hit(GW - 10 - PW, aY, false);
 
-            if (ball.x < 0) { combo = 0; aScore++; updScore(); aScore >= WIN ? endGame(false) : resetBall(); }
-            if (ball.x > GW) { combo = 0; pScore++; updScore(); pScore >= WIN ? endGame(true) : aScore >= WIN ? endGame(false) : resetBall(); }
+            // Goal detection
+            if (ball.x < 0) {
+                combo = 0; aScore++; updScore();
+                if (aScore >= WIN) endGame(false);
+                else resetBall();
+            }
+            if (ball.x > GW) {
+                combo = 0; pScore++; updScore();
+                if (pScore >= WIN) endGame(true);
+                else resetBall();
+            }
+
+            // 5. Host broadcasts the authoritative state to guest
+            if (isMultiplayer && isHost && peerConn && peerConn.open) {
+                peerConn.send({
+                    type: 'STATE',
+                    ball: ball,
+                    pY: pY,
+                    aY: aY,
+                    pScore: pScore,
+                    aScore: aScore,
+                    combo: combo,
+                    shk: shk,
+                    parts: parts.map(function (p) {
+                        return { x: p.x, y: p.y, vx: p.vx, vy: p.vy, life: p.life, col: p.col, sz: p.sz };
+                    })
+                });
+            }
         }
 
         // ── Rounded rectangle helper (fallback for older browsers)
@@ -27481,22 +27764,68 @@
             ball = { x: GW / 2, y: GH / 2, r: 11, sp: 7, dx: 7, dy: 3 };
 
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'ArrowUp' || e.key === 'w') upP = true;
-                if (e.key === 'ArrowDown' || e.key === 's') dnP = true;
+                if (isMultiplayer) {
+                    if (isHost) {
+                        if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') upP1 = true;
+                        if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') dnP1 = true;
+                    } else {
+                        if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') upP2 = true;
+                        if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') dnP2 = true;
+                    }
+                } else {
+                    if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') upP = true;
+                    if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') dnP = true;
+                }
             });
             document.addEventListener('keyup', function (e) {
-                if (e.key === 'ArrowUp' || e.key === 'w') upP = false;
-                if (e.key === 'ArrowDown' || e.key === 's') dnP = false;
+                if (isMultiplayer) {
+                    if (isHost) {
+                        if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') upP1 = false;
+                        if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') dnP1 = false;
+                    } else {
+                        if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') upP2 = false;
+                        if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') dnP2 = false;
+                    }
+                } else {
+                    if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') upP = false;
+                    if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') dnP = false;
+                }
             });
             canvas.addEventListener('mousemove', function (e) {
                 if (gState === 'PLAYING' && currentPage === 'minigame') {
-                    var r = canvas.getBoundingClientRect(); pY = (e.clientY - r.top) * (GH / r.height) - PH / 2;
+                    var r = canvas.getBoundingClientRect();
+                    var newY = (e.clientY - r.top) * (GH / r.height) - PH / 2;
+                    if (isMultiplayer) {
+                        if (isHost) {
+                            pY = newY;
+                        } else {
+                            aY = newY;
+                            if (peerConn && peerConn.open) {
+                                peerConn.send({ type: 'INPUT', aY: aY });
+                            }
+                        }
+                    } else {
+                        pY = newY;
+                    }
                 }
             });
             canvas.addEventListener('touchmove', function (e) {
                 if (gState === 'PLAYING' && currentPage === 'minigame') {
                     e.preventDefault();
-                    var r = canvas.getBoundingClientRect(); pY = (e.touches[0].clientY - r.top) * (GH / r.height) - PH / 2;
+                    var r = canvas.getBoundingClientRect();
+                    var newY = (e.touches[0].clientY - r.top) * (GH / r.height) - PH / 2;
+                    if (isMultiplayer) {
+                        if (isHost) {
+                            pY = newY;
+                        } else {
+                            aY = newY;
+                            if (peerConn && peerConn.open) {
+                                peerConn.send({ type: 'INPUT', aY: aY });
+                            }
+                        }
+                    } else {
+                        pY = newY;
+                    }
                 }
             }, { passive: false });
 
