@@ -1087,8 +1087,8 @@ textarea {
 }
 
 .custom-min-input {
-    flex: 1;
-    min-width: 0;
+    flex: 2;
+    min-width: 90px;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.12);
     color: white;
@@ -1101,13 +1101,14 @@ textarea {
 }
 
 .custom-type-sel {
+    width: 54px;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.12);
     color: rgba(255, 255, 255, 0.7);
     border-radius: 6px;
-    padding: 4px 5px;
+    padding: 4px 2px;
     font-family: var(--fm);
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     outline: none;
     cursor: pointer;
 }
@@ -1751,6 +1752,293 @@ textarea {
     color: rgba(100, 255, 140, 0.6);
 }
 
+/* ==========================================================================
+   MOBILE & TABLET RESPONSIVE OVERRIDES (planner.html)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  /* 1. Header Layout Consolidation */
+  .page-header {
+    padding: 10px 14px !important;
+    gap: 8px !important;
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    align-items: center !important;
+  }
+  
+  .page-title {
+    font-size: 1.6rem !important;
+  }
+  
+  .header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .header-actions .action-btn {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--border) !important;
+  }
+  
+  .header-actions .action-btn .btn-text {
+    display: none !important;
+  }
+  
+  .header-actions .action-btn .btn-icon {
+    display: inline !important;
+    font-size: 0.95rem !important;
+  }
+  
+  .streak-badge {
+    padding: 4px 10px !important;
+    font-size: 0.78rem !important;
+    border-radius: 999px !important;
+    background: rgba(255,159,67,0.1) !important;
+    border: 1px solid rgba(255,159,67,0.3) !important;
+    color: #ff9f43 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+  
+  .streak-badge .streak-text {
+    display: none !important; /* Hide " day streak" text to save space */
+  }
+
+  .nav-tabs {
+    grid-column: 1 / span 2 !important;
+    width: 100% !important;
+    border-radius: 12px !important;
+    padding: 4px !important;
+    background: rgba(255,255,255,0.03) !important;
+    -ms-overflow-style: none !important;  /* IE/Edge */
+    scrollbar-width: none !important;  /* Firefox */
+  }
+  
+  .nav-tabs::-webkit-scrollbar {
+    display: none !important; /* Hide Chrome/Safari scrollbar */
+  }
+  
+  .nav-tab {
+    padding: 8px 14px !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* 2. Main Layout Containers */
+  .main-container {
+    padding: 12px !important;
+  }
+  
+  .card {
+    padding: 16px !important;
+    margin-bottom: 14px !important;
+  }
+  
+  #greetingText {
+    font-size: clamp(1.6rem, 6vw, 2.2rem) !important;
+  }
+
+  /* 3. Week View stacked daily columns */
+  .week-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  
+  .day-column {
+    min-height: auto !important;
+    padding: 14px !important;
+  }
+  
+  .task-dropzone {
+    min-height: 80px !important;
+  }
+
+  /* 4. Calendar View compression */
+  .cal-weekday-label {
+    font-size: 0.65rem !important;
+  }
+  
+  .calendar-grid {
+    gap: 4px !important;
+  }
+  
+  .calendar-day {
+    padding: 4px !important;
+    border-radius: 8px !important;
+  }
+  
+  .day-number {
+    font-size: 0.72rem !important;
+  }
+  
+  .day-tasks {
+    gap: 1px !important;
+  }
+  
+  .task-dot {
+    width: 5px !important;
+    height: 5px !important;
+  }
+
+  /* 5. Search & Filters row on All Tasks View */
+  #view-assignments .glass.card > div:first-child {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  
+  #view-assignments .search-bar {
+    grid-column: 1 / span 2 !important;
+    width: 100% !important;
+  }
+  
+  #view-assignments select {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* 6. Ask AI view scrollable skills list */
+  #view-ai div[style*="display:flex;gap:8px;flex-wrap:wrap;"] {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    padding-bottom: 6px !important;
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+  
+  #view-ai div[style*="display:flex;gap:8px;flex-wrap:wrap;"]::-webkit-scrollbar {
+    display: none !important;
+  }
+  
+  .skill-pill {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* 7. StudyBuddy (📚 Study) Mobile segment views */
+  .study-mobile-selector {
+    display: flex !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--rp) !important;
+    padding: 3px !important;
+    margin-bottom: 16px !important;
+    width: 100% !important;
+    gap: 2px !important;
+  }
+  
+  .study-mobile-selector button {
+    flex: 1 !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    font-family: var(--fb) !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    padding: 8px 12px !important;
+    border-radius: var(--rp) !important;
+    cursor: pointer !important;
+    transition: all 0.22s ease !important;
+  }
+  
+  .study-mobile-selector button.active {
+    background: rgba(255, 111, 171, 0.25) !important;
+    color: white !important;
+    border: 1px solid var(--border-p) !important;
+    box-shadow: 0 0 10px rgba(255, 111, 171, 0.15) !important;
+  }
+
+  /* Hide one card depending on active study tab on mobile */
+  .study-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+  
+  .study-timer-card, .study-right-card {
+    transition: opacity 0.25s ease, transform 0.25s ease !important;
+  }
+  
+  .study-timer-card.mobile-hidden,
+  .study-right-card.mobile-hidden {
+    display: none !important;
+  }
+  
+  /* Compact timer details */
+  .progress-ring {
+    width: 140px !important;
+    height: 140px !important;
+  }
+  
+  #timerDisplay {
+    font-size: 2.2rem !important;
+  }
+
+  /* 8. Bottom Sheet Modals */
+  .modal {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+  
+  .modal-content {
+    max-width: 100% !important;
+    border-radius: 24px 24px 0 0 !important;
+    border-bottom: none !important;
+    padding: 20px !important;
+    animation: slideUpBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    max-height: 85vh !important;
+  }
+  
+  /* Add top swipe handle drag decoration on bottom sheet */
+  .modal-content::before {
+    content: '' !important;
+    display: block !important;
+    width: 36px !important;
+    height: 4px !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 2px !important;
+    margin: -8px auto 16px auto !important;
+  }
+}
+
+@keyframes slideUpBottom {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+  /* Compression for tiny viewports (e.g. 360px phones) */
+  .cal-weekday-label {
+    font-size: 0px !important; /* Hide labels text */
+  }
+  
+  .cal-weekday-label::first-letter {
+    font-size: 0.65rem !important; /* Show single character S, M, T... */
+  }
+  
+  .calendar-day {
+    min-height: 42px !important;
+  }
+  
+  .study-right-tabs {
+    gap: 4px !important;
+  }
+  
+  .study-right-tab {
+    padding: 6px 8px !important;
+    font-size: 0.78rem !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1759,7 +2047,7 @@ textarea {
 <header class="page-header">
   <div class="page-title">
     <span>✨</span>
-    <span>Numa's Planner</span></div>
+    <span>Numa's Planner</span>
   </div>
 
   <div class="nav-tabs">
@@ -1773,13 +2061,22 @@ textarea {
     <div class="nav-tab" data-view="study">📚 Study</div>
   </div>
 
-  <div style="display: flex; align-items: center; gap: 12px; flex-shrink: 0;">
-    <div id="streakDisplay" style="font-family: var(--fm); font-size: 0.85rem; background: rgba(255,159,67,0.1); padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(255,159,67,0.3); color: #ff9f43;">
-      🔥 <span id="streakCount">0</span> day streak
+  <div class="header-actions">
+    <div id="streakDisplay" class="streak-badge">
+      🔥 <span id="streakCount">0</span><span class="streak-text"> day streak</span>
     </div>
-    <button onclick="showExportModal();setTimeout(()=>{const s=document.getElementById('importSection');if(s)s.scrollIntoView({behavior:'smooth'});},200)" class="btn btn-secondary" style="padding: 8px 14px; font-size: 0.8rem;">Import</button>
-    <button onclick="showExportModal()" class="btn btn-secondary" style="padding: 8px 14px; font-size: 0.8rem;">Export</button>
-    <button onclick="window.location.href='index.html'" class="btn btn-secondary" style="padding: 8px 14px; font-size: 0.8rem;">Home</button>
+    <button onclick="showExportModal();setTimeout(()=>{const s=document.getElementById('importSection');if(s)s.scrollIntoView({behavior:'smooth'});},200)" class="btn btn-secondary action-btn" title="Import">
+      <span class="btn-text">Import</span>
+      <span class="btn-icon">📥</span>
+    </button>
+    <button onclick="showExportModal()" class="btn btn-secondary action-btn" title="Export">
+      <span class="btn-text">Export</span>
+      <span class="btn-icon">📤</span>
+    </button>
+    <button onclick="window.location.href='index.html'" class="btn btn-secondary action-btn" title="Home">
+      <span class="btn-text">Home</span>
+      <span class="btn-icon">🏠</span>
+    </button>
   </div>
 </header>
 
@@ -2086,6 +2383,12 @@ Example:
     <div class="study-glow-blob study-glow-1"></div>
     <div class="study-glow-blob study-glow-2"></div>
     
+    <!-- StudyBuddy Mobile Segment Selector -->
+    <div class="study-mobile-selector" style="display: none;">
+      <button id="sbSelTimer" class="active" onclick="switchStudyMobileTab('timer')">⏱️ Timer</button>
+      <button id="sbSelWorkspace" onclick="switchStudyMobileTab('workspace')">💬 Workspace</button>
+    </div>
+
     <div class="study-grid">
       
       <!-- LEFT: Core Timer & Ambient Player -->
@@ -2192,7 +2495,7 @@ Example:
       </div>
 
       <!-- RIGHT: Tabbed Workspace Panel -->
-      <div class="glass card study-right-card">
+      <div class="glass card study-right-card mobile-hidden">
         
         <!-- Tab navigation -->
         <div class="study-right-tabs">
@@ -2621,7 +2924,15 @@ function showToast(msg) {
 function switchView(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + view).classList.add('active');
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+  
+  const tabs = document.querySelectorAll('.nav-tab');
+  tabs.forEach(t => {
+    const isActive = t.dataset.view === view;
+    t.classList.toggle('active', isActive);
+    if (isActive && window.innerWidth <= 768) {
+      t.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  });
 
   if (view === 'today')       { renderTodayTasks(); renderTodayProgress(); }
   if (view === 'week')        renderWeekView();
@@ -4958,6 +5269,25 @@ function renderStudyChatLog() {
   log.scrollTop = log.scrollHeight;
 }
 
+
+function switchStudyMobileTab(tab) {
+  const btnTimer = document.getElementById('sbSelTimer');
+  const btnWork = document.getElementById('sbSelWorkspace');
+  const cardTimer = document.querySelector('.study-timer-card');
+  const cardRight = document.querySelector('.study-right-card');
+  if (!btnTimer || !btnWork || !cardTimer || !cardRight) return;
+  if (tab === 'timer') {
+    btnTimer.classList.add('active');
+    btnWork.classList.remove('active');
+    cardTimer.classList.remove('mobile-hidden');
+    cardRight.classList.add('mobile-hidden');
+  } else {
+    btnTimer.classList.remove('active');
+    btnWork.classList.add('active');
+    cardTimer.classList.add('mobile-hidden');
+    cardRight.classList.remove('mobile-hidden');
+  }
+}
 
 window.addEventListener('load', initPlanner);
 </script>
