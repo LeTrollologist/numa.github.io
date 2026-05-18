@@ -96,8 +96,15 @@
         #moonSvg {
             position: fixed;
             transform: translate(-50%, -50%);
-            z-index: 2;
             transition: opacity .8s
+        }
+
+        #sunSvg {
+            z-index: 2;
+        }
+
+        #moonSvg {
+            z-index: 3; /* Render in front of Sun */
         }
 
         #sunSvg,
@@ -108,7 +115,7 @@
 
         #moonLabel {
             position: fixed;
-            z-index: 2;
+            z-index: 3; /* Keep label above Sun's rays */
             color: rgba(180, 210, 255, 0.82);
             font-size: .58rem;
             font-family: 'DM Mono', monospace;
