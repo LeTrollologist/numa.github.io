@@ -305,6 +305,48 @@
             color: var(--text);
         }
 
+        .live-clock {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            padding: 3px 10px;
+            border-radius: 14px;
+            color: var(--text);
+            font-weight: normal;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0;
+            text-transform: none;
+            transition: all 0.3s ease;
+        }
+
+        .live-clock::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            animation: pulse-glow 2s infinite;
+        }
+
+        .east .live-clock::before {
+            background: var(--east-glow);
+            box-shadow: 0 0 8px var(--east-glow);
+        }
+
+        .ist .live-clock::before {
+            background: var(--ist-glow);
+            box-shadow: 0 0 8px var(--ist-glow);
+        }
+
+        @keyframes pulse-glow {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+
         /* Custom Time Pickers */
         .time-box {
             display: flex;
@@ -819,17 +861,20 @@
             <!-- Left Wing: US Eastern Time -->
             <div class="input-card east">
                 <div class="card-title east">
-                    <span>US Eastern</span>
-                    <span class="timezone-offset" id="east-offset">EDT (UTC-4)</span>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <span style="font-size: 1rem;">US Eastern</span>
+                        <span class="timezone-offset" id="east-offset" style="font-size: 0.65rem; width: fit-content; text-transform: none; padding: 1px 6px;">EDT (UTC-4)</span>
+                    </div>
+                    <span class="live-clock" id="east-live-clock">--:--:--</span>
                 </div>
                 
                 <!-- Time Inputs -->
                 <div class="time-box">
                     <span class="time-label">Set Time</span>
                     <div class="time-inputs">
-                        <input type="text" class="num-input" id="east-hour" maxlength="2" value="09" oninput="validateInput(this, 1, 12); syncFromEast()">
+                        <input type="text" class="num-input" id="east-hour" maxlength="2" value="09" oninput="handleTimeInput(this, 'hour')" onblur="formatTimeInput(this, 'hour')">
                         <span class="separator">:</span>
-                        <input type="text" class="num-input" id="east-min" maxlength="2" value="00" oninput="validateInput(this, 0, 59); syncFromEast()">
+                        <input type="text" class="num-input" id="east-min" maxlength="2" value="00" oninput="handleTimeInput(this, 'min')" onblur="formatTimeInput(this, 'min')">
                         
                         <!-- AM/PM Toggle -->
                         <div class="ampm-toggle" onclick="toggleAmPm('east')">
@@ -889,17 +934,20 @@
             <!-- Right Wing: Indian Standard Time -->
             <div class="input-card ist">
                 <div class="card-title ist">
-                    <span>IST Time</span>
-                    <span class="timezone-offset">IST (UTC+5.5)</span>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <span style="font-size: 1rem;">IST Time</span>
+                        <span class="timezone-offset" style="font-size: 0.65rem; width: fit-content; text-transform: none; padding: 1px 6px;">IST (UTC+5.5)</span>
+                    </div>
+                    <span class="live-clock" id="ist-live-clock">--:--:--</span>
                 </div>
                 
                 <!-- Time Inputs -->
                 <div class="time-box">
                     <span class="time-label">Set Time</span>
                     <div class="time-inputs">
-                        <input type="text" class="num-input" id="ist-hour" maxlength="2" value="06" oninput="validateInput(this, 1, 12); syncFromIst()">
+                        <input type="text" class="num-input" id="ist-hour" maxlength="2" value="06" oninput="handleTimeInput(this, 'hour')" onblur="formatTimeInput(this, 'hour')">
                         <span class="separator">:</span>
-                        <input type="text" class="num-input" id="ist-min" maxlength="2" value="30" oninput="validateInput(this, 0, 59); syncFromIst()">
+                        <input type="text" class="num-input" id="ist-min" maxlength="2" value="30" oninput="handleTimeInput(this, 'min')" onblur="formatTimeInput(this, 'min')">
                         
                         <!-- AM/PM Toggle -->
                         <div class="ampm-toggle" onclick="toggleAmPm('ist')">
@@ -1005,14 +1053,68 @@
             return isEasternDST(d) ? 9.5 : 10.5;
         }
 
-        // Input validation handler
-        function validateInput(input, min, max) {
+        // Non-intrusive Input validation handler (typing phase)
+        function handleTimeInput(input, type) {
+            var start = input.selectionStart;
+            
+            // Limit characters to digits
             var val = input.value.replace(/[^0-9]/g, '');
-            if (val !== '') {
-                var num = parseInt(val, 10);
-                if (num < min) num = min;
-                if (num > max) num = max;
-                input.value = String(num).padStart(2, '0');
+            input.value = val;
+            
+            // Restore exact selection range to prevent cursor jumping
+            input.setSelectionRange(start, start);
+            
+            if (val === '') return; // Allow user to backspace the field completely
+            
+            var num = parseInt(val, 10);
+            var isValid = false;
+            
+            if (type === 'min') {
+                isValid = (num >= 0 && num <= 59);
+            } else if (type === 'hour') {
+                if (hour24Mode) {
+                    isValid = (num >= 0 && num <= 23);
+                } else {
+                    isValid = (num >= 1 && num <= 12);
+                }
+            }
+            
+            // Trigger dynamic update only if we typed a valid intermediate number
+            if (isValid) {
+                if (input.id.startsWith('east')) {
+                    syncFromEast();
+                } else {
+                    syncFromIst();
+                }
+            }
+        }
+
+        // Final formatting and clamping handler (blur or commit phase)
+        function formatTimeInput(input, type) {
+            var val = input.value.replace(/[^0-9]/g, '');
+            var min = 0;
+            var max = 59;
+            
+            if (type === 'hour') {
+                if (hour24Mode) {
+                    min = 0;
+                    max = 23;
+                } else {
+                    min = 1;
+                    max = 12;
+                }
+            }
+            
+            var num = val === '' ? min : parseInt(val, 10);
+            if (num < min) num = min;
+            if (num > max) num = max;
+            
+            input.value = String(num).padStart(2, '0');
+            
+            if (input.id.startsWith('east')) {
+                syncFromEast();
+            } else {
+                syncFromIst();
             }
         }
 
@@ -1112,12 +1214,23 @@
             btn.textContent = hour24Mode ? '24h' : '12h';
             btn.classList.toggle('active', hour24Mode);
             
+            // Show/Hide AM/PM toggles
+            var ampmToggles = document.querySelectorAll('.ampm-toggle');
+            ampmToggles.forEach(function(el) {
+                el.style.display = hour24Mode ? 'none' : 'flex';
+            });
+            
             // Re-render Timeline and update slider titles
             syncFromEastSlider();
+            
+            // Update live clocks instantly
+            updateLiveClocks();
         }
 
         // Toggle AM/PM state
         function toggleAmPm(zone) {
+            if (hour24Mode) return; // AM/PM toggling is ignored in 24h mode
+            
             var slider = document.getElementById(zone + '-ampm-slider');
             var isPm = slider.classList.toggle('pm');
             
@@ -1130,13 +1243,19 @@
 
         // Bidirectional Synchronization Logic (Core Conversion Engine)
         function syncFromEast() {
-            var eh = parseInt(document.getElementById('east-hour').value || '12', 10);
-            var em = parseInt(document.getElementById('east-min').value || '00', 10);
-            var isPm = document.getElementById('east-ampm-slider').classList.contains('pm');
+            var eh = parseInt(document.getElementById('east-hour').value || '0', 10);
+            var em = parseInt(document.getElementById('east-min').value || '0', 10);
             
-            // Standardize to 24h
-            if (isPm && eh < 12) eh += 12;
-            if (!isPm && eh === 12) eh = 0;
+            if (hour24Mode) {
+                if (eh < 0) eh = 0;
+                if (eh > 23) eh = 23;
+            } else {
+                if (eh < 1) eh = 1;
+                if (eh > 12) eh = 12;
+                var isPm = document.getElementById('east-ampm-slider').classList.contains('pm');
+                if (isPm && eh < 12) eh += 12;
+                if (!isPm && eh === 12) eh = 0;
+            }
 
             activeMinutesEast = eh * 60 + em;
             
@@ -1152,28 +1271,39 @@
             // Update Eastern Input Text boxes
             var h = Math.floor(activeMinutesEast / 60);
             var m = activeMinutesEast % 60;
-            var isPm = h >= 12;
-            var displayH = h % 12 || 12;
-
-            document.getElementById('east-hour').value = String(displayH).padStart(2, '0');
+            
+            if (hour24Mode) {
+                document.getElementById('east-hour').value = String(h).padStart(2, '0');
+            } else {
+                var isPm = h >= 12;
+                var displayH = h % 12 || 12;
+                document.getElementById('east-hour').value = String(displayH).padStart(2, '0');
+                
+                var ampmSlider = document.getElementById('east-ampm-slider');
+                ampmSlider.classList.toggle('pm', isPm);
+                document.getElementById('east-am-btn').classList.toggle('active', !isPm);
+                document.getElementById('east-pm-btn').classList.toggle('active', isPm);
+            }
+            
             document.getElementById('east-min').value = String(m).padStart(2, '0');
             
-            var ampmSlider = document.getElementById('east-ampm-slider');
-            ampmSlider.classList.toggle('pm', isPm);
-            document.getElementById('east-am-btn').classList.toggle('active', !isPm);
-            document.getElementById('east-pm-btn').classList.toggle('active', isPm);
-
             updateTimelinesFromEast(activeMinutesEast);
         }
 
         function syncFromIst() {
-            var ih = parseInt(document.getElementById('ist-hour').value || '12', 10);
-            var im = parseInt(document.getElementById('ist-min').value || '00', 10);
-            var isPm = document.getElementById('ist-ampm-slider').classList.contains('pm');
+            var ih = parseInt(document.getElementById('ist-hour').value || '0', 10);
+            var im = parseInt(document.getElementById('ist-min').value || '0', 10);
             
-            // Standardize to 24h
-            if (isPm && ih < 12) ih += 12;
-            if (!isPm && ih === 12) ih = 0;
+            if (hour24Mode) {
+                if (ih < 0) ih = 0;
+                if (ih > 23) ih = 23;
+            } else {
+                if (ih < 1) ih = 1;
+                if (ih > 12) ih = 12;
+                var isPm = document.getElementById('ist-ampm-slider').classList.contains('pm');
+                if (isPm && ih < 12) ih += 12;
+                if (!isPm && ih === 12) ih = 0;
+            }
 
             var activeMinutesIst = ih * 60 + im;
             
@@ -1217,17 +1347,22 @@
             // Update IST input fields
             var ih = Math.floor(istMins / 60);
             var im = istMins % 60;
-            var isPmIst = ih >= 12;
-            var displayHIst = ih % 12 || 12;
+            
+            if (hour24Mode) {
+                document.getElementById('ist-hour').value = String(ih).padStart(2, '0');
+            } else {
+                var isPmIst = ih >= 12;
+                var displayHIst = ih % 12 || 12;
+                document.getElementById('ist-hour').value = String(displayHIst).padStart(2, '0');
+                
+                var ampmSliderIst = document.getElementById('ist-ampm-slider');
+                ampmSliderIst.classList.toggle('pm', isPmIst);
+                document.getElementById('ist-am-btn').classList.toggle('active', !isPmIst);
+                document.getElementById('ist-pm-btn').classList.toggle('active', isPmIst);
+            }
 
-            document.getElementById('ist-hour').value = String(displayHIst).padStart(2, '0');
             document.getElementById('ist-min').value = String(im).padStart(2, '0');
             document.getElementById('ist-slider').value = istMins;
-
-            var ampmSliderIst = document.getElementById('ist-ampm-slider');
-            ampmSliderIst.classList.toggle('pm', isPmIst);
-            document.getElementById('ist-am-btn').classList.toggle('active', !isPmIst);
-            document.getElementById('ist-pm-btn').classList.toggle('active', isPmIst);
 
             // Calculate Dates if cross-midnight
             var eastDate = new Date(baseDate);
@@ -1410,9 +1545,45 @@
             loop();
         })();
 
+        // Auto-updating Live Clocks showing true current time in EST/EDT & IST
+        function updateLiveClocks() {
+            var now = new Date();
+            
+            var optionsEast = {
+                timeZone: 'America/New_York',
+                hour12: !hour24Mode,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            var optionsIst = {
+                timeZone: 'Asia/Kolkata',
+                hour12: !hour24Mode,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            
+            var eastStr = now.toLocaleTimeString('en-US', optionsEast);
+            var istStr = now.toLocaleTimeString('en-US', optionsIst);
+            
+            // Clean up leading spaces or zeros if returned by some browsers
+            eastStr = eastStr.replace(/^0/, '');
+            istStr = istStr.replace(/^0/, '');
+            
+            var eastClock = document.getElementById('east-live-clock');
+            var istClock = document.getElementById('ist-live-clock');
+            if (eastClock) eastClock.textContent = eastStr;
+            if (istClock) istClock.textContent = istStr;
+        }
+
         // Start Conversion init
         renderCalendar();
         syncFromEastSlider();
+        
+        // Start clocks instantly and register interval
+        updateLiveClocks();
+        setInterval(updateLiveClocks, 1000);
     </script>
 </body>
 </html>
