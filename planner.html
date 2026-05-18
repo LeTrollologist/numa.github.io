@@ -4041,10 +4041,20 @@ function renderAIView() {
 function renderChatLog() {
   const log = document.getElementById('aiChatLog');
   if (!log) return;
+  
+  // Preserve transient thinking bubble if active
+  const wasThinking = !!log.querySelector('.thinking');
+  
   log.innerHTML = '';
 
   if (aiHistory.length === 0) {
     log.innerHTML = '<div class="empty-state" style="padding:48px 0;margin:auto;">Hi ' + escapeHtml(aiSession?.username || '') + '! ✨<br><span style="font-size:0.8rem;opacity:0.6;">Ask me about your tasks, deadlines, or weekly focus.</span></div>';
+    if (wasThinking) {
+      const thinking = document.createElement('div');
+      thinking.className = 'ai-bubble assistant thinking';
+      thinking.textContent = 'Thinking…';
+      log.appendChild(thinking);
+    }
     return;
   }
 
@@ -4061,6 +4071,14 @@ function renderChatLog() {
     }
     log.appendChild(b);
   });
+  
+  if (wasThinking) {
+    const thinking = document.createElement('div');
+    thinking.className = 'ai-bubble assistant thinking';
+    thinking.textContent = 'Thinking…';
+    log.appendChild(thinking);
+  }
+  
   log.scrollTop = log.scrollHeight;
 }
 
@@ -4331,17 +4349,15 @@ Weekly focus: ${plannerData.weeklyFocus || 'not set'}`;
     log.scrollTop = log.scrollHeight;
   } catch (e) {
     thinking.remove();
-    const b = document.createElement('div');
-    b.className = 'ai-bubble assistant error';
-    b.textContent = '❌ ' + (e.message || 'Something went wrong.');
+    let errMsg = '❌ ' + (e.message || 'Something went wrong.');
     if (e.message && e.message.includes('expired')) {
-      b.textContent += ' Click Logout and log in again.';
+      errMsg += ' Click Logout and log in again.';
       aiSession = null;
       sessionStorage.removeItem('aiSession');
       setTimeout(renderAIView, 2000);
     }
-    log.appendChild(b);
-    log.scrollTop = log.scrollHeight;
+    aiHistory.push({ role: 'assistant', content: errMsg });
+    renderChatLog();
   }
 }
 
@@ -5309,6 +5325,10 @@ function sendStudyAiSuggestion(promptText) {
 function renderStudyChatLog() {
   const log = document.getElementById('studyAiChatLog');
   if (!log) return;
+  
+  // Preserve transient thinking bubble if active
+  const wasThinking = !!log.querySelector('.thinking');
+  
   log.innerHTML = '';
 
   if (studyAiHistory.length === 0) {
@@ -5318,6 +5338,12 @@ function renderStudyChatLog() {
         Tell me what topic you are working on, ask me to explain a concept, create a practice quiz for you, or ask for encouragement!
       </div>
     `;
+    if (wasThinking) {
+      const thinking = document.createElement('div');
+      thinking.className = 'ai-bubble assistant thinking';
+      thinking.textContent = 'Thinking…';
+      log.appendChild(thinking);
+    }
     return;
   }
 
@@ -5334,6 +5360,14 @@ function renderStudyChatLog() {
     }
     log.appendChild(b);
   });
+  
+  if (wasThinking) {
+    const thinking = document.createElement('div');
+    thinking.className = 'ai-bubble assistant thinking';
+    thinking.textContent = 'Thinking…';
+    log.appendChild(thinking);
+  }
+  
   log.scrollTop = log.scrollHeight;
 }
 
