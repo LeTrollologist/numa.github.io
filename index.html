@@ -3884,11 +3884,19 @@
             var roomNum = Math.floor(1000 + Math.random() * 9000);
             var generatedId = 'NUMA-' + roomNum;
             
+            console.log('Initializing PeerJS client with ID:', generatedId);
             peer = new Peer(generatedId, {
-                debug: 1
+                debug: 2,
+                config: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:global.stun.twilio.com:3478' }
+                    ]
+                }
             });
 
             peer.on('open', function (id) {
+                console.log('PeerJS client online. Reg ID:', id);
                 myPeerId = id;
                 document.getElementById('multiStatus').innerText = 'System online. Ready to create/join rooms.';
                 document.getElementById('multiStatus').style.color = '#00ff88';
@@ -3896,12 +3904,13 @@
             });
 
             peer.on('error', function (err) {
-                console.error('PeerJS error:', err);
+                console.error('PeerJS error event:', err);
                 document.getElementById('multiStatus').innerText = 'Network error: ' + err.type;
                 document.getElementById('multiStatus').style.color = '#ff4040';
             });
 
             peer.on('connection', function (conn) {
+                console.log('Host received connection request from:', conn.peer);
                 // Incoming guest connection (runs on host)
                 if (isHost) {
                     peerConn = conn;
@@ -3944,16 +3953,19 @@
             isHost = false;
 
             initPeer(function () {
+                console.log('Connecting from Guest to Host:', targetId);
                 document.getElementById('multiStatus').innerText = 'Connecting to room ' + targetId + '...';
-                peerConn = peer.connect(targetId, { reliable: true });
+                peerConn = peer.connect(targetId);
                 setupPeerConnection();
             });
         }
 
         function setupPeerConnection() {
+            console.log('setupPeerConnection triggered. peerConn.open =', peerConn.open);
             document.getElementById('multiStatus').innerText = 'Initializing handshake...';
             
             function handleConnectSuccess() {
+                console.log('WebRTC P2P DataChannel fully opened!');
                 document.getElementById('multiStatus').innerText = 'Connected! Telemetry synced. 💖';
                 document.getElementById('multiStatus').style.color = '#00ff88';
                 
@@ -3983,7 +3995,14 @@
                 handleIncomingData(data);
             });
 
+            peerConn.on('error', function (err) {
+                console.error('DataConnection error event:', err);
+                document.getElementById('multiStatus').innerText = 'Handshake error: ' + err.message;
+                document.getElementById('multiStatus').style.color = '#ff4040';
+            });
+
             peerConn.on('close', function () {
+                console.log('WebRTC connection closed.');
                 document.getElementById('multiStatus').innerText = 'Partner disconnected. 🌸';
                 document.getElementById('multiStatus').style.color = '#ff4040';
                 gState = 'START';
