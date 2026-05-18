@@ -4,8 +4,19 @@
  * Optimized for: Stargazer, Pong, Sketch, Grove, and Planner.
  */
 (function() {
+    // 1. REGISTER SERVICE WORKER GLOBALLY (All Devices: PCs, Phones, Tablets)
+    if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+        navigator.serviceWorker.register('service-worker.js')
+            .then(() => console.log("📦 Service Worker Registered"))
+            .catch(err => console.warn("📦 Service Worker Registration Failed", err));
+    }
+
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
-    if (!isMobile) return;
+    if (!isMobile) {
+        // Fallback for PCs to prevent crashes when they call window.haptic() on UI actions
+        window.haptic = () => {};
+        return;
+    }
 
     console.log("📱 Mobile Optimizer v3.0 Initialized");
 
@@ -48,6 +59,11 @@
         },
 
         setupDetection() {
+            if (!document.body) {
+                document.addEventListener('DOMContentLoaded', () => this.setupDetection(), { once: true });
+                return;
+            }
+
             // Monitor active pages/modals
             const observer = new MutationObserver(() => this.update());
             observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class', 'style'] });
@@ -200,6 +216,23 @@
     };
 
     // ==========================================
+    // 6. UTILITIES (Haptics & PWA)
+    // ==========================================
+    const Utils = {
+        init() {
+            this.patchVibration();
+        },
+        patchVibration() {
+            window.haptic = (type = 'light') => {
+                if (!navigator.vibrate) return;
+                if (type === 'light') navigator.vibrate(12);
+                else if (type === 'medium') navigator.vibrate(35);
+                else if (type === 'heavy') navigator.vibrate([45, 30, 45]);
+            };
+        }
+    };
+
+    // ==========================================
     // INITIALIZE
     // ==========================================
     PowerManager.init();
@@ -207,6 +240,6 @@
     VisualManager.init();
     EventManager.init();
     FrameEngine.init();
+    Utils.init();
 
 })();
-
