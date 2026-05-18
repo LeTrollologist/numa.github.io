@@ -813,19 +813,159 @@
                 overflow-y: auto;
                 height: auto;
                 padding-bottom: 40px;
+                gap: 15px;
             }
 
             body {
                 overflow-y: auto;
                 height: auto;
+                display: block;
+            }
+
+            .app-container {
+                height: auto;
+                padding: 10px;
             }
 
             .timeline-container {
-                height: 500px;
+                height: 450px;
             }
 
             .input-card {
                 max-height: none;
+            }
+        }
+
+        /* Mobile Segmented Tab View on Phones */
+        .mobile-tabs {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: center;
+                text-align: center;
+                padding-bottom: 12px;
+                margin-bottom: 12px;
+            }
+
+            .brand h1 {
+                font-size: 1.6rem !important;
+            }
+
+            .brand p {
+                font-size: 0.75rem !important;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .thrw {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* Responsive tab navigation bar */
+            .mobile-tabs {
+                display: flex;
+                justify-content: space-between;
+                background: rgba(5, 8, 22, 0.6);
+                border: 1px solid var(--border);
+                border-radius: 18px;
+                padding: 4px;
+                margin-bottom: 15px;
+                backdrop-filter: blur(15px);
+                -webkit-backdrop-filter: blur(15px);
+                gap: 4px;
+                position: sticky;
+                top: 10px;
+                z-index: 100;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .mobile-tab {
+                flex: 1;
+                background: none;
+                border: none;
+                font-family: var(--font-ui);
+                font-size: 0.72rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: var(--muted);
+                padding: 10px 6px;
+                border-radius: 14px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-align: center;
+                font-weight: 500;
+            }
+
+            .mobile-tab.active {
+                background: var(--accent-d);
+                border: 1px solid var(--border-h);
+                color: var(--text);
+                box-shadow: 0 0 10px rgba(168, 159, 216, 0.05);
+            }
+
+            /* Toggle active panel structures smoothly */
+            .workspace > .input-card.east,
+            .workspace > .timeline-card,
+            .workspace > .input-card.ist {
+                display: none !important;
+            }
+
+            .workspace > .input-card.east.active-panel,
+            .workspace > .timeline-card.active-panel,
+            .workspace > .input-card.ist.active-panel {
+                display: flex !important;
+                animation: panelFadeSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            }
+
+            @keyframes panelFadeSlide {
+                from {
+                    opacity: 0;
+                    transform: translateY(12px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .timeline-container {
+                height: 380px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .input-card {
+                padding: 15px;
+            }
+
+            .time-inputs {
+                gap: 6px;
+            }
+
+            .num-input {
+                width: 52px;
+                height: 52px;
+                font-size: 1.4rem;
+            }
+
+            .live-clock {
+                font-size: 0.65rem;
+                padding: 2px 6px;
+            }
+            
+            .timezone-offset {
+                font-size: 0.6rem;
+                padding: 1px 4px;
             }
         }
     </style>
@@ -854,6 +994,13 @@
                 <button class="toggle-btn" id="hourFormatToggle" onclick="toggleHourFormat()">24h</button>
             </div>
         </header>
+
+        <!-- Mobile Navigation Tabs (visible only on mobile) -->
+        <div class="mobile-tabs">
+            <button class="mobile-tab active" data-tab="east" onclick="switchMobileTab('east')">Eastern</button>
+            <button class="mobile-tab" data-tab="timeline" onclick="switchMobileTab('timeline')">Timeline</button>
+            <button class="mobile-tab" data-tab="ist" onclick="switchMobileTab('ist')">IST Time</button>
+        </div>
 
         <!-- Main Workspace -->
         <div class="workspace">
@@ -917,7 +1064,7 @@
             </div>
 
             <!-- Central Column: Twin Timeline Column -->
-            <div class="timeline-container">
+            <div class="timeline-container timeline-card">
                 <div class="timeline-header">
                     <div class="timeline-col-title east">US Eastern</div>
                     <div class="timeline-col-title ist">Indian Standard</div>
@@ -1575,6 +1722,50 @@
             var istClock = document.getElementById('ist-live-clock');
             if (eastClock) eastClock.textContent = eastStr;
             if (istClock) istClock.textContent = istStr;
+        }
+
+        // Mobile Segmented View Controller
+        function switchMobileTab(tabName) {
+            var tabs = document.querySelectorAll('.mobile-tab');
+            var panels = {
+                east: document.querySelector('.input-card.east'),
+                timeline: document.querySelector('.timeline-card'),
+                ist: document.querySelector('.input-card.ist')
+            };
+
+            // Switch active tab styling
+            tabs.forEach(function(tab) {
+                if (tab.getAttribute('data-tab') === tabName) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+
+            // Switch visible panel active classes
+            Object.keys(panels).forEach(function(key) {
+                var p = panels[key];
+                if (!p) return;
+                if (key === tabName) {
+                    p.classList.add('active-panel');
+                } else {
+                    p.classList.remove('active-panel');
+                }
+            });
+            
+            // If switched to timeline, trigger scroll position update to center selected item cleanly
+            if (tabName === 'timeline') {
+                setTimeout(function() {
+                    var ehVal = parseInt(document.getElementById('east-slider').value, 10);
+                    positionTimelinePointer(ehVal);
+                }, 50);
+            }
+        }
+
+        // Initialize default active panel on mobile sizes on load
+        if (window.innerWidth <= 768) {
+            var eastPanel = document.querySelector('.input-card.east');
+            if (eastPanel) eastPanel.classList.add('active-panel');
         }
 
         // Start Conversion init
