@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Numa's Space - Celestial Time Aligner</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Mono:wght@300;400;500&family=Cinzel:wght@400;500&family=Josefin+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet -->
+    <style>
+        :root {
+            --bg: #04060e;
+            --panel: rgba(5, 8, 22, 0.93);
+            --border: rgba(168, 159, 216, 0.14);
+            --border-h: rgba(168, 159, 216, 0.32);
+            --accent: #a89fd8;
+            --accent-d: rgba(168, 159, 216, 0.16);
+            --text: #cdd5ed;
+            --muted: #58697f;
+            --gold: #c9a84c;
+            --gold-d: rgba(201, 168, 76, 0.14);
+
+            --east-glow: var(--accent);
+            --ist-glow: var(--gold);
+            --glass: var(--panel);
+            --font-display: 'Cinzel', serif;
+            --font-body: 'Josefin Sans', sans-serif;
+            --font-ui: 'Josefin Sans', sans-serif;
+            --font-mono: 'DM Mono', monospace;
+            --vh: 1vh;
+        }
+
+        body.moonlit {
+            --bg: #040714;
+            --accent: #7eb8f7;
+            --accent-d: rgba(126, 184, 247, 0.15);
+            --border: rgba(126, 184, 247, 0.13);
+            --border-h: rgba(126, 184, 247, 0.30);
+            --east-glow: var(--accent);
+            --ist-glow: #bf5eff;
+        }
+
+        body.ember {
+            --bg: #0b0502;
+            --accent: #f0a96a;
+            --accent-d: rgba(240, 169, 106, 0.14);
+            --border: rgba(240, 169, 106, 0.13);
+            --border-h: rgba(240, 169, 106, 0.30);
+            --east-glow: var(--accent);
+            --ist-glow: var(--gold);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            height: calc(var(--vh, 1vh) * 100);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        /* Ambient Stars Canvas background */
+        #stars-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* Layout Container */
+        .app-container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 20px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* ── HEADER ── */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand h1 {
+            font-family: var(--font-display);
+            font-size: 2.1rem;
+            color: #ffffff;
+            letter-spacing: 0.05em;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            line-height: 1.1;
+        }
+
+        .brand p {
+            font-family: var(--font-ui);
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--muted);
+            margin-top: 5px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            font-family: var(--font-ui);
+            background: var(--glass);
+            border: 1px solid var(--border);
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            text-transform: uppercase;
+        }
+
+        .nav-btn:hover {
+            background: var(--accent-d);
+            border-color: var(--accent);
+            transform: scale(1.03);
+        }
+
+        .toggle-btn {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn.active {
+            border-color: var(--accent);
+            color: #ffffff;
+            box-shadow: 0 0 10px var(--accent);
+            background: var(--accent-d);
+        }
+
+        /* Theme switcher buttons */
+        .thrw {
+            display: flex;
+            gap: 5px;
+        }
+
+        .thbtn {
+            padding: 8px 14px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: transparent;
+            font-family: 'Josefin Sans', sans-serif;
+            font-size: .65rem;
+            letter-spacing: .10em;
+            text-transform: uppercase;
+            color: var(--muted);
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            border-radius: 16px;
+        }
+
+        .thbtn::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .thbtn[data-t="mist"]::before {
+            background: #a89fd8;
+        }
+
+        .thbtn[data-t="moonlit"]::before {
+            background: #7eb8f7;
+        }
+
+        .thbtn[data-t="ember"]::before {
+            background: #f0a96a;
+        }
+
+        .thbtn:hover {
+            border-color: var(--border-h);
+            color: var(--text);
+            background: var(--accent-d);
+        }
+
+        .thbtn.on {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-d);
+        }
+
+        /* ── DUAL COLUMN GRID ── */
+        .workspace {
+            display: grid;
+            grid-template-columns: 350px 1fr 350px;
+            gap: 25px;
+            flex-grow: 1;
+            overflow: hidden;
+            height: calc(100% - 90px);
+        }
+
+        /* Holographic Inputs (Side Wings) */
+        .input-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+            max-height: 100%;
+            overflow-y: auto;
+        }
+
+        .input-card.east {
+            border-left: 3px solid var(--east-glow);
+        }
+        .input-card.east:focus-within {
+            border-color: var(--east-glow);
+            box-shadow: 0 0 25px var(--accent-d);
+        }
+
+        .input-card.ist {
+            border-right: 3px solid var(--ist-glow);
+        }
+        .input-card.ist:focus-within {
+            border-color: var(--ist-glow);
+            box-shadow: 0 0 25px rgba(201, 168, 76, 0.12);
+        }
+
+        .card-title {
+            font-family: var(--font-ui);
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            font-weight: 500;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title.east { color: var(--east-glow); }
+        .card-title.ist { color: var(--ist-glow); }
+
+        .timezone-offset {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            background: var(--accent-d);
+            border: 1px solid var(--border);
+            padding: 2px 8px;
+            border-radius: 12px;
+            color: var(--text);
+        }
+
+        /* Custom Time Pickers */
+        .time-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .time-label {
+            font-family: var(--font-ui);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--muted);
+        }
+
+        .time-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .num-input {
+            width: 70px;
+            height: 56px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            color: #ffffff;
+            font-family: var(--font-mono);
+            font-size: 1.8rem;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .num-input:focus {
+            background: var(--accent-d);
+            border-color: var(--accent);
+        }
+
+        .separator {
+            font-family: var(--font-mono);
+            font-size: 1.8rem;
+            color: var(--border);
+        }
+
+        .ampm-toggle {
+            height: 56px;
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            display: flex;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .ampm-btn {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: var(--font-ui);
+            font-weight: 700;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.4);
+            z-index: 2;
+            transition: color 0.3s ease;
+        }
+
+        .ampm-btn.active {
+            color: #ffffff;
+        }
+
+        .ampm-slider {
+            position: absolute;
+            top: 4px;
+            bottom: 4px;
+            left: 4px;
+            width: calc(50% - 4px);
+            border-radius: 10px;
+            z-index: 1;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .east .ampm-slider {
+            background: linear-gradient(135deg, var(--east-glow), #a224ff);
+            box-shadow: 0 4px 15px rgba(191, 94, 255, 0.3);
+        }
+
+        .ist .ampm-slider {
+            background: linear-gradient(135deg, var(--ist-glow), #00a8ff);
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .ampm-slider.pm {
+            transform: translateX(100%);
+        }
+
+        /* Calendar Picker styling */
+        .calendar-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .date-display {
+            font-family: var(--font-ui);
+            font-size: 1.1rem;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .date-display:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .custom-calendar {
+            background: rgba(10, 10, 20, 0.95);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 12px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+        }
+
+        .cal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-ui);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 5px;
+        }
+
+        .cal-arrow {
+            cursor: pointer;
+            color: rgba(255,255,255,0.4);
+            font-weight: bold;
+            transition: color 0.2s;
+            padding: 2px 8px;
+        }
+
+        .cal-arrow:hover { color: #ffffff; }
+
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            text-align: center;
+        }
+
+        .cal-day-label {
+            font-family: var(--font-ui);
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
+            padding-bottom: 4px;
+        }
+
+        .cal-cell {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.2s ease;
+        }
+
+        .cal-cell:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+        }
+
+        .cal-cell.active {
+            background: var(--east-glow);
+            color: #ffffff;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(191, 94, 255, 0.4);
+        }
+
+        .cal-cell.other-month {
+            color: rgba(255, 255, 255, 0.15);
+        }
+
+        /* ── CENTRAL VERTICAL TIMELINE ── */
+        .timeline-container {
+            background: rgba(5, 5, 10, 0.65);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            backdrop-filter: blur(15px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+
+        .timeline-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            text-align: center;
+            padding: 18px 0;
+            background: rgba(10, 10, 20, 0.9);
+            border-bottom: 1px solid var(--border);
+            z-index: 10;
+        }
+
+        .timeline-col-title {
+            font-family: var(--font-ui);
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
+        }
+
+        .timeline-col-title.east { color: var(--east-glow); }
+        .timeline-col-title.ist { color: var(--ist-glow); }
+
+        .timeline-scroll {
+            flex-grow: 1;
+            overflow-y: scroll;
+            position: relative;
+            padding: 10px 0;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+        }
+
+        .timeline-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .timeline-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 3px;
+        }
+
+        /* The Grid Rows */
+        .hour-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            height: 72px; /* Fixed height for exact minute indicator mapping */
+            position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            transition: background 0.3s;
+            cursor: pointer;
+        }
+
+        .hour-row::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 1px;
+            background: var(--border);
+            z-index: 2;
+        }
+
+        .hour-cell {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .hour-time {
+            font-family: var(--font-mono);
+            font-size: 1.25rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .hour-date {
+            font-family: var(--font-ui);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 3px;
+        }
+
+        /* Interactive active state overlay */
+        .hour-row.active {
+            background: rgba(255, 255, 255, 0.035) !important;
+        }
+
+        /* Day/Night & Overlap Colors */
+        .night-zone {
+            background: linear-gradient(90deg, rgba(8, 8, 25, 0.4), rgba(4, 4, 12, 0.4));
+        }
+
+        .day-zone {
+            background: linear-gradient(90deg, rgba(40, 30, 15, 0.15), rgba(15, 25, 40, 0.1));
+        }
+
+        /* Golden Overlap Zone (Both awake 8am-10pm) */
+        .golden-zone {
+            background: rgba(255, 111, 171, 0.025);
+        }
+
+        .golden-badge {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: rgba(255, 198, 92, 0.1);
+            border: 1px solid rgba(255, 198, 92, 0.25);
+            color: rgb(255, 198, 92);
+            font-family: var(--font-ui);
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 1px 6px;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        /* ── GLOWING TIMELINE POINTER (MINUTE SELECTOR) ── */
+        .timeline-pointer {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--east-glow), var(--ist-glow));
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.8), 0 0 20px rgba(191, 94, 255, 0.8);
+            z-index: 5;
+            pointer-events: none;
+            transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .timeline-pointer::before {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: -6px;
+            width: 15px;
+            height: 15px;
+            background: var(--east-glow);
+            clip-path: polygon(100% 50%, 0 0, 0 100%);
+            box-shadow: 0 0 10px var(--east-glow);
+        }
+
+        .timeline-pointer::after {
+            content: '';
+            position: absolute;
+            right: 4px;
+            top: -6px;
+            width: 15px;
+            height: 15px;
+            background: var(--ist-glow);
+            clip-path: polygon(0 50%, 100% 0, 100% 100%);
+            box-shadow: 0 0 10px var(--ist-glow);
+        }
+
+        /* Slider Controls below Cards */
+        .slider-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--font-ui);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.4);
+        }
+
+        .custom-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .east .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--east-glow);
+            box-shadow: 0 0 10px var(--east-glow);
+            cursor: pointer;
+        }
+
+        .ist .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--ist-glow);
+            box-shadow: 0 0 10px var(--ist-glow);
+            cursor: pointer;
+        }
+
+        /* ── DUAL ARROWS ON SCREEN ── */
+        .bottom-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            gap: 15px;
+            z-index: 10;
+        }
+
+        .sync-hud {
+            font-family: var(--font-ui);
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            padding: 8px 18px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(15px);
+        }
+
+        .sync-arrow {
+            animation: bounce-x 2s infinite ease-in-out;
+        }
+
+        @keyframes bounce-x {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(4px); }
+        }
+
+        /* ── RESPONSIVE MOBILE ADJUSTMENTS ── */
+        @media (max-width: 1024px) {
+            .workspace {
+                grid-template-columns: 1fr;
+                overflow-y: auto;
+                height: auto;
+                padding-bottom: 40px;
+            }
+
+            body {
+                overflow-y: auto;
+                height: auto;
+            }
+
+            .timeline-container {
+                height: 500px;
+            }
+
+            .input-card {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Stars Parallax Background -->
+    <canvas id="stars-canvas"></canvas>
+
+    <!-- App Container -->
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header>
+            <div class="brand">
+                <h1>Celestial Aligner</h1>
+                <p>US Eastern ⇄ Indian Standard Time</p>
+            </div>
+            <div class="header-actions">
+                <div class="thrw">
+                    <button class="thbtn on" data-t="mist" onclick="setTheme('mist')">Mist</button>
+                    <button class="thbtn" data-t="moonlit" onclick="setTheme('moonlit')">Moonlit</button>
+                    <button class="thbtn" data-t="ember" onclick="setTheme('ember')">Ember</button>
+                </div>
+                <a href="index.html" class="nav-btn">Home</a>
+                <button class="toggle-btn" id="hourFormatToggle" onclick="toggleHourFormat()">24h</button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <div class="workspace">
+            
+            <!-- Left Wing: US Eastern Time -->
+            <div class="input-card east">
+                <div class="card-title east">
+                    <span>US Eastern</span>
+                    <span class="timezone-offset" id="east-offset">EDT (UTC-4)</span>
+                </div>
+                
+                <!-- Time Inputs -->
+                <div class="time-box">
+                    <span class="time-label">Set Time</span>
+                    <div class="time-inputs">
+                        <input type="text" class="num-input" id="east-hour" maxlength="2" value="09" oninput="validateInput(this, 1, 12); syncFromEast()">
+                        <span class="separator">:</span>
+                        <input type="text" class="num-input" id="east-min" maxlength="2" value="00" oninput="validateInput(this, 0, 59); syncFromEast()">
+                        
+                        <!-- AM/PM Toggle -->
+                        <div class="ampm-toggle" onclick="toggleAmPm('east')">
+                            <div class="ampm-slider" id="east-ampm-slider"></div>
+                            <div class="ampm-btn active" id="east-am-btn">AM</div>
+                            <div class="ampm-btn" id="east-pm-btn">PM</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Minute Slider -->
+                <div class="slider-box">
+                    <div class="slider-header">
+                        <span>Precise Timeline Slide</span>
+                        <span id="east-slider-val">9:00 AM</span>
+                    </div>
+                    <input type="range" class="custom-slider" id="east-slider" min="0" max="1439" value="540" oninput="syncFromEastSlider()">
+                </div>
+
+                <!-- Calendar support -->
+                <div class="calendar-box">
+                    <span class="time-label">Choose Date</span>
+                    <div class="date-display" onclick="toggleCalendar()">
+                        <span id="cal-date-str">Monday, May 18, 2026</span>
+                        <span style="opacity: 0.4;">📅</span>
+                    </div>
+                    
+                    <!-- Beautiful Custom Calendar Overlay -->
+                    <div class="custom-calendar" id="calendarOverlay">
+                        <div class="cal-header">
+                            <span class="cal-arrow" onclick="changeMonth(-1)">◀</span>
+                            <span id="cal-month-year">May 2026</span>
+                            <span class="cal-arrow" onclick="changeMonth(1)">▶</span>
+                        </div>
+                        <div class="cal-grid" id="calendarGrid">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Central Column: Twin Timeline Column -->
+            <div class="timeline-container">
+                <div class="timeline-header">
+                    <div class="timeline-col-title east">US Eastern</div>
+                    <div class="timeline-col-title ist">Indian Standard</div>
+                </div>
+                
+                <div class="timeline-scroll" id="timelineScroll">
+                    <div class="timeline-pointer" id="timelinePointer"></div>
+                    <div id="timelineRows">
+                        <!-- 24 hourly rows populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Wing: Indian Standard Time -->
+            <div class="input-card ist">
+                <div class="card-title ist">
+                    <span>IST Time</span>
+                    <span class="timezone-offset">IST (UTC+5.5)</span>
+                </div>
+                
+                <!-- Time Inputs -->
+                <div class="time-box">
+                    <span class="time-label">Set Time</span>
+                    <div class="time-inputs">
+                        <input type="text" class="num-input" id="ist-hour" maxlength="2" value="06" oninput="validateInput(this, 1, 12); syncFromIst()">
+                        <span class="separator">:</span>
+                        <input type="text" class="num-input" id="ist-min" maxlength="2" value="30" oninput="validateInput(this, 0, 59); syncFromIst()">
+                        
+                        <!-- AM/PM Toggle -->
+                        <div class="ampm-toggle" onclick="toggleAmPm('ist')">
+                            <div class="ampm-slider pm" id="ist-ampm-slider"></div>
+                            <div class="ampm-btn" id="ist-am-btn">AM</div>
+                            <div class="ampm-btn active" id="ist-pm-btn">PM</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Minute Slider -->
+                <div class="slider-box">
+                    <div class="slider-header">
+                        <span>Precise Timeline Slide</span>
+                        <span id="ist-slider-val">6:30 PM</span>
+                    </div>
+                    <input type="range" class="custom-slider" id="ist-slider" min="0" max="1439" value="1110" oninput="syncFromIstSlider()">
+                </div>
+
+                <!-- Summary statistics Card -->
+                <div class="calendar-box" style="margin-top: 15px;">
+                    <span class="time-label">Scheduling Summary</span>
+                    <div class="date-display" style="cursor: default; display: flex; flex-direction: column; align-items: flex-start; gap: 8px;">
+                        <div style="font-size: 0.9rem; color: rgba(255,255,255,0.85);" id="summary-east-str">Eastern: May 18, 9:00 AM</div>
+                        <div style="font-size: 0.9rem; color: rgba(255,255,255,0.85);" id="summary-ist-str">IST: May 18, 6:30 PM</div>
+                        <div style="font-size: 0.75rem; color: #ffb6d9;" id="summary-state-str">Golden overlap: Perfect wake times!</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sync Arrow HUD footer -->
+        <div class="bottom-actions">
+            <div class="sync-hud">
+                <span class="sync-arrow">🔀</span>
+                <span>Times are synchronized in real-time. Drag sliders or edit fields on either wing!</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Optimization scripts -->
+    <script src="compute-optimizer.js"></script>
+    <script src="mobile-optimizer.js"></script>
+    <script src="apple-optimizer.js"></script>
+    
+    <!-- Time Aligner Logic Core -->
+    <script>
+        // Global variables
+        var baseDate = new Date(); // Chosen base calendar day
+        var hour24Mode = false;
+        var calCurrentMonth = baseDate.getMonth();
+        var calCurrentYear = baseDate.getFullYear();
+        
+        // Active timeline highlights tracker
+        var activeMinutesEast = 540; // 9:00 AM
+
+        // Theme Switcher Logic
+        function setTheme(t) {
+            document.body.className = '';
+            if (t !== 'mist') {
+                document.body.classList.add(t);
+            }
+            
+            var buttons = document.querySelectorAll('.thbtn');
+            buttons.forEach(function(btn) {
+                if (btn.getAttribute('data-t') === t) {
+                    btn.classList.add('on');
+                } else {
+                    btn.classList.remove('on');
+                }
+            });
+
+            // Re-render to propagate theme-derived colors immediately
+            syncFromEastSlider();
+        }
+
+        // Determine if selected date is in Daylight Saving Time (EDT = UTC-4, otherwise EST = UTC-5)
+        function isEasternDST(d) {
+            // US DST starts 2nd Sunday in March, ends 1st Sunday in November
+            var year = d.getFullYear();
+            
+            // March: Find second Sunday
+            var marchSecondSunday = new Date(year, 2, 8);
+            while (marchSecondSunday.getDay() !== 0) {
+                marchSecondSunday.setDate(marchSecondSunday.getDate() + 1);
+            }
+            
+            // November: Find first Sunday
+            var novFirstSunday = new Date(year, 10, 1);
+            while (novFirstSunday.getDay() !== 0) {
+                novFirstSunday.setDate(novFirstSunday.getDate() + 1);
+            }
+            
+            // Compare
+            return d > marchSecondSunday && d < novFirstSunday;
+        }
+
+        // Get timezone offset offset in hours: IST is UTC+5.5.
+        // If EDT (DST): difference is 5.5 - (-4) = 9.5 hours
+        // If EST (Standard): difference is 5.5 - (-5) = 10.5 hours
+        function getOffsetHours(d) {
+            return isEasternDST(d) ? 9.5 : 10.5;
+        }
+
+        // Input validation handler
+        function validateInput(input, min, max) {
+            var val = input.value.replace(/[^0-9]/g, '');
+            if (val !== '') {
+                var num = parseInt(val, 10);
+                if (num < min) num = min;
+                if (num > max) num = max;
+                input.value = String(num).padStart(2, '0');
+            }
+        }
+
+        // Initialize Calendar
+        function renderCalendar() {
+            var grid = document.getElementById('calendarGrid');
+            var title = document.getElementById('cal-month-year');
+            grid.innerHTML = '';
+            
+            // Header day labels
+            var days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+            days.forEach(function(day) {
+                var el = document.createElement('div');
+                el.className = 'cal-day-label';
+                el.textContent = day;
+                grid.appendChild(el);
+            });
+
+            var firstDay = new Date(calCurrentYear, calCurrentMonth, 1).getDay();
+            var daysInMonth = new Date(calCurrentYear, calCurrentMonth + 1, 0).getDate();
+            var daysInPrevMonth = new Date(calCurrentYear, calCurrentMonth, 0).getDate();
+            
+            var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            title.textContent = months[calCurrentMonth] + ' ' + calCurrentYear;
+
+            // Fill previous month cells
+            for (var i = firstDay - 1; i >= 0; i--) {
+                var el = document.createElement('div');
+                el.className = 'cal-cell other-month';
+                el.textContent = daysInPrevMonth - i;
+                grid.appendChild(el);
+            }
+
+            // Fill active month cells
+            for (var d = 1; d <= daysInMonth; d++) {
+                (function(dayNum) {
+                    var el = document.createElement('div');
+                    el.className = 'cal-cell';
+                    el.textContent = dayNum;
+                    
+                    // Mark active date
+                    if (dayNum === baseDate.getDate() && calCurrentMonth === baseDate.getMonth() && calCurrentYear === baseDate.getFullYear()) {
+                        el.classList.add('active');
+                    }
+                    
+                    el.onclick = function() {
+                        baseDate = new Date(calCurrentYear, calCurrentMonth, dayNum);
+                        document.getElementById('cal-date-str').textContent = baseDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                        document.getElementById('calendarOverlay').style.display = 'none';
+                        
+                        // Update dynamic DST indicators
+                        var isDST = isEasternDST(baseDate);
+                        document.getElementById('east-offset').textContent = isDST ? 'EDT (UTC-4)' : 'EST (UTC-5)';
+                        
+                        renderCalendar();
+                        syncFromEastSlider(); // Re-trigger mapping
+                    };
+                    grid.appendChild(el);
+                })(d);
+            }
+        }
+
+        function changeMonth(dir) {
+            calCurrentMonth += dir;
+            if (calCurrentMonth < 0) {
+                calCurrentMonth = 11;
+                calCurrentYear--;
+            } else if (calCurrentMonth > 11) {
+                calCurrentMonth = 0;
+                calCurrentYear++;
+            }
+            renderCalendar();
+        }
+
+        function toggleCalendar() {
+            var overlay = document.getElementById('calendarOverlay');
+            overlay.style.display = (overlay.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        // Formatter HH:MM for sliders
+        function formatMinutes(minCount) {
+            var h = Math.floor(minCount / 60);
+            var m = minCount % 60;
+            if (hour24Mode) {
+                return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+            } else {
+                var ap = h >= 12 ? 'PM' : 'AM';
+                var displayH = h % 12 || 12;
+                return displayH + ':' + String(m).padStart(2, '0') + ' ' + ap;
+            }
+        }
+
+        // Hour Format Toggle
+        function toggleHourFormat() {
+            hour24Mode = !hour24Mode;
+            var btn = document.getElementById('hourFormatToggle');
+            btn.textContent = hour24Mode ? '24h' : '12h';
+            btn.classList.toggle('active', hour24Mode);
+            
+            // Re-render Timeline and update slider titles
+            syncFromEastSlider();
+        }
+
+        // Toggle AM/PM state
+        function toggleAmPm(zone) {
+            var slider = document.getElementById(zone + '-ampm-slider');
+            var isPm = slider.classList.toggle('pm');
+            
+            document.getElementById(zone + '-am-btn').classList.toggle('active', !isPm);
+            document.getElementById(zone + '-pm-btn').classList.toggle('active', isPm);
+
+            if (zone === 'east') syncFromEast();
+            else syncFromIst();
+        }
+
+        // Bidirectional Synchronization Logic (Core Conversion Engine)
+        function syncFromEast() {
+            var eh = parseInt(document.getElementById('east-hour').value || '12', 10);
+            var em = parseInt(document.getElementById('east-min').value || '00', 10);
+            var isPm = document.getElementById('east-ampm-slider').classList.contains('pm');
+            
+            // Standardize to 24h
+            if (isPm && eh < 12) eh += 12;
+            if (!isPm && eh === 12) eh = 0;
+
+            activeMinutesEast = eh * 60 + em;
+            
+            // Set slider value
+            document.getElementById('east-slider').value = activeMinutesEast;
+            
+            updateTimelinesFromEast(activeMinutesEast);
+        }
+
+        function syncFromEastSlider() {
+            activeMinutesEast = parseInt(document.getElementById('east-slider').value, 10);
+            
+            // Update Eastern Input Text boxes
+            var h = Math.floor(activeMinutesEast / 60);
+            var m = activeMinutesEast % 60;
+            var isPm = h >= 12;
+            var displayH = h % 12 || 12;
+
+            document.getElementById('east-hour').value = String(displayH).padStart(2, '0');
+            document.getElementById('east-min').value = String(m).padStart(2, '0');
+            
+            var ampmSlider = document.getElementById('east-ampm-slider');
+            ampmSlider.classList.toggle('pm', isPm);
+            document.getElementById('east-am-btn').classList.toggle('active', !isPm);
+            document.getElementById('east-pm-btn').classList.toggle('active', isPm);
+
+            updateTimelinesFromEast(activeMinutesEast);
+        }
+
+        function syncFromIst() {
+            var ih = parseInt(document.getElementById('ist-hour').value || '12', 10);
+            var im = parseInt(document.getElementById('ist-min').value || '00', 10);
+            var isPm = document.getElementById('ist-ampm-slider').classList.contains('pm');
+            
+            // Standardize to 24h
+            if (isPm && ih < 12) ih += 12;
+            if (!isPm && ih === 12) ih = 0;
+
+            var activeMinutesIst = ih * 60 + im;
+            
+            // Set IST slider value
+            document.getElementById('ist-slider').value = activeMinutesIst;
+            
+            // Convert to East
+            var offset = getOffsetHours(baseDate);
+            var eastMins = activeMinutesIst - (offset * 60);
+            if (eastMins < 0) eastMins += 1440;
+            
+            activeMinutesEast = eastMins;
+            document.getElementById('east-slider').value = activeMinutesEast;
+            
+            syncFromEastSlider();
+        }
+
+        function syncFromIstSlider() {
+            var activeMinutesIst = parseInt(document.getElementById('ist-slider').value, 10);
+            
+            // Convert to East
+            var offset = getOffsetHours(baseDate);
+            var eastMins = activeMinutesIst - (offset * 60);
+            if (eastMins < 0) eastMins += 1440;
+
+            activeMinutesEast = eastMins;
+            document.getElementById('east-slider').value = activeMinutesEast;
+            
+            syncFromEastSlider();
+        }
+
+        // Core Renderer and Synchronization dispatcher
+        function updateTimelinesFromEast(eastMins) {
+            var offsetHours = getOffsetHours(baseDate);
+            var istMins = (eastMins + (offsetHours * 60)) % 1440;
+
+            // Update sliders labels
+            document.getElementById('east-slider-val').textContent = formatMinutes(eastMins);
+            document.getElementById('ist-slider-val').textContent = formatMinutes(istMins);
+
+            // Update IST input fields
+            var ih = Math.floor(istMins / 60);
+            var im = istMins % 60;
+            var isPmIst = ih >= 12;
+            var displayHIst = ih % 12 || 12;
+
+            document.getElementById('ist-hour').value = String(displayHIst).padStart(2, '0');
+            document.getElementById('ist-min').value = String(im).padStart(2, '0');
+            document.getElementById('ist-slider').value = istMins;
+
+            var ampmSliderIst = document.getElementById('ist-ampm-slider');
+            ampmSliderIst.classList.toggle('pm', isPmIst);
+            document.getElementById('ist-am-btn').classList.toggle('active', !isPmIst);
+            document.getElementById('ist-pm-btn').classList.toggle('active', isPmIst);
+
+            // Calculate Dates if cross-midnight
+            var eastDate = new Date(baseDate);
+            var istDate = new Date(baseDate);
+            
+            // IST is ahead. If East + offset crosses 24h, IST is tomorrow!
+            if (eastMins + (offsetHours * 60) >= 1440) {
+                istDate.setDate(istDate.getDate() + 1);
+            }
+
+            // Update Info HUD Cards
+            document.getElementById('summary-east-str').textContent = `US Eastern: ${eastDate.toLocaleDateString(undefined, {month:'short', day:'numeric'})}, ${formatMinutes(eastMins)}`;
+            document.getElementById('summary-ist-str').textContent = `IST: ${istDate.toLocaleDateString(undefined, {month:'short', day:'numeric'})}, ${formatMinutes(istMins)}`;
+
+            // Work out sleep overlap comfort scores
+            // Awake defined as 8:00 AM to 10:00 PM (480 mins to 1320 mins)
+            var eastAwake = (eastMins >= 480 && eastMins <= 1320);
+            var istAwake = (istMins >= 480 && istMins <= 1320);
+            
+            var summaryState = document.getElementById('summary-state-str');
+            if (eastAwake && istAwake) {
+                summaryState.textContent = "🔥 Golden Overlap: Perfect for calls!";
+                summaryState.style.color = "#00f0ff";
+            } else if (eastAwake && !istAwake) {
+                summaryState.textContent = "💤 Eastern is awake, but India is sleeping.";
+                summaryState.style.color = "rgba(255,255,255,0.4)";
+            } else if (!eastAwake && istAwake) {
+                summaryState.textContent = "💤 India is awake, but Eastern is sleeping.";
+                summaryState.style.color = "rgba(255,255,255,0.4)";
+            } else {
+                summaryState.textContent = "😴 Silent Night: Both zones are sleeping.";
+                summaryState.style.color = "#bf5eff";
+            }
+
+            // Re-render dynamic list rows
+            renderTimelineRows(eastMins, istMins);
+            
+            // Position the glowing timeline pointer smoothly
+            positionTimelinePointer(eastMins);
+        }
+
+        // Render the 24 dynamic rows in the scroll viewport
+        function renderTimelineRows(activeEastMins, activeIstMins) {
+            var parent = document.getElementById('timelineRows');
+            parent.innerHTML = '';
+
+            var offsetHours = getOffsetHours(baseDate);
+            var activeHour = Math.floor(activeEastMins / 60);
+
+            for (var h = 0; h < 24; h++) {
+                var row = document.createElement('div');
+                row.className = 'hour-row';
+                
+                // Calculate corresponding IST hour for this row
+                var istH = (h + Math.floor(offsetHours)) % 24;
+                var istMinOffset = (offsetHours % 1 === 0.5) ? 30 : 0;
+                
+                // Eastern Date / IST Date for this row
+                var rowEastDate = new Date(baseDate);
+                var rowIstDate = new Date(baseDate);
+                if (h + offsetHours >= 24) {
+                    rowIstDate.setDate(rowIstDate.getDate() + 1);
+                }
+
+                // Determine Zone classifications
+                // Sleep hours: 11pm (23) to 7am (7)
+                var eastSleep = (h < 7 || h >= 23);
+                var istSleep = (istH < 7 || istH >= 23);
+                var isGolden = (!eastSleep && !istSleep);
+
+                if (isGolden) row.classList.add('golden-zone');
+                else if (eastSleep && istSleep) row.classList.add('night-zone');
+                else row.classList.add('day-zone');
+
+                if (h === activeHour) row.classList.add('active');
+
+                // Custom double hour cell building
+                row.innerHTML = `
+                    <div class="hour-cell">
+                        ${isGolden ? '<span class="golden-badge">Overlap</span>' : ''}
+                        <div class="hour-time">${formatCellHour(h)}</div>
+                        <div class="hour-date">${rowEastDate.toLocaleDateString(undefined, {month:'short', day:'numeric'})}</div>
+                    </div>
+                    <div class="hour-cell">
+                        <div class="hour-time">${formatCellHour(istH, istMinOffset)}</div>
+                        <div class="hour-date">${rowIstDate.toLocaleDateString(undefined, {month:'short', day:'numeric'})}</div>
+                    </div>
+                `;
+
+                // Handle row clicks: sync sliders to exactly this hour!
+                (function(selectedHour) {
+                    row.onclick = function() {
+                        activeMinutesEast = selectedHour * 60;
+                        document.getElementById('east-slider').value = activeMinutesEast;
+                        syncFromEastSlider();
+                    };
+                })(h);
+
+                parent.appendChild(row);
+            }
+        }
+
+        function formatCellHour(h, minOffset = 0) {
+            var displayMin = minOffset === 30 ? ':30' : ':00';
+            if (hour24Mode) {
+                return String(h).padStart(2, '0') + displayMin;
+            } else {
+                var ap = h >= 12 ? 'PM' : 'AM';
+                var displayH = h % 12 || 12;
+                return displayH + displayMin + ' ' + ap;
+            }
+        }
+
+        // Drive the physical location of the glowing linear pointer
+        function positionTimelinePointer(eastMins) {
+            var scrollContainer = document.getElementById('timelineScroll');
+            var pointer = document.getElementById('timelinePointer');
+            
+            // Total height of 24 rows: each row is 72px. Total: 1728px.
+            // 1440 minutes map to 1728px.
+            // Calculation: top position = (minutes / 1440) * 1728
+            var totalHeight = 24 * 72;
+            var topPx = (eastMins / 1440) * totalHeight;
+            
+            pointer.style.top = topPx + 'px';
+
+            // Auto-scroll scrollContainer to center the active time row
+            var containerHeight = scrollContainer.clientHeight;
+            var targetScrollTop = topPx - (containerHeight / 2) + 1.5; // offset center height
+            
+            scrollContainer.scrollTo({
+                top: targetScrollTop,
+                behavior: 'smooth'
+            });
+        }
+
+        // Dynamic Space Background Stars
+        (function() {
+            var canvas = document.getElementById('stars-canvas');
+            var ctx = canvas.getContext('2d');
+            var stars = [];
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                initStars();
+            }
+
+            function initStars() {
+                stars = [];
+                var count = Math.round((canvas.width * canvas.height) * 0.00015);
+                for (var i = 0; i < count; i++) {
+                    stars.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        sz: Math.random() * 1.5,
+                        a: 0.1 + Math.random() * 0.8,
+                        dir: Math.random() > 0.5 ? 1 : -1
+                    });
+                }
+            }
+
+            function loop() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ffffff';
+                stars.forEach(function(s) {
+                    s.a += s.dir * 0.005;
+                    if (s.a <= 0.1 || s.a >= 0.9) s.dir *= -1;
+                    ctx.globalAlpha = s.a;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.sz, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                ctx.globalAlpha = 1;
+                requestAnimationFrame(loop);
+            }
+
+            window.addEventListener('resize', resize);
+            resize();
+            loop();
+        })();
+
+        // Start Conversion init
+        renderCalendar();
+        syncFromEastSlider();
+    </script>
+</body>
+</html>
