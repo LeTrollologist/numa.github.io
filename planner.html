@@ -736,6 +736,13 @@ textarea {
 }
 .ai-bubble.thinking { opacity: 0.5; font-style: italic; }
 .ai-bubble.error { border-color: rgba(255,80,80,0.35); }
+.ai-bubble.compact {
+    padding: 8px 12px;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    line-height: 1.35;
+    font-size: 0.82rem;
+}
 
 /* ── Task card left stripe ── */
 .task-item { border-left: 3px solid transparent; transition: all 0.2s ease, border-left-color 0s; }
@@ -2367,7 +2374,12 @@ Example:
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
           <div style="font-size:0.65rem;color:rgba(255,255,255,0.25);font-family:var(--fm);">Context &amp; memories sent each message. Not stored on server.</div>
-          <div style="display:flex;gap:6px;">
+          <div style="display:flex;gap:6px;align-items:center;">
+            <span style="font-size:0.65rem;color:rgba(255,255,255,0.35);font-family:var(--fm);">Parser Mode:</span>
+            <select id="aiParserModeSel" onchange="changeParserMode(this.value)" class="btn btn-secondary" style="font-size:0.68rem;padding:3px 6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);cursor:pointer;border-radius:4px;font-family:var(--fb);">
+              <option value="default" style="background:var(--bg-card);color:#fff;">Normal</option>
+              <option value="compact" style="background:var(--bg-card);color:#fff;">Compact</option>
+            </select>
             <button onclick="saveCurrentChat()" class="btn btn-secondary" style="font-size:0.7rem;padding:4px 10px;">&#128190; Save Chat</button>
             <button onclick="clearChat()" class="btn btn-secondary" style="font-size:0.7rem;padding:4px 10px;">Clear</button>
           </div>
@@ -2534,6 +2546,16 @@ Example:
               <input id="studyAiPromptInput" type="text" placeholder="Ask your study coach anything..." style="flex:1;"
                      onkeydown="if(event.key==='Enter'){event.preventDefault();sendStudyAIMessage();}">
               <button onclick="sendStudyAIMessage()" class="btn btn-primary" style="padding:8px 16px;">Send</button>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+              <div style="font-size:0.65rem; color:rgba(255,255,255,0.25);">Auto-saves study progress.</div>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <span style="font-size:0.65rem; color:rgba(255,255,255,0.35);">Parser Mode:</span>
+                <select id="studyAiParserModeSel" onchange="changeParserMode(this.value)" class="btn btn-secondary" style="font-size:0.68rem; padding:3px 6px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.7); cursor:pointer; border-radius:4px; font-family:var(--fb);">
+                  <option value="default" style="background:var(--bg-card);color:#fff;">Normal</option>
+                  <option value="compact" style="background:var(--bg-card);color:#fff;">Compact</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -3989,6 +4011,13 @@ function initAIAuth() {
   if (memoriesEditor) {
     memoriesEditor.value = localStorage.getItem('aiMemories') || '';
   }
+
+  // Initialize parser mode dropdowns
+  const savedParserMode = localStorage.getItem('aiParserMode') || 'default';
+  const sel1 = document.getElementById('aiParserModeSel');
+  const sel2 = document.getElementById('studyAiParserModeSel');
+  if (sel1) sel1.value = savedParserMode;
+  if (sel2) sel2.value = savedParserMode;
 }
 
 function renderAIView() {
@@ -4022,6 +4051,9 @@ function renderChatLog() {
   aiHistory.forEach(m => {
     const b = document.createElement('div');
     b.className = 'ai-bubble ' + m.role;
+    if (localStorage.getItem('aiParserMode') === 'compact') {
+      b.classList.add('compact');
+    }
     if (m.role === 'assistant') {
       b.innerHTML = parseMarkdown(m.content);
     } else {
@@ -4442,9 +4474,12 @@ function useSuggestion(text) {
   input.focus();
 }
 
-// ==================== PARSEMARKDOWN ====================
+// ==================== PARSEMARKDOWN & COMPACT MODES ====================
 function parseMarkdown(text) {
   if (!text) return '';
+  const mode = localStorage.getItem('aiParserMode') || 'default';
+  const isCompact = (mode === 'compact');
+
   // Escape HTML tags to prevent XSS except the ones we explicitly generate
   let safe = text
     .replace(/&/g, '&amp;')
@@ -4455,14 +4490,30 @@ function parseMarkdown(text) {
 
   // Markdown translation:
   // Headers (### and ####)
-  safe = safe.replace(/^###\s+(.*)$/gm, '<h3 style="font-family:var(--fb);font-weight:700;font-size:1.15rem;margin-top:12px;margin-bottom:6px;color:var(--pink-s);">$1</h3>');
-  safe = safe.replace(/^####\s+(.*)$/gm, '<h4 style="font-family:var(--fb);font-weight:600;font-size:1rem;margin-top:8px;margin-bottom:4px;color:rgba(255,255,255,0.85);">$1</h4>');
+  const h3Style = isCompact
+    ? 'font-family:var(--fb);font-weight:700;font-size:0.95rem;margin-top:4px;margin-bottom:2px;color:var(--pink-s);'
+    : 'font-family:var(--fb);font-weight:700;font-size:1.15rem;margin-top:12px;margin-bottom:6px;color:var(--pink-s);';
+
+  const h4Style = isCompact
+    ? 'font-family:var(--fb);font-weight:600;font-size:0.85rem;margin-top:3px;margin-bottom:1px;color:rgba(255,255,255,0.85);'
+    : 'font-family:var(--fb);font-weight:600;font-size:1rem;margin-top:8px;margin-bottom:4px;color:rgba(255,255,255,0.85);';
+
+  safe = safe.replace(/^###\s+(.*)$/gm, `<h3 style="${h3Style}">$1</h3>`);
+  safe = safe.replace(/^####\s+(.*)$/gm, `<h4 style="${h4Style}">$1</h4>`);
 
   // Blockquotes (>)
-  safe = safe.replace(/^&gt;\s+(.*)$/gm, '<div style="border-left:2px solid var(--pink);padding-left:10px;color:rgba(255,255,255,0.6);font-style:italic;margin:8px 0;">$1</div>');
+  const bqStyle = isCompact
+    ? 'border-left:2px solid var(--pink);padding-left:6px;color:rgba(255,255,255,0.6);font-style:italic;margin:3px 0;'
+    : 'border-left:2px solid var(--pink);padding-left:10px;color:rgba(255,255,255,0.6);font-style:italic;margin:8px 0;';
+
+  safe = safe.replace(/^&gt;\s+(.*)$/gm, `<div style="${bqStyle}">$1</div>`);
 
   // Lists (- )
-  safe = safe.replace(/^-\s+(.*)$/gm, '<div style="display:flex;gap:6px;margin:4px 0 4px 10px;align-items:flex-start;"><span style="color:var(--pink);">•</span><span>$1</span></div>');
+  const liStyle = isCompact
+    ? 'display:flex;gap:4px;margin:2px 0 2px 6px;align-items:flex-start;'
+    : 'display:flex;gap:6px;margin:4px 0 4px 10px;align-items:flex-start;';
+
+  safe = safe.replace(/^-\s+(.*)$/gm, `<div style="${liStyle}"><span style="color:var(--pink);">•</span><span>$1</span></div>`);
 
   // Bold (**text**)
   safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
@@ -4476,10 +4527,24 @@ function parseMarkdown(text) {
   // Links ([text](url))
   safe = safe.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" style="color:var(--pink);text-decoration:none;border-bottom:1px dashed var(--pink-g);">$1</a>');
 
-  // Newlines to br
+  // Newlines to br (compress multiple breaks in compact mode)
+  if (isCompact) {
+    safe = safe.replace(/\n\n+/g, '\n');
+  }
   safe = safe.replace(/\n/g, '<br>');
 
   return safe;
+}
+
+function changeParserMode(value) {
+  localStorage.setItem('aiParserMode', value);
+  const sel1 = document.getElementById('aiParserModeSel');
+  const sel2 = document.getElementById('studyAiParserModeSel');
+  if (sel1) sel1.value = value;
+  if (sel2) sel2.value = value;
+  if (typeof renderChatLog === 'function') renderChatLog();
+  if (typeof renderStudyChatLog === 'function') renderStudyChatLog();
+  showToast(`Parser mode set to: ${value.toUpperCase()}`);
 }
 
 // ==================== DRAG-DROP IMPORT ====================
@@ -5259,6 +5324,9 @@ function renderStudyChatLog() {
   studyAiHistory.forEach(m => {
     const b = document.createElement('div');
     b.className = 'ai-bubble ' + m.role;
+    if (localStorage.getItem('aiParserMode') === 'compact') {
+      b.classList.add('compact');
+    }
     if (m.role === 'assistant') {
       b.innerHTML = parseMarkdown(m.content);
     } else {
