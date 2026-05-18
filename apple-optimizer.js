@@ -24,6 +24,7 @@
                 --sab: env(safe-area-inset-bottom, 0px);
                 --sal: env(safe-area-inset-left, 0px);
                 --keyboard-h: 0px;
+                --vh: 1vh;
             }
 
             header, .page-header, #nav-bar {
@@ -42,11 +43,21 @@
         `;
         document.head.appendChild(style);
 
+        // Handle dynamic iOS viewport height (100vh address bar bug)
+        const calculateVh = () => {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        };
+        window.addEventListener('resize', calculateVh);
+        window.addEventListener('orientationchange', calculateVh);
+        calculateVh();
+
         // Handle Keyboard / Visual Viewport changes
         if (window.visualViewport) {
             window.visualViewport.addEventListener('resize', () => {
                 const keyboardHeight = window.innerHeight - window.visualViewport.height;
                 document.documentElement.style.setProperty('--keyboard-h', `${Math.max(0, keyboardHeight)}px`);
+                calculateVh(); // recalculate on keyboard toggles
             });
         }
     };
@@ -136,6 +147,16 @@
             if (target) target.style.transform = 'scale(1)';
         }, { passive: true });
 
+        document.addEventListener('touchcancel', (e) => {
+            const target = e.target.closest(selector);
+            if (target) target.style.transform = 'scale(1)';
+        }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            const target = e.target.closest(selector);
+            if (target) target.style.transform = 'scale(1)';
+        }, { passive: true });
+
         // Hardening
         const style = document.createElement('style');
         style.innerHTML = `
@@ -145,7 +166,10 @@
                 user-select: none !important;
             }
             input, textarea, select { font-size: 16px !important; }
-            * { -webkit-overflow-scrolling: touch; }
+            * { 
+                -webkit-overflow-scrolling: touch; 
+                -webkit-tap-highlight-color: transparent !important;
+            }
         `;
         document.head.appendChild(style);
     };
