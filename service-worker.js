@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hollow-grove-v1.4';
+const CACHE_NAME = 'hollow-grove-v1.7';
 const ASSETS = [
   'index.html',
   'sketch.html',      // Prod link
@@ -12,7 +12,14 @@ const ASSETS = [
   'game.html',        // Prod link (if renamed)
   'compute-optimizer.js',
   'mobile-optimizer.js',
-  'apple-optimizer.js'
+  'apple-optimizer.js',
+  'favicon/site.webmanifest',
+  'favicon/favicon.svg',
+  'favicon/favicon-96x96.png',
+  'favicon/favicon-192x192.png',
+  'favicon/favicon-512x512.png',
+  'favicon/apple-touch-icon.png',
+  'favicon/favicon.ico'
 ];
 
 // 1. INSTALLATION: Cache static assets with fail-safe resilience
