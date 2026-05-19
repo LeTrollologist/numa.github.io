@@ -3583,9 +3583,11 @@
 
         // Convert altitude (radians, −π/2 → +π/2) to a screen Y coordinate.
         // Horizon sits at 72% of viewport height (safely above the dashboard UI);
-        // zenith sits at 10%. Negative altitudes clamp to the horizon line.
+        // zenith sits at 10%. Slightly negative altitudes render ON the horizon
+        // so celestial bodies don't vanish before touching it.
         function altToY(altRad) {
-            return innerHeight * (0.72 - Math.max(0, altRad) / (Math.PI / 2) * 0.62);
+            var clamped = Math.max(-0.04, altRad); // allow ~2° below horizon to sit on the line
+            return innerHeight * (0.72 - clamped / (Math.PI / 2) * 0.62);
         }
 
         // Cache SunCalc/MoonCalc results — positions change slowly, no need to recalc every frame.
@@ -3628,7 +3630,7 @@
             var moonLabel = document.getElementById('moonLabel');
             if (show) {
                 // ── Sun ──
-                if (sp.altitude > -.1) {
+                if (sp.altitude > -.18) {
                     sun.style.left = ((sp.azimuth + Math.PI) / (2 * Math.PI) * innerWidth) + 'px';
                     sun.style.top = altToY(sp.altitude) + 'px';
                     sun.style.display = 'block';
@@ -3639,7 +3641,7 @@
 
                 // ── Moon ── (position driven by getMoonPosition altitude/azimuth,
                 //             exactly as mooncalc.org uses those values internally)
-                if (mp.altitude > -.1) {
+                if (mp.altitude > -.18) {
                     // Azimuth → X: SunCalc measures from South clockwise, offset by π gives 0–2π
                     // mapping naturally puts East (moonrise) on the left and West (moonset) on right.
                     var moonX = (mp.azimuth + Math.PI) / (2 * Math.PI) * innerWidth;
