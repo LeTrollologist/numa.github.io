@@ -102,7 +102,8 @@
         }
 
         #moonSvg {
-            z-index: 3; /* Render in front of Sun */
+            z-index: 3;
+            /* Render in front of Sun */
         }
 
         #sunSvg,
@@ -113,7 +114,8 @@
 
         #moonLabel {
             position: fixed;
-            z-index: 3; /* Keep label above Sun's rays */
+            z-index: 3;
+            /* Keep label above Sun's rays */
             color: rgba(180, 210, 255, 0.82);
             font-size: .58rem;
             font-family: 'DM Mono', monospace;
@@ -2980,9 +2982,12 @@
         <a class="mob-link" data-page="minigame" onclick="navigate('minigame');closeMob()">🏓 Minigame</a>
         <a class="mob-link" data-page="dreamland" onclick="navigate('dreamland');closeMob()">🌙 Dreamland</a>
         <a class="mob-link" data-page="stargazer" onclick="navigate('stargazer');closeMob()">🌌 Stargazer</a>
-        <a class="mob-link" href="https://letrollologist.github.io/numa.github.io/planner.html" onclick="closeMob()">📆 Planner</a>
-        <a class="mob-link" href="https://letrollologist.github.io/numa.github.io/sketch.html" onclick="closeMob()">🎨 Sketchbook</a>
-        <a class="mob-link" href="https://letrollologist.github.io/numa.github.io/grove.html" onclick="closeMob()">🌼 Garden</a>
+        <a class="mob-link" href="https://letrollologist.github.io/numa.github.io/planner.html" onclick="closeMob()">📆
+            Planner</a>
+        <a class="mob-link" href="https://letrollologist.github.io/numa.github.io/sketch.html" onclick="closeMob()">🎨
+            Sketchbook</a>
+        <a class="mob-link" href="https://letrollologist.github.io/numa.github.io/grove.html" onclick="closeMob()">🌼
+            Garden</a>
         <a class="mob-link" href="converter.html" onclick="closeMob()">⏰ Time Aligner</a>
     </div>
 
@@ -3010,6 +3015,10 @@
                 <div class="clock-box">
                     <div class="clock-label">India 🇮🇳</div>
                     <div class="clock-time" id="time-ist">--:--:-- --</div>
+                </div>
+                <div class="clock-box">
+                    <div class="clock-label" id="time-ita-label">🌸</div>
+                    <div class="clock-time" id="time-ita" style="font-size:inherit">--:--:-- --</div>
                 </div>
             </div>
         </div>
@@ -3126,8 +3135,10 @@
                     <h1>Pong</h1>
                     <p>Connect and play across the miles. 🌸</p>
                     <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px; width: 220px;">
-                        <button onclick="showSubMenu('solo')" style="font-size: 1.2rem; padding: 10px 20px;">Solo vs AI 🤖</button>
-                        <button onclick="showSubMenu('multi')" style="font-size: 1.2rem; padding: 10px 20px;">Play Online 🌌</button>
+                        <button onclick="showSubMenu('solo')" style="font-size: 1.2rem; padding: 10px 20px;">Solo vs AI
+                            🤖</button>
+                        <button onclick="showSubMenu('multi')" style="font-size: 1.2rem; padding: 10px 20px;">Play
+                            Online 🌌</button>
                     </div>
                 </div>
 
@@ -3135,7 +3146,8 @@
                 <div id="pongSoloMenu" style="display: none; flex-direction: column; align-items: center;">
                     <h1>Solo Mode</h1>
                     <p>Select AI Difficulty</p>
-                    <div id="diffButtons" style="display:flex; gap:8px; margin:10px 0 18px; flex-wrap:wrap; justify-content:center">
+                    <div id="diffButtons"
+                        style="display:flex; gap:8px; margin:10px 0 18px; flex-wrap:wrap; justify-content:center">
                         <button class="diff-btn" onclick="setDiff('easy')" id="diff-easy">Easy</button>
                         <button class="diff-btn" onclick="setDiff('medium')" id="diff-medium">Medium</button>
                         <button class="diff-btn active" onclick="setDiff('numa')" id="diff-numa">Numa</button>
@@ -3148,31 +3160,42 @@
                 </div>
 
                 <!-- Sub-Menu: Online Multiplayer Lobby -->
-                <div id="pongMultiMenu" style="display: none; flex-direction: column; align-items: center; width: 100%; max-width: 320px;">
+                <div id="pongMultiMenu"
+                    style="display: none; flex-direction: column; align-items: center; width: 100%; max-width: 320px;">
                     <h1>Play Online</h1>
-                    <p id="multiStatus" style="color: gold; margin-bottom: 12px; font-size: 0.9rem;">Connecting to cosmic network...</p>
-                    
+                    <p id="multiStatus" style="color: gold; margin-bottom: 12px; font-size: 0.9rem;">Connecting to
+                        cosmic network...</p>
+
                     <!-- Action Buttons -->
                     <div id="lobbyActions" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
                         <!-- Host Card -->
-                        <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-p); padding: 12px; border-radius: var(--rp); text-align: center;">
-                            <button id="btnHost" onclick="initHost()" style="font-size: 1rem; padding: 8px 16px; width: 80%;">Create a Room</button>
-                            <div id="hostCodeDisplay" style="display: none; margin-top: 10px; font-family: monospace; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; border: 1px solid var(--pink-g);">
-                                Room Code: <span id="lblRoomCode" style="color: var(--pink); font-weight: bold; font-size: 1.1rem; letter-spacing: 1px;">...</span>
-                                <div style="font-size: 0.68rem; opacity: 0.6; margin-top: 4px;">Share this code with Numa</div>
+                        <div
+                            style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-p); padding: 12px; border-radius: var(--rp); text-align: center;">
+                            <button id="btnHost" onclick="initHost()"
+                                style="font-size: 1rem; padding: 8px 16px; width: 80%;">Create a Room</button>
+                            <div id="hostCodeDisplay"
+                                style="display: none; margin-top: 10px; font-family: monospace; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; border: 1px solid var(--pink-g);">
+                                Room Code: <span id="lblRoomCode"
+                                    style="color: var(--pink); font-weight: bold; font-size: 1.1rem; letter-spacing: 1px;">...</span>
+                                <div style="font-size: 0.68rem; opacity: 0.6; margin-top: 4px;">Share this code with
+                                    Numa</div>
                             </div>
                         </div>
 
                         <!-- Join Card -->
-                        <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-p); padding: 12px; border-radius: var(--rp); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                            <input type="text" id="txtJoinCode" placeholder="Enter Room Code" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-p); background: rgba(0,0,0,0.5); color: white; font-family: monospace; text-align: center; font-size: 1rem; width: 80%;">
-                            <button id="btnJoin" onclick="initJoin()" style="font-size: 1rem; padding: 8px 16px; width: 80%;">Join Room</button>
+                        <div
+                            style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-p); padding: 12px; border-radius: var(--rp); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                            <input type="text" id="txtJoinCode" placeholder="Enter Room Code"
+                                style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-p); background: rgba(0,0,0,0.5); color: white; font-family: monospace; text-align: center; font-size: 1rem; width: 80%;">
+                            <button id="btnJoin" onclick="initJoin()"
+                                style="font-size: 1rem; padding: 8px 16px; width: 80%;">Join Room</button>
                         </div>
                     </div>
 
 
 
-                    <button onclick="showSubMenu('main')" class="diff-btn" style="margin-top: 18px; opacity:0.8;">❮ Back to Menu</button>
+                    <button onclick="showSubMenu('main')" class="diff-btn" style="margin-top: 18px; opacity:0.8;">❮ Back
+                        to Menu</button>
                 </div>
             </div>
             <div id="gameOverOverlay" class="overlay">
@@ -3351,7 +3374,7 @@
         var BASE_SP = 9;      // starting ball speed (logical px/frame @60fps)
         var MAX_SP = 22;     // hard cap on ball speed
         var pongDiff = 'numa'; // current difficulty
-        
+
         // PeerJS P2P Online State
         var peer = null;
         var peerConn = null;
@@ -3385,6 +3408,7 @@
         // Dates
         var est = { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
         var istO = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+        var itaO = { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
 
         // ══════════════════════════════════════════════════════════
         // MOBILE NAV
@@ -3443,7 +3467,7 @@
             var msg = document.getElementById('statusMessage');
             var nodes = ['analytics', 'database', 'checkIns'];
             msg.innerText = 'Synchronizing with Sentinel…';
-            
+
             // 1. Immediate Main Site Verification
             document.getElementById('txt-mainSite').innerText = 'ONLINE';
             document.getElementById('txt-mainSite').style.color = '#00ff88';
@@ -3458,7 +3482,7 @@
 
             // 3. Fetch remote health with timeout
             var controller = new AbortController();
-            var timeoutId = setTimeout(function() { controller.abort(); }, 8000);
+            var timeoutId = setTimeout(function () { controller.abort(); }, 8000);
 
             fetch('https://analytics-server-bdrm.onrender.com/api/health', { signal: controller.signal })
                 .then(function (r) { return r.json(); })
@@ -3469,7 +3493,7 @@
                         var status = d[n];
                         var ok = status === 'ONLINE';
                         var label = status || 'UNKNOWN';
-                        
+
                         document.getElementById('txt-' + n).innerText = label;
                         document.getElementById('txt-' + n).style.color = ok ? '#00ff88' : (status === 'OFFLINE' ? '#ff4040' : '#facc15');
                         document.getElementById('dot-' + n).className = 'dot ' + (ok ? 'online' : (status === 'OFFLINE' ? 'offline' : 'loading'));
@@ -3874,36 +3898,36 @@
                 return;
             }
             document.getElementById('multiStatus').innerText = 'Linking to PeerJS cluster...';
-            
+
             // Alphanumeric room code helper: e.g. NUMA-XXXX
             // Generate a secure 4-digit code to keep room joining simple.
             var roomNum = Math.floor(1000 + Math.random() * 9000);
             var generatedId = 'NUMA-' + roomNum;
-            
+
             // Hardcoded secure STUN/TURN servers configurations for direct P2P NAT traversal
             var iceServersList = [
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:global.stun.twilio.com:3478' },
                 { urls: 'stun:stun.relay.metered.ca:80' },
-                { 
-                    urls: 'turn:global.relay.metered.ca:80', 
-                    username: 'db89656906bd87d96e070c76', 
-                    credential: '0s1/4DRcCGnHywFg' 
+                {
+                    urls: 'turn:global.relay.metered.ca:80',
+                    username: 'db89656906bd87d96e070c76',
+                    credential: '0s1/4DRcCGnHywFg'
                 },
-                { 
-                    urls: 'turn:global.relay.metered.ca:80?transport=tcp', 
-                    username: 'db89656906bd87d96e070c76', 
-                    credential: '0s1/4DRcCGnHywFg' 
+                {
+                    urls: 'turn:global.relay.metered.ca:80?transport=tcp',
+                    username: 'db89656906bd87d96e070c76',
+                    credential: '0s1/4DRcCGnHywFg'
                 },
-                { 
-                    urls: 'turn:global.relay.metered.ca:443', 
-                    username: 'db89656906bd87d96e070c76', 
-                    credential: '0s1/4DRcCGnHywFg' 
+                {
+                    urls: 'turn:global.relay.metered.ca:443',
+                    username: 'db89656906bd87d96e070c76',
+                    credential: '0s1/4DRcCGnHywFg'
                 },
-                { 
-                    urls: 'turns:global.relay.metered.ca:443?transport=tcp', 
-                    username: 'db89656906bd87d96e070c76', 
-                    credential: '0s1/4DRcCGnHywFg' 
+                {
+                    urls: 'turns:global.relay.metered.ca:443?transport=tcp',
+                    username: 'db89656906bd87d96e070c76',
+                    credential: '0s1/4DRcCGnHywFg'
                 }
             ];
 
@@ -3983,7 +4007,7 @@
         function setupPeerConnection() {
             console.log('setupPeerConnection triggered. peerConn.open =', peerConn.open);
             document.getElementById('multiStatus').innerText = 'Initializing handshake...';
-            
+
             // Handshake timeout warning if strict NAT/firewalls delay WebRTC connection
             var handshakeTimeout = setTimeout(function () {
                 if (peerConn && !peerConn.open) {
@@ -3992,13 +4016,13 @@
                     document.getElementById('multiStatus').style.color = '#ffaa00';
                 }
             }, 6000);
-            
+
             function handleConnectSuccess() {
                 clearTimeout(handshakeTimeout);
                 console.log('WebRTC P2P DataChannel fully opened!');
                 document.getElementById('multiStatus').innerText = 'Connected! Telemetry synced. 💖';
                 document.getElementById('multiStatus').style.color = '#00ff88';
-                
+
                 setTimeout(function () {
                     // Hide overlay and launch gameplay loop
                     document.getElementById('startOverlay').classList.remove('active');
@@ -4165,7 +4189,7 @@
             var o = document.getElementById('gameOverOverlay');
             var title = 'Good Try! 🌸';
             var desc = 'Better luck next time.';
-            
+
             if (isMultiplayer) {
                 var hostWon = pScore >= WIN;
                 var iAmHost = isHost;
@@ -4186,7 +4210,7 @@
                 desc = won ? "Well played, lovely." : "Better luck next time.";
                 if (won) { for (var i = 0; i < 50; i++) pImpact(GW / 2, GH / 2, 'pink'); }
             }
-            
+
             document.getElementById('gameOverTitle').innerText = title;
             document.getElementById('gameOverTitle').style.color = (title.indexOf('Victory') >= 0 || title.indexOf('Won') >= 0) ? 'var(--pink)' : 'white';
             document.getElementById('gameOverText').innerText = desc;
@@ -4291,13 +4315,13 @@
                         ball.dy = ball.sp * Math.sin(ang);
                         ball.x = isP ? px + PW + ball.r : px - ball.r;
                         shk = 7;
-                        
+
                         var c1 = isP ? '#ffb6d9' : '#ff6fab';
                         pImpact(ball.x, ball.y, c1);
                         if (isMultiplayer && isHost && peerConn && peerConn.open) {
                             peerConn.send({ type: 'IMPACT', x: ball.x, y: ball.y, col: c1 });
                         }
-                        
+
                         if (combo >= 5) {
                             var c2 = 'rgba(255,220,60,0.9)';
                             pImpact(ball.x, ball.y, c2);
@@ -4355,7 +4379,7 @@
 
         function drawPong() {
             if (!ball) return; // Defensive guard: wait for initial host state packet in multiplayer
-            
+
             // Background — semi-transparent so state blends slightly
             ctx.fillStyle = 'rgba(0,0,0,0.68)';
             ctx.fillRect(0, 0, GW, GH);
@@ -27810,8 +27834,24 @@
             function tick2() {
                 var now = new Date();
                 var e1 = document.getElementById('time-est'), e2 = document.getElementById('time-ist');
+                var e3 = document.getElementById('time-ita');
+                var e3Label = document.getElementById('time-ita-label');
                 if (e1) e1.innerText = now.toLocaleTimeString('en-US', est);
                 if (e2) e2.innerText = now.toLocaleTimeString('en-US', istO);
+                if (e3) e3.innerText = now.toLocaleTimeString('en-US', itaO);
+                if (e3Label) {
+                    try {
+                        var tzString = now.toLocaleString('en-US', { timeZone: 'Europe/Rome' });
+                        var localDate = new Date(tzString);
+                        var utcString = now.toLocaleString('en-US', { timeZone: 'UTC' });
+                        var utcDate = new Date(utcString);
+                        var diffHours = Math.round((localDate - utcDate) / 3600000);
+                        var sign = diffHours >= 0 ? '+' : '';
+                        e3Label.innerText = "Sister's Time 🌸 (UTC" + sign + diffHours + ")";
+                    } catch (e) {
+                        e3Label.innerText = "Sister's Time 🌸";
+                    }
+                }
                 checkAlarm();
             }
             tick2(); setInterval(tick2, 1000);
@@ -27940,8 +27980,8 @@
             // ── Register Service Worker for PWA installability ──
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('service-worker.js')
-                    .then(function(reg) { console.log('SW registered', reg.scope); })
-                    .catch(function(err) { console.warn('SW registration failed', err); });
+                    .then(function (reg) { console.log('SW registered', reg.scope); })
+                    .catch(function (err) { console.warn('SW registration failed', err); });
             }
         });
     </script>
