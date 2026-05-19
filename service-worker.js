@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hollow-grove-v1.8';
+const CACHE_NAME = 'hollow-grove-v1.9';
 const ASSETS = [
   'index.html',
   'sketch.html',      // Prod link
@@ -13,7 +13,8 @@ const ASSETS = [
   'compute-optimizer.js',
   'mobile-optimizer.js',
   'apple-optimizer.js',
-  'favicon/site.webmanifest',
+  'manifest.json',
+  'favicon/manifest.json',
   'favicon/favicon.svg',
   'favicon/favicon-96x96.png',
   'favicon/favicon-192x192.png',
