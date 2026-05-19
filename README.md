@@ -44,10 +44,10 @@ Key highlights:
 ## 🗂 Repository Architecture
 
 ```mermaid
-graph TD
-    A[index.html — Core SPA] --> B[grovein.html — The Grove]
+graph TE
+    A[index.html — Core SPA] --> B[grove.html — The Grove]
     A --> C[planner.html — Constellation Planner]
-    A --> D[sketchin.html — Sketchpad]
+    A --> D[sketch.html — Sketchpad]
     A --> E[converter.html — Time Aligner]
 
     subgraph PWA ["PWA Offline Infrastructure"]
