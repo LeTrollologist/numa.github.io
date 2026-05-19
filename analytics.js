@@ -95,44 +95,38 @@
     };
 
     // ── Heartbeat Activity Engine ─────────────────────────────────────────────
-    // Tracks active engagement on dedicated sectors with custom page-specific rates:
-    // - Sketchbook (sketchin): 5 minutes
-    // - Core SPA (index/gamein): 2 minutes
-    // - Grove (grovein): 10 minutes
-    // - Planner (planner): 2 minutes
+    // Tracks active engagement on dedicated sectors with a 30-second keep-alive:
+    // - Sketchbook (sketchin)
+    // - Core SPA (index/gamein)
+    // - Grove (grovein)
+    // - Planner (planner)
     try {
         const path = window.location.pathname.toLowerCase();
-        let intervalMs = 300000; // default 5 mins
         let sectorLabel = 'Core SPA';
 
         if (path.includes('sketchin')) {
-            intervalMs = 300000; // 5 mins
             sectorLabel = 'Sketchbook';
         } else if (path.includes('grovein')) {
-            intervalMs = 600000; // 10 mins
             sectorLabel = 'Grove';
         } else if (path.includes('planner')) {
-            intervalMs = 120000; // 2 mins
             sectorLabel = 'Planner';
         } else if (path.includes('index') || path === '/' || path.includes('gamein')) {
-            intervalMs = 120000; // 2 mins
             sectorLabel = 'Core SPA';
         }
 
-        let activeMinutes = 0;
+        // Send a keep-alive heartbeat every 30 seconds.
+        // Dwell duration is computed dynamically on the server from the session's start time.
         setInterval(function () {
-            activeMinutes += (intervalMs / 60000);
             fetch(SENTINEL_URL + '/log/heartbeat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     sessionId: sessionId,
                     page: window.location.pathname + window.location.search || '/',
-                    sector: sectorLabel,
-                    duration: activeMinutes
+                    sector: sectorLabel
                 }),
                 keepalive: true
             }).catch(() => {});
-        }, intervalMs);
+        }, 30000);
     } catch (err) {}
 })();
