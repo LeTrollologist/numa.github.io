@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hollow-grove-v2.1';
+const CACHE_NAME = 'hollow-grove-v2.2';
 const ASSETS = [
   'index.html',
   'sketch.html',      // Prod link
@@ -8,6 +8,7 @@ const ASSETS = [
   'planner.html',
   'converter.html',
   'install.html',
+  'credits.html',
   'gamein.html',      // Dev link
   'game.html',        // Prod link (if renamed)
   'compute-optimizer.js',
