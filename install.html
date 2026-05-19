@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Numa's Space - Install Portal 🌌</title>
+    
+    <!-- Unified Versioned Favicons -->
+    <link rel="icon" type="image/png" href="/favicon-96x96.png?v=20260519" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=20260519" />
+    <link rel="shortcut icon" href="/favicon.ico?v=20260519" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260519" />
+    <meta name="apple-mobile-web-app-title" content="Numa's Space" />
+    <link rel="manifest" href="/site.webmanifest?v=20260519" />
+    
+    <!-- Versioned Telemetry Ingestion -->
+    <script src="analytics.js?v=3.0.0" async></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Mono:wght@300;400;500&family=Josefin+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --pink: #ff6fab;
+            --pink-g: rgba(255, 111, 171, 0.4);
+            --pink-d: rgba(255, 111, 171, 0.12);
+            --bg: #04060e;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-d: rgba(8, 8, 25, 0.85);
+            --border: rgba(255, 255, 255, 0.09);
+            --border-p: rgba(255, 111, 171, 0.28);
+            --text: #cdd5ed;
+            --muted: #58697f;
+            --gold: #c9a84c;
+            
+            --font-display: 'Cormorant Garamond', serif;
+            --font-ui: 'Josefin Sans', sans-serif;
+            --font-mono: 'DM Mono', monospace;
+        }
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-ui);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            padding: 20px;
+        }
+
+        /* Animated Starry Background */
+        #stars-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        /* Ambient glowing nebula spheres */
+        .nebula {
+            position: absolute;
+            width: 40vw;
+            height: 40vw;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.15;
+        }
+        .nebula-pink {
+            background: var(--pink);
+            top: -10%;
+            left: -10%;
+        }
+        .nebula-blue {
+            background: #7eb8f7;
+            bottom: -10%;
+            right: -10%;
+        }
+
+        /* PWA Install Container */
+        .portal-card {
+            position: relative;
+            z-index: 1;
+            background: var(--glass-d);
+            border: 1px solid var(--border);
+            border-top: 3px solid var(--pink);
+            border-radius: 28px;
+            width: 100%;
+            max-width: 520px;
+            padding: 40px 30px;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 111, 171, 0.05);
+            text-align: center;
+            animation: cardEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header App Identity */
+        .brand-badge {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(255,111,171,0.18) 0%, rgba(0,0,0,0.4) 100%);
+            border: 1.5px solid var(--border-p);
+            border-radius: 22px;
+            margin-bottom: 25px;
+            position: relative;
+            box-shadow: 0 0 25px rgba(255, 111, 171, 0.2);
+            animation: pulse-badge 3s infinite alternate;
+        }
+
+        @keyframes pulse-badge {
+            0% { box-shadow: 0 0 15px rgba(255, 111, 171, 0.15); border-color: rgba(255, 111, 171, 0.2); }
+            100% { box-shadow: 0 0 30px rgba(255, 111, 171, 0.35); border-color: var(--pink); }
+        }
+
+        .brand-badge svg {
+            width: 44px;
+            height: 44px;
+            fill: none;
+            stroke: var(--pink);
+            stroke-width: 1.5;
+            filter: drop-shadow(0 0 4px var(--pink-g));
+        }
+
+        h1 {
+            font-family: var(--font-display);
+            font-size: 2.3rem;
+            color: #ffffff;
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 15px rgba(255,255,255,0.1);
+        }
+
+        .subtitle {
+            font-size: 0.88rem;
+            color: var(--muted);
+            margin-bottom: 30px;
+            letter-spacing: 0.5px;
+            line-height: 1.5;
+        }
+
+        /* Action Buttons Area */
+        .action-area {
+            margin-bottom: 35px;
+        }
+
+        /* Beautiful glowing custom install button */
+        .btn-install {
+            display: none; /* Displayed dynamically via Javascript on beforeinstallprompt */
+            width: 100%;
+            background: linear-gradient(135deg, var(--pink) 0%, #a224ff 100%);
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-family: var(--font-ui);
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 16px 24px;
+            border-radius: 18px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(255, 111, 171, 0.35);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-install::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+            transition: all 0.6s ease;
+        }
+
+        .btn-install:hover::before {
+            left: 150%;
+        }
+
+        .btn-install:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(255, 111, 171, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .btn-install:active {
+            transform: translateY(1px);
+        }
+
+        /* Secondary Launch link */
+        .launch-direct-btn {
+            display: inline-block;
+            margin-top: 15px;
+            color: var(--pink);
+            text-decoration: none;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 600;
+            transition: opacity 0.25s, text-shadow 0.25s;
+        }
+        .launch-direct-btn:hover {
+            opacity: 0.9;
+            text-shadow: 0 0 8px var(--pink-g);
+        }
+
+        /* Custom platform instruction tabs */
+        .instruction-container {
+            border-top: 1px solid var(--border);
+            padding-top: 25px;
+            text-align: left;
+        }
+
+        .tabs-header {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            padding: 4px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            padding: 8px;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.25s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--glass);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .instruction-panel {
+            display: none;
+            animation: fadeIn 0.4s ease both;
+        }
+        .instruction-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel-title {
+            font-size: 0.95rem;
+            color: #ffffff;
+            margin-bottom: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-title::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--pink);
+            box-shadow: 0 0 6px var(--pink);
+        }
+
+        ol {
+            padding-left: 20px;
+            color: var(--text);
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        ol li {
+            margin-bottom: 8px;
+        }
+
+        ol li strong {
+            color: #ffffff;
+        }
+
+        /* Safari share icon display helper */
+        .safari-icon-helper {
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
+            background: rgba(255,255,255,0.08);
+            border-radius: 4px;
+            padding: 2px 4px;
+            margin: 0 2px;
+        }
+        .safari-icon-helper svg {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: #7eb8f7;
+            stroke-width: 1.8;
+        }
+
+        /* Success State Overlay */
+        .success-overlay {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: var(--bg);
+            border-radius: 28px;
+            z-index: 10;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.4s ease both;
+            padding: 30px;
+        }
+
+        .success-overlay.active {
+            display: flex;
+        }
+
+        .success-icon {
+            width: 72px;
+            height: 72px;
+            background: rgba(74, 222, 128, 0.12);
+            border: 2px solid rgb(74, 222, 128);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.25);
+            animation: scaleCheck 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+
+        @keyframes scaleCheck {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        .success-icon svg {
+            width: 36px;
+            height: 36px;
+            stroke: rgb(74, 222, 128);
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .success-title {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .success-desc {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nebula nebula-pink"></div>
+    <div class="nebula nebula-blue"></div>
+
+    <canvas id="stars-canvas"></canvas>
+
+    <div class="portal-card">
+        
+        <!-- App Installed State Overlay -->
+        <div class="success-overlay" id="success-state">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24"><path d="M20 6L9 17L4 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h2 class="success-title">App Installed</h2>
+            <p class="success-desc">Numa's Space has been successfully saved to your device.</p>
+            <a href="index.html" class="btn-install" style="display: block; text-decoration: none; text-align: center;">Launch Space</a>
+        </div>
+
+        <div class="brand-badge">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+
+        <h1>Numa's Space</h1>
+        <p class="subtitle">Install our progressive web application directly on your device to enable instant load times, full PWA features, and offline availability.</p>
+
+        <div class="action-area">
+            <!-- Native prompt trigger button -->
+            <button class="btn-install" id="install-btn">Install App</button>
+            <a href="index.html" class="launch-direct-btn">Launch in Browser →</a>
+        </div>
+
+        <!-- Instructions guide tabs -->
+        <div class="instruction-container">
+            <div class="tabs-header">
+                <button class="tab-btn active" onclick="switchTab('desktop')">Desktop</button>
+                <button class="tab-btn" onclick="switchTab('safari')">iOS Safari</button>
+                <button class="tab-btn" onclick="switchTab('android')">Android</button>
+            </div>
+
+            <!-- DESKTOP GUIDE -->
+            <div class="instruction-panel active" id="panel-desktop">
+                <h3 class="panel-title">Chrome & Edge (PC/Mac)</h3>
+                <ol>
+                    <li>Click the glowing **"Install App"** button above.</li>
+                    <li>Alternatively, tap the **PWA Install Icon** in the right-hand corner of your browser's address bar.</li>
+                    <li>Select **"Install"** in the browser pop-up window.</li>
+                </ol>
+            </div>
+
+            <!-- iOS SAFARI GUIDE -->
+            <div class="instruction-panel" id="panel-safari">
+                <h3 class="panel-title">Apple iPhone & iPad</h3>
+                <ol>
+                    <li>Open this page inside Apple's native **Safari Browser**.</li>
+                    <li>Tap the **Share Icon**
+                        <span class="safari-icon-helper">
+                            <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </span>
+                        in Safari's navigation toolbar.
+                    </li>
+                    <li>Scroll down the actions sheet and select **"Add to Home Screen"**.</li>
+                    <li>Tap **"Add"** in the top right corner.</li>
+                </ol>
+            </div>
+
+            <!-- ANDROID GUIDE -->
+            <div class="instruction-panel" id="panel-android">
+                <h3 class="panel-title">Google Chrome for Android</h3>
+                <ol>
+                    <li>Click the glowing **"Install App"** button above.</li>
+                    <li>If it doesn't appear, tap the **Menu Icon** (three vertical dots) in the top-right corner of Chrome.</li>
+                    <li>Select **"Install App"** or **"Add to Home screen"** from the drop-down menu list.</li>
+                </ol>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- PWA Installation Script & Starry background physics -->
+    <script>
+        // 1. STAR PHYSICS LAYERS
+        const canvas = document.getElementById('stars-canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initStars();
+        }
+
+        function initStars() {
+            stars = [];
+            const count = Math.floor((canvas.width * canvas.height) / 11000);
+            for (let i = 0; i < count; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 1.5,
+                    alpha: Math.random() * 0.8 + 0.2,
+                    speed: Math.random() * 0.02 + 0.005
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(s => {
+                ctx.fillStyle = `rgba(205, 213, 237, ${s.alpha})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+
+                s.alpha += s.speed;
+                if (s.alpha > 1 || s.alpha < 0.2) {
+                    s.speed = -s.speed;
+                }
+            });
+            requestAnimationFrame(drawStars);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        drawStars();
+
+        // 2. TAB CONTROLLER
+        function switchTab(platform) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.instruction-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+
+            // Find clicked button
+            const clickedBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.textContent.toLowerCase().includes(platform === 'safari' ? 'ios' : platform));
+            if (clickedBtn) clickedBtn.classList.add('active');
+
+            const activePanel = document.getElementById(`panel-${platform}`);
+            if (activePanel) activePanel.classList.add('active');
+        }
+
+        // 3. AUTO DETECT PLATFORM FOR TAB
+        function autoDetectPlatform() {
+            const ua = navigator.userAgent.toLowerCase();
+            if (/ipad|iphone|ipod/.test(ua) && !window.MSStream) {
+                switchTab('safari');
+            } else if (/android/.test(ua)) {
+                switchTab('android');
+            } else {
+                switchTab('desktop');
+            }
+        }
+        autoDetectPlatform();
+
+        // 4. INTERCEPT beforeinstallprompt FOR CHROMIUM
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+        const successState = document.getElementById('success-state');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Update UI to show the install button
+            installBtn.style.display = 'block';
+            
+            // Auto switch instructions tab to match
+            const ua = navigator.userAgent.toLowerCase();
+            if (/android/.test(ua)) {
+                switchTab('android');
+            } else {
+                switchTab('desktop');
+            }
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            // Show the native Chrome install prompt
+            deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`PWA install prompt response: ${outcome}`);
+            
+            if (outcome === 'accepted') {
+                // Hide button and clear prompt handle
+                installBtn.style.display = 'none';
+                deferredPrompt = null;
+                // Display success overlays
+                successState.classList.add('active');
+            }
+        });
+
+        // Detect successful installation post-trigger
+        window.addEventListener('appinstalled', () => {
+            console.log('📦 Numa\'s Space successfully installed as a native web app.');
+            successState.classList.add('active');
+        });
+    </script>
+</body>
+</html>
