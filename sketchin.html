@@ -14,15 +14,14 @@
 <script src="compute-optimizer.js"></script>
 <script src="mobile-optimizer.js"></script>
 <script src="apple-optimizer.js"></script>
-<script src="analytics.js" async></script>
+<script src="analytics.js?v=3.0.0" async></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
-<link rel="shortcut icon" href="/favicon/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="For Numa" />
-<link rel="manifest" href="/favicon/site.webmanifest" />
-<link rel="shortcut icon" type="image/x-icon" href="https://raw.githubusercontent.com/LeTrollologist/numa.github.io/refs/heads/main/favicon.ico">
+<link rel="icon" type="image/png" href="/favicon-96x96.png?v=20260519" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=20260519" />
+<link rel="shortcut icon" href="/favicon.ico?v=20260519" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260519" />
+<meta name="apple-mobile-web-app-title" content="Numa's Space" />
+<link rel="manifest" href="/site.webmanifest?v=20260519" />
 <meta name="google-site-verification" content="krF3ofyKNoHewfwgCg7NXU_nt5U6Gm-elSz5FrKrSNk" />
 <style>
 /* ═══════════════════════════════════ RESET + VARS ══════════════════════════════════ */
@@ -426,7 +425,6 @@ input[type=range]::-moz-range-thumb {
 #viewport {
   position: relative;
   transform-origin: center center;
-  will-change: transform;
 }
 #canvas-container {
   position: relative;
@@ -1447,6 +1445,7 @@ const cvs = interactionCvs;
 let layers = [];
 let activeLayer = null;
 let layerCounter = 0;
+let isTempDrawing = false;
 
 /* ── App State ── */
 let tool      = 'brush';
@@ -1488,7 +1487,6 @@ let selectionMask = null;
 let lassoPts = [];
 let lassoActive = false;
 let lassoClosed = false;
-let lassoPreview = null;
 let marqueeBegin = null;
 let cropBegin = null;
 const overlayCvs = typeof document !== 'undefined' ? document.getElementById('overlay-cvs') : null;
@@ -2134,9 +2132,9 @@ function quickMenuAction(action) {
   }
 }
 
-/* ── Pointer state ── */
 let drawing    = false;
 let lx=0, ly=0, lp=0.5;
+let strokePts  = [];
 let lineStart  = null;
 let lineSnap   = null;
 let shapeStart = null;
@@ -2951,47 +2949,62 @@ function redrawOverlay() {
   overlayCtx.clearRect(0, 0, cvs.width, cvs.height);
   overlayCtx.save();
   const dashOff = (performance.now() / 50) % 20;
-  overlayCtx.setLineDash([6, 4]);
-  overlayCtx.lineDashOffset = -dashOff;
-  overlayCtx.strokeStyle = 'rgba(255,255,255,.85)';
+  
   overlayCtx.lineWidth = 1;
-  // Only draw rectangle for rectangular selections (marquee/crop)
-  if (selectionRect && selectionRect.w > 0 && selectionRect.h > 0 && !(lassoClosed && lassoPts.length > 1)) {
-    const r = selectionRect;
-    overlayCtx.strokeRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1);
-  }
-  // Draw lasso marching ants if closed
+
+  // 1. Draw lasso path (either active drawing or closed marching ants)
   if (lassoPts.length > 1) {
+    overlayCtx.save();
     if (lassoClosed) {
+      // Draw standard marching ants for closed selection
       overlayCtx.setLineDash([6, 4]);
+      overlayCtx.lineDashOffset = -dashOff;
+      overlayCtx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
       overlayCtx.beginPath();
       lassoPts.forEach((pt, i) => i === 0 ? overlayCtx.moveTo(pt.x, pt.y) : overlayCtx.lineTo(pt.x, pt.y));
       overlayCtx.closePath();
       overlayCtx.stroke();
-      overlayCtx.setLineDash([]);
+
+      overlayCtx.setLineDash([6, 4]);
+      overlayCtx.lineDashOffset = -dashOff + 6; // alternate contrast dash!
+      overlayCtx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+      overlayCtx.beginPath();
+      lassoPts.forEach((pt, i) => i === 0 ? overlayCtx.moveTo(pt.x, pt.y) : overlayCtx.lineTo(pt.x, pt.y));
+      overlayCtx.closePath();
+      overlayCtx.stroke();
     } else {
-      overlayCtx.setLineDash([]);
+      // Actively drawing the lasso path - high-contrast colored glow
+      overlayCtx.strokeStyle = 'rgba(255, 111, 171, 0.9)';
+      overlayCtx.lineWidth = 1.8;
       overlayCtx.beginPath();
       lassoPts.forEach((pt, i) => i === 0 ? overlayCtx.moveTo(pt.x, pt.y) : overlayCtx.lineTo(pt.x, pt.y));
       overlayCtx.stroke();
-      // Draw preview line if not closed
-      if (lassoActive && lassoPreview) {
-        const last = lassoPts[lassoPts.length - 1];
-        overlayCtx.beginPath();
-        overlayCtx.moveTo(last.x, last.y);
-        overlayCtx.lineTo(lassoPreview.x, lassoPreview.y);
-        overlayCtx.strokeStyle = 'rgba(255,255,255,0.5)';
-        overlayCtx.stroke();
-        overlayCtx.strokeStyle = 'rgba(255,255,255,.85)';
-      }
     }
+    overlayCtx.restore();
   }
+
+  // 2. Draw rectangular selection ONLY if it's NOT a lasso selection
+  if (selectionRect && selectionRect.w > 0 && selectionRect.h > 0 && lassoPts.length === 0) {
+    overlayCtx.setLineDash([6, 4]);
+    overlayCtx.lineDashOffset = -dashOff;
+    overlayCtx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+    overlayCtx.strokeRect(selectionRect.x + 0.5, selectionRect.y + 0.5, selectionRect.w - 1, selectionRect.h - 1);
+
+    overlayCtx.setLineDash([6, 4]);
+    overlayCtx.lineDashOffset = -dashOff + 6;
+    overlayCtx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+    overlayCtx.strokeRect(selectionRect.x + 0.5, selectionRect.y + 0.5, selectionRect.w - 1, selectionRect.h - 1);
+  }
+
+  // 3. Draw polygon selection helper lines
   if (polygonPts.length > 1) {
     overlayCtx.setLineDash([4, 4]);
+    overlayCtx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
     overlayCtx.beginPath();
     polygonPts.forEach((pt, i) => i === 0 ? overlayCtx.moveTo(pt.x, pt.y) : overlayCtx.lineTo(pt.x, pt.y));
     overlayCtx.stroke();
   }
+  
   overlayCtx.restore();
 }
 
@@ -3063,7 +3076,6 @@ function closeLassoSelection() {
   if (lassoPts.length < 2) return;
   lassoClosed = true;
   lassoActive = false;
-  lassoPreview = null;
   const W = cvs.width, H = cvs.height;
   const t = document.createElement('canvas');
   t.width = W;
@@ -3086,7 +3098,6 @@ function closeLassoSelection() {
     }
   }
   selectionRect = { x: minx, y: miny, w: maxx - minx + 1, h: maxy - miny + 1 };
-  lassoPts = [];
   redrawOverlay();
 }
 
@@ -3363,7 +3374,7 @@ function symmetricParticlePositions(px, py) {
   }
   return out;
 }
-
+const paintTools = ['brush', 'pencil', 'watercolor', 'chalk', 'spray', 'smudge', 'clone', 'eraser', 'fill', 'line', 'rect', 'ellipse', 'gradient'];
 
 /* ════════ POINTER EVENTS ════════════════════════════ */
 function getPos(e) {
@@ -3449,26 +3460,10 @@ function onDown(e) {
     return;
   }
   if (tool === 'lasso') {
-    if (!lassoActive || lassoClosed) {
-      lassoPts = [{ x: p.x, y: p.y }];
-      lassoActive = true;
-      lassoClosed = false;
-      drawing = true;
-      redrawOverlay();
-      return;
-    }
-    // Check if click is near the starting point to close
-    const first = lassoPts[0];
-    if (Math.hypot(p.x - first.x, p.y - first.y) < 8 && lassoPts.length > 2) {
-      lassoClosed = true;
-      lassoActive = false;
-      closeLassoSelection();
-      drawing = false;
-      redrawOverlay();
-      return;
-    }
-    // Add new point
-    lassoPts.push({ x: p.x, y: p.y });
+    lassoPts = [{ x: p.x, y: p.y }];
+    lassoActive = true;
+    lassoClosed = false;
+    drawing = true;
     redrawOverlay();
     return;
   }
@@ -3516,13 +3511,20 @@ function onDown(e) {
 
   if (e.button !== 0 && tool !== 'fill') return;
 
-// Global paintTools definition (move to top-level script scope)
-const paintTools = ['brush', 'pencil', 'watercolor', 'chalk', 'spray', 'smudge', 'clone', 'eraser', 'fill', 'line', 'rect', 'ellipse', 'gradient'];
-
   drawing = true;
   lx = p.x;
   ly = p.y;
   lp = p.p;
+  strokePts = [{x: p.x, y: p.y, p: p.p}];
+
+  if (paintTools.includes(tool) && (tool === 'brush' || tool === 'pencil')) {
+    isTempDrawing = true;
+    cvs.style.opacity = opacity;
+    if (brushHardness < 0.88) {
+      const b = (1 - brushHardness) * brushSz * 0.35;
+      cvs.style.filter = `blur(${b}px)`;
+    }
+  }
 
   if (tool === 'fill') {
     floodFill(Math.floor(p.x), Math.floor(p.y), brushHex());
@@ -3600,8 +3602,8 @@ function onMove(e) {
     redrawOverlay();
     return;
   }
-  if (tool === 'lasso' && drawing && lassoActive && !lassoClosed && lassoPts.length) {
-    lassoPreview = { x: p.x, y: p.y };
+  if (tool === 'lasso' && drawing && lassoActive && !lassoClosed) {
+    lassoPts.push({ x: p.x, y: p.y });
     redrawOverlay();
     return;
   }
@@ -3635,7 +3637,34 @@ function onMove(e) {
   const t = 1 - smoothing * 0.78;
   const nx = lx + (p.x - lx) * t;
   const ny = ly + (p.y - ly) * t;
-  paintStroke(lx, ly, nx, ny, lp, p.p);
+  
+  strokePts.push({x: nx, y: ny, p: p.p});
+  if (strokePts.length === 2) {
+    const p0 = strokePts[0];
+    const p1 = strokePts[1];
+    paintStroke(p0.x, p0.y, (p0.x+p1.x)/2, (p0.y+p1.y)/2, p0.p, (p0.p+p1.p)/2);
+  } else if (strokePts.length >= 3) {
+    const p0 = strokePts[strokePts.length - 3];
+    const p1 = strokePts[strokePts.length - 2];
+    const p2 = strokePts[strokePts.length - 1];
+    const cp1x = (p0.x + p1.x) / 2, cp1y = (p0.y + p1.y) / 2;
+    const cp2x = (p1.x + p2.x) / 2, cp2y = (p1.y + p2.y) / 2;
+    
+    const dist = Math.hypot(cp2x - cp1x, cp2y - cp1y);
+    const steps = Math.max(2, Math.ceil(dist / 3));
+    let lastX = cp1x, lastY = cp1y, lastP = (p0.p + p1.p) / 2;
+    
+    for (let i = 1; i <= steps; i++) {
+      const u = i / steps;
+      const mu = 1 - u;
+      const bx = mu * mu * cp1x + 2 * mu * u * p1.x + u * u * cp2x;
+      const by = mu * mu * cp1y + 2 * mu * u * p1.y + u * u * cp2y;
+      const bp = mu * mu * lastP + 2 * mu * u * p1.p + u * u * ((p1.p + p2.p) / 2);
+      paintStroke(lastX, lastY, bx, by, lastP, bp);
+      lastX = bx; lastY = by; lastP = bp;
+    }
+  }
+
   lx = nx;
   ly = ny;
   lp = p.p;
@@ -3679,17 +3708,16 @@ function onUp(e) {
     return;
   }
 
-  if (tool === 'lasso' && lassoActive && !lassoClosed) {
-    // Double-click closes lasso
-    if (e.detail === 2 && lassoPts.length > 2) {
+  if (tool === 'lasso' && lassoActive && !lassoClosed && wasDrawing) {
+    if (lassoPts.length > 2) {
       lassoClosed = true;
       lassoActive = false;
       closeLassoSelection();
-      drawing = false;
-      redrawOverlay();
-      return;
+    } else {
+      clearSelection();
     }
-    // Otherwise, keep adding points on click (handled in onDown)
+    drawing = false;
+    redrawOverlay();
     return;
   }
 
@@ -3736,10 +3764,36 @@ function onUp(e) {
     shapeStart = null;
     shapeSnap = null;
   }
+
+  if (paintTools.includes(tool) && strokePts && strokePts.length >= 2) {
+    const p1 = strokePts[strokePts.length - 2];
+    const p2 = strokePts[strokePts.length - 1];
+    const mx = (p1.x + p2.x) / 2;
+    const my = (p1.y + p2.y) / 2;
+    paintStroke(mx, my, p2.x, p2.y, (p1.p + p2.p) / 2, p2.p);
+  }
+
+  strokePts = [];
   ctx.shadowBlur = 0;
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
   ctx.filter = 'none';
+
+  if (isTempDrawing) {
+    isTempDrawing = false;
+    ctx.save();
+    ctx.globalAlpha = opacity;
+    if (brushHardness < 0.88) {
+      const b = (1 - brushHardness) * brushSz * 0.35;
+      ctx.filter = `blur(${b}px)`;
+    }
+    ctx.drawImage(cvs, 0, 0);
+    ctx.restore();
+    interactionCtx.clearRect(0, 0, cvs.width, cvs.height);
+    cvs.style.opacity = 1;
+    cvs.style.filter = 'none';
+  }
+
   snapHistory();
 }
 
@@ -3750,7 +3804,7 @@ function effSz(p) {
   return brushSz*(0.5+p*.9);
 }
 
-function prepCtx(p, targetCtx) {
+function prepCtx(p, targetCtx, forceSolid) {
   const c = targetCtx || ctx;
   c.lineJoin = 'round';
   c.lineCap = 'round';
@@ -3764,17 +3818,17 @@ function prepCtx(p, targetCtx) {
   }
   switch (tool) {
     case 'brush':
-      c.globalAlpha = opacity;
+      c.globalAlpha = forceSolid ? 1 : opacity;
       c.strokeStyle = c.fillStyle = pc;
       c.shadowColor = pc;
-      if (brushHardness < 0.88) {
+      if (!forceSolid && brushHardness < 0.88) {
         c.shadowBlur = (1 - brushHardness) * brushSz * 0.75 + brushSz * 0.06;
       } else {
         c.shadowBlur = 0;
       }
       break;
     case 'pencil':
-      c.globalAlpha = opacity;
+      c.globalAlpha = forceSolid ? 1 : opacity;
       c.strokeStyle = c.fillStyle = pc;
       break;
     case 'watercolor':
@@ -3869,7 +3923,7 @@ function renderRadial(x1, y1, x2, y2, p1, p2, isDot, targetCtx) {
 
 function stampBrushDot(c, x, y, pr) {
   const s = effSz(pr);
-  prepCtx(pr, c);
+  prepCtx(pr, c, isTempDrawing);
   c.lineWidth = s;
   const pc = brushHex();
   const draw = (ox, oy) => {
@@ -3890,15 +3944,17 @@ function stampBrushDot(c, x, y, pr) {
 }
 
 function paintDot(x, y, p) {
-  withSelectionClip(ctx, c => stampBrushDot(c, x, y, p));
+  const target = isTempDrawing ? interactionCtx : ctx;
+  withSelectionClip(target, c => stampBrushDot(c, x, y, p));
 }
 
 function paintStroke(x1, y1, x2, y2, p1, p2) {
+  const target = isTempDrawing ? interactionCtx : ctx;
   if (tool === 'clone') {
     if (!cloneSource || !cloneDragAnchor) return;
     const srcImg = cloneCompositeCanvas || activeLayer.canvas;
-    withSelectionClip(ctx, c => {
-      prepCtx(p2, c);
+    withSelectionClip(target, c => {
+      prepCtx(p2, c, isTempDrawing);
       const r = Math.ceil(effSz((p1 + p2) / 2));
       let sx, sy;
       if (cloneAligned) {
@@ -3935,8 +3991,8 @@ function paintStroke(x1, y1, x2, y2, p1, p2) {
     return;
   }
   if (tool === 'spray') {
-    withSelectionClip(ctx, c => {
-      prepCtx(p2, c);
+    withSelectionClip(target, c => {
+      prepCtx(p2, c, isTempDrawing);
       sprayAt(x2, y2, p2, c);
       cleanCtx(c);
     });
@@ -3946,7 +4002,7 @@ function paintStroke(x1, y1, x2, y2, p1, p2) {
   if (spacedTools.includes(tool)) {
     const spacing = Math.max(0.8, brushSz * (0.08 + brushSpacing * 0.42));
     const d = Math.hypot(x2 - x1, y2 - y1);
-    withSelectionClip(ctx, c => {
+    withSelectionClip(target, c => {
       if (d < 0.15) {
         stampBrushDot(c, x2, y2, p2);
         return;
@@ -3962,8 +4018,8 @@ function paintStroke(x1, y1, x2, y2, p1, p2) {
     });
     return;
   }
-  withSelectionClip(ctx, c => {
-    prepCtx((p1 + p2) / 2, c);
+  withSelectionClip(target, c => {
+    prepCtx((p1 + p2) / 2, c, isTempDrawing);
     c.lineWidth = (effSz(p1) + effSz(p2)) / 2;
     const draw = (a1, b1, a2, b2) => {
       c.beginPath();
@@ -4160,7 +4216,8 @@ function clearCanvas() {
   layers.forEach(l => l.ctx.clearRect(0, 0, cvs.width, cvs.height));
   interactionCtx.clearRect(0, 0, cvs.width, cvs.height);
   selectionRect = selectionMask = null;
-  lassoPts = polygonPts = [];
+  lassoPts = [];
+  polygonPts = [];
   redrawOverlay();
   hist=[]; hIdx=-1; snapHistory();
   status('Canvas cleared');
