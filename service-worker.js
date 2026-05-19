@@ -6,6 +6,7 @@ const ASSETS = [
   'grove.html',       // Prod link
   'grovein.html',     // Dev link
   'planner.html',
+  'converter.html',
   'gamein.html',      // Dev link
   'game.html',        // Prod link (if renamed)
   'compute-optimizer.js',
