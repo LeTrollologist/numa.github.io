@@ -3013,12 +3013,12 @@
                     <div class="clock-time" id="time-est">--:--:-- --</div>
                 </div>
                 <div class="clock-box">
-                    <div class="clock-label">India 🇮🇳</div>
-                    <div class="clock-time" id="time-ist">--:--:-- --</div>
-                </div>
-                <div class="clock-box">
                     <div class="clock-label" id="time-ita-label">🌸</div>
                     <div class="clock-time" id="time-ita" style="font-size:inherit">--:--:-- --</div>
+                </div>
+                <div class="clock-box">
+                    <div class="clock-label">India 🇮🇳</div>
+                    <div class="clock-time" id="time-ist">--:--:-- --</div>
                 </div>
             </div>
         </div>
@@ -27847,7 +27847,7 @@
                         var utcDate = new Date(utcString);
                         var diffHours = Math.round((localDate - utcDate) / 3600000);
                         var sign = diffHours >= 0 ? '+' : '';
-                        e3Label.innerText = "🌸 (UTC" + sign + diffHours + ")";
+                        e3Label.innerText = "Sister's Time 🌸 (UTC" + sign + diffHours + ")";
                     } catch (e) {
                         e3Label.innerText = "Sister's Time 🌸";
                     }
