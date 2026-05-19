@@ -4344,6 +4344,8 @@
         }
 
         function drawPong() {
+            if (!ball) return; // Defensive guard: wait for initial host state packet in multiplayer
+            
             // Background — semi-transparent so state blends slightly
             ctx.fillStyle = 'rgba(0,0,0,0.68)';
             ctx.fillRect(0, 0, GW, GH);
