@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Credits · Numa's Space</title>
+
+    <!-- Unified Versioned Favicons -->
+    <link rel="icon" type="image/png" href="favicon/favicon-96x96.png?v=20260519" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="favicon/favicon.svg?v=20260519" />
+    <link rel="shortcut icon" href="favicon/favicon.ico?v=20260519" />
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png?v=20260519" />
+    <meta name="apple-mobile-web-app-title" content="Numa's Space" />
+    <link rel="manifest" href="manifest.json?v=20260519" />
+
+    <!-- Versioned Telemetry Ingestion -->
+    <script src="analytics.js?v=3.0.0" async></script>
+
+    <!-- Fonts (matches Grove) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400;1,500&family=Cinzel:wght@400;500&family=Josefin+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #04060e;
+            --panel: rgba(5, 8, 22, 0.93);
+            --border: rgba(168, 159, 216, 0.14);
+            --border-h: rgba(168, 159, 216, 0.32);
+            --accent: #a89fd8;
+            --accent-d: rgba(168, 159, 216, 0.16);
+            --text: #cdd5ed;
+            --muted: #58697f;
+            --gold: #c9a84c;
+            --gold-d: rgba(201, 168, 76, 0.14);
+        }
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        body {
+            font-family: 'Josefin Sans', sans-serif;
+            color: var(--text);
+        }
+
+        /* ── Star canvas ── */
+        #stars-cvs {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ── App shell ── */
+        #app {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* ── Header ── */
+        header {
+            height: 50px;
+            flex-shrink: 0;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            gap: 10px;
+        }
+
+        .logo {
+            font-family: 'Cinzel', serif;
+            font-size: .95rem;
+            font-weight: 400;
+            color: var(--text);
+            letter-spacing: .10em;
+            flex-shrink: 0;
+        }
+
+        .logo em {
+            color: var(--accent);
+            font-style: normal;
+        }
+
+        .logo-sub {
+            font-size: .58rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--muted);
+            flex-shrink: 0;
+        }
+
+        .hsp { flex: 1; }
+
+        .hbtn {
+            font-family: 'Josefin Sans', sans-serif;
+            font-size: .62rem;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            padding: 5px 11px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            transition: all .22s;
+            flex-shrink: 0;
+            text-decoration: none;
+        }
+
+        .hbtn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-d);
+        }
+
+        /* ── Main scroll area ── */
+        main {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 30px 16px 60px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(168,159,216,.18) transparent;
+        }
+
+        main::-webkit-scrollbar { width: 4px; }
+        main::-webkit-scrollbar-thumb {
+            background: rgba(168,159,216,.22);
+            border-radius: 999px;
+        }
+
+        /* ── Page heading ── */
+        .page-heading {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .page-heading h1 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            font-weight: 400;
+            color: #fff;
+            letter-spacing: .08em;
+            margin-bottom: 6px;
+            text-shadow: 0 0 20px rgba(168,159,216,.25);
+        }
+
+        .page-heading p {
+            font-size: .78rem;
+            color: var(--muted);
+            letter-spacing: .06em;
+        }
+
+        /* ── Credits grid ── */
+        .credits-container {
+            width: min(100%, 820px);
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* ── Section cards ── */
+        .credit-section {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px 10px;
+            border-bottom: 1px solid rgba(168,159,216,.06);
+            background: rgba(255,255,255,.015);
+        }
+
+        .section-icon {
+            font-size: .9rem;
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-family: 'Cinzel', serif;
+            font-size: .78rem;
+            font-weight: 400;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .section-body {
+            padding: 0;
+        }
+
+        /* ── Credit row ── */
+        .credit-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(168,159,216,.04);
+            transition: background .2s;
+        }
+
+        .credit-row:last-child {
+            border-bottom: none;
+        }
+
+        .credit-row:hover {
+            background: rgba(168,159,216,.04);
+        }
+
+        .credit-badge {
+            width: 34px;
+            height: 34px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-d);
+            border: 1px solid var(--border);
+            font-size: .85rem;
+        }
+
+        .credit-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .credit-name {
+            font-family: 'Cinzel', serif;
+            font-size: .76rem;
+            font-weight: 400;
+            letter-spacing: .06em;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .credit-desc {
+            font-size: .68rem;
+            color: var(--muted);
+            line-height: 1.55;
+            letter-spacing: .02em;
+        }
+
+        .credit-link {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color .2s;
+            font-size: .64rem;
+            letter-spacing: .04em;
+        }
+
+        .credit-link:hover {
+            color: #fff;
+        }
+
+        .credit-tag {
+            font-size: .52rem;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--gold);
+            border: 1px solid rgba(201,168,76,.28);
+            background: rgba(201,168,76,.08);
+            padding: 2px 7px;
+            align-self: center;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        /* ── Status bar ── */
+        .statusbar {
+            height: 24px;
+            flex-shrink: 0;
+            background: rgba(2, 4, 10, .92);
+            border-top: 1px solid rgba(168, 159, 216, .06);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 11px;
+            font-size: .57rem;
+            letter-spacing: .10em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .sdot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .ssp { flex: 1; }
+
+        .statusbar a {
+            color: var(--muted);
+            text-decoration: none;
+            transition: color .2s;
+        }
+
+        .statusbar a:hover {
+            color: var(--accent);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 480px) {
+            main { padding: 20px 10px 50px; }
+
+            .credit-row { padding: 10px 12px; }
+
+            .credit-badge { width: 28px; height: 28px; font-size: .72rem; }
+
+            .page-heading h1 { font-size: 1.4rem; }
+
+            .section-header { padding: 10px 12px 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="stars-cvs"></canvas>
+
+    <div id="app">
+        <!-- Header -->
+        <header>
+            <span class="logo"><em>✦</em> Credits</span>
+            <span class="logo-sub">Acknowledgements</span>
+            <div class="hsp"></div>
+            <a class="hbtn" href="index.html">← Return</a>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <div class="page-heading">
+                <h1>Credits &amp; Acknowledgements</h1>
+                <p>The open-source libraries, assets, and services that help power Numa's Space.</p>
+            </div>
+
+            <div class="credits-container">
+
+                <!-- Open-Source Libraries -->
+                <section class="credit-section">
+                    <div class="section-header">
+                        <span class="section-icon">📦</span>
+                        <span class="section-title">Open-Source Libraries</span>
+                    </div>
+                    <div class="section-body">
+                        <div class="credit-row">
+                            <div class="credit-badge">🌞</div>
+                            <div class="credit-info">
+                                <div class="credit-name">SunCalc & MoonCalc</div>
+                                <div class="credit-desc">
+                                    Sun &amp; moon position calculations for the real-time celestial sky engine.
+                                    <br><a class="credit-link" href="https://github.com/mourner/suncalc" target="_blank" rel="noopener">github.com/mourner/suncalc</a>
+                                </div>
+                            </div>
+                            <span class="credit-tag">BSD-2</span>
+                        </div>
+                        <div class="credit-row">
+                            <div class="credit-badge">🔗</div>
+                            <div class="credit-info">
+                                <div class="credit-name">PeerJS</div>
+                                <div class="credit-desc">
+                                    WebRTC peer-to-peer connectivity for the online multiplayer Pong mode.
+                                    <br><a class="credit-link" href="https://github.com/peers/peerjs" target="_blank" rel="noopener">github.com/peers/peerjs</a>
+                                </div>
+                            </div>
+                            <span class="credit-tag">MIT</span>
+                        </div>
+                        <div class="credit-row">
+                            <div class="credit-badge">📁</div>
+                            <div class="credit-info">
+                                <div class="credit-name">JSZip</div>
+                                <div class="credit-desc">
+                                    ZIP archive generation for Sketchbook multi-canvas export.
+                                    <br><a class="credit-link" href="https://github.com/Stuk/jszip" target="_blank" rel="noopener">github.com/Stuk/jszip</a>
+                                </div>
+                            </div>
+                            <span class="credit-tag">MIT</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Audio & Sound Effects -->
+                <section class="credit-section">
+                    <div class="section-header">
+                        <span class="section-icon">🎵</span>
+                        <span class="section-title">Audio &amp; Sound</span>
+                    </div>
+                    <div class="section-body">
+                        <div class="credit-row">
+                            <div class="credit-badge">⏰</div>
+                            <div class="credit-info">
+                                <div class="credit-name">Alarm Clock Sound</div>
+                                <div class="credit-desc">
+                                    Dreamland alarm tone — sourced from Freesound community.
+                                    <br><a class="credit-link" href="https://freesound.org/people/community/sounds/90867/" target="_blank" rel="noopener">freesound.org · #90867</a>
+                                </div>
+                            </div>
+                            <span class="credit-tag">CC0</span>
+                        </div>
+                        <div class="credit-row">
+                            <div class="credit-badge">💧</div>
+                            <div class="credit-info">
+                                <div class="credit-name">Watering Kettle Sound</div>
+                                <div class="credit-desc">
+                                    Garden watering sound effect by 16gpanskakomarkova_marina.
+                                    <br><a class="credit-link" href="https://freesound.org/people/16gpanskakomarkova_marina/sounds/496739/" target="_blank" rel="noopener">freesound.org · #496739</a>
+                                </div>
+                            </div>
+                            <span class="credit-tag">CC0</span>
+                        </div>
+                        <div class="credit-row">
+                            <div class="credit-badge">🐦</div>
+                            <div class="credit-info">
+                                <div class="credit-name">Birds Chirping Ambience</div>
+                                <div class="credit-desc">
+                                    Forest ambience by alivvie — used in Garden environment.
+                                    <br><a class="credit-link" href="https://freesound.org/people/alivvie/sounds/382294/" target="_blank" rel="noopener">freesound.org · #382294</a>
+                                </div>
+                            </div>
+                            <span class="credit-tag">CC0</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Fonts & Typography -->
+                <section class="credit-section">
+                    <div class="section-header">
+                        <span class="section-icon">🔤</span>
+                        <span class="section-title">Typography</span>
+                    </div>
+                    <div class="section-body">
+                        <div class="credit-row">
+                            <div class="credit-badge">✦</div>
+                            <div class="credit-info">
+                                <div class="credit-name">Cinzel</div>
+                                <div class="credit-desc">Elegant serif display typeface used across Grove, Sketchbook, and Credits.</div>
+                            </div>
+                            <span class="credit-tag">OFL</span>
+                        </div>
+                        <div class="credit-row">
+                            <div class="credit-badge">✦</div>
+                            <div class="credit-info">
+                                <div class="credit-name">Cormorant Garamond</div>
+                                <div class="credit-desc">Classical serif body typeface used site-wide for headings and prose.</div>
+                            </div>
+                            <span class="credit-tag">OFL</span>
+                        </div>
+                        <div class="credit-row">
+                            <div class="credit-badge">✦</div>
+                            <div class="credit-info">
+                                <div class="credit-name">Josefin Sans</div>
+                                <div class="credit-desc">Geometric sans-serif used for UI labels, buttons, and interface text.</div>
+                            </div>
+                            <span class="credit-tag">OFL</span>
+                        </div>
+                        <div class="credit-row">
+                            <div class="credit-badge">✦</div>
+                            <div class="credit-info">
+                                <div class="credit-name">Great Vibes</div>
+                                <div class="credit-desc">Calligraphic script used for brand title and romantic display text.</div>
+                            </div>
+                            <span class="credit-tag">OFL</span>
+                        </div>
+                        <div class="credit-row">
+                            <div class="credit-badge">✦</div>
+                            <div class="credit-info">
+                                <div class="credit-name">DM Mono</div>
+                                <div class="credit-desc">Monospaced font used for data readouts, clocks, and code-style labels.</div>
+                            </div>
+                            <span class="credit-tag">OFL</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Services & Infrastructure -->
+                <section class="credit-section">
+                    <div class="section-header">
+                        <span class="section-icon">🛠</span>
+                        <span class="section-title">Services &amp; Infrastructure</span>
+                    </div>
+                    <div class="section-body">
+                        <div class="credit-row">
+                            <div class="credit-badge">🐙</div>
+                            <div class="credit-info">
+                                <div class="credit-name">GitHub Pages</div>
+                                <div class="credit-desc">
+                                    Static site hosting and deployment.
+                                    <br><a class="credit-link" href="https://pages.github.com" target="_blank" rel="noopener">pages.github.com</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="credit-row">
+                            <div class="credit-badge">☁️</div>
+                            <div class="credit-info">
+                                <div class="credit-name">Cloudinary</div>
+                                <div class="credit-desc">
+                                    Cloud media delivery for audio and image assets.
+                                    <br><a class="credit-link" href="https://cloudinary.com" target="_blank" rel="noopener">cloudinary.com</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="credit-row">
+                            <div class="credit-badge">🚀</div>
+                            <div class="credit-info">
+                                <div class="credit-name">Render</div>
+                                <div class="credit-desc">
+                                    Sentinel Core analytics backend hosting.
+                                    <br><a class="credit-link" href="https://render.com" target="_blank" rel="noopener">render.com</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="credit-row">
+                            <div class="credit-badge">▶️</div>
+                            <div class="credit-info">
+                                <div class="credit-name">YouTube IFrame API</div>
+                                <div class="credit-desc">
+                                    Embedded video player for the Dreamland module.
+                                    <br><a class="credit-link" href="https://developers.google.com/youtube/iframe_api_reference" target="_blank" rel="noopener">YouTube IFrame API Reference</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="credit-row">
+                            <div class="credit-badge">🔤</div>
+                            <div class="credit-info">
+                                <div class="credit-name">Google Fonts</div>
+                                <div class="credit-desc">
+                                    Typeface hosting and delivery.
+                                    <br><a class="credit-link" href="https://fonts.google.com" target="_blank" rel="noopener">fonts.google.com</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Made With Love -->
+                <section class="credit-section" style="border-color: rgba(201,168,76,.18); background: rgba(201,168,76,.03);">
+                    <div class="section-header" style="border-bottom-color: rgba(201,168,76,.08);">
+                        <span class="section-icon">💛</span>
+                        <span class="section-title" style="color: var(--gold);">Made With Love</span>
+                    </div>
+                    <div class="section-body">
+                        <div class="credit-row">
+                            <div class="credit-badge" style="background: var(--gold-d); border-color: rgba(201,168,76,.22);">🌌</div>
+                            <div class="credit-info">
+                                <div class="credit-name" style="color: var(--gold);">Numa's Space</div>
+                                <div class="credit-desc">
+                                    Designed, built, and maintained with love. All original code, artwork, and design, unless credited above, is the work of the developer.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+        <!-- Status bar -->
+        <div class="statusbar">
+            <span class="sdot"></span>
+            <span>Credits</span>
+            <div class="ssp"></div>
+            <a href="index.html">Home</a>
+            <span>·</span>
+            <a href="install.html">Install</a>
+        </div>
+    </div>
+
+    <!-- Star field -->
+    <script>
+        const cvs = document.getElementById('stars-cvs');
+        const ctx = cvs.getContext('2d');
+        let stars = [];
+
+        function resize() {
+            cvs.width = innerWidth;
+            cvs.height = innerHeight;
+            initStars();
+        }
+
+        function initStars() {
+            stars = [];
+            const count = Math.floor((cvs.width * cvs.height) / 9000);
+            for (let i = 0; i < count; i++) {
+                stars.push({
+                    x: Math.random() * cvs.width,
+                    y: Math.random() * cvs.height,
+                    r: Math.random() * 1.3 + 0.2,
+                    a: Math.random() * 0.7 + 0.15,
+                    s: Math.random() * 0.015 + 0.003
+                });
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, cvs.width, cvs.height);
+            for (const s of stars) {
+                ctx.fillStyle = `rgba(205,213,237,${s.a})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+                s.a += s.s;
+                if (s.a > 0.85 || s.a < 0.15) s.s = -s.s;
+            }
+            requestAnimationFrame(draw);
+        }
+
+        addEventListener('resize', resize);
+        resize();
+        draw();
+    </script>
+</body>
+</html>
