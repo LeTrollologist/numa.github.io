@@ -3898,12 +3898,12 @@
                             credential: 'openrelayproject' 
                         },
                         { 
-                            urls: 'turn:openrelay.metered.ca:443', 
+                            urls: 'turns:openrelay.metered.ca:443', 
                             username: 'openrelayproject', 
                             credential: 'openrelayproject' 
                         },
                         { 
-                            urls: 'turn:openrelay.metered.ca:443?transport=tcp', 
+                            urls: 'turns:openrelay.metered.ca:443?transport=tcp', 
                             username: 'openrelayproject', 
                             credential: 'openrelayproject' 
                         }
@@ -3971,7 +3971,7 @@
             initPeer(function () {
                 console.log('Connecting from Guest to Host:', targetId);
                 document.getElementById('multiStatus').innerText = 'Connecting to room ' + targetId + '...';
-                peerConn = peer.connect(targetId);
+                peerConn = peer.connect(targetId, { serialization: 'json' });
                 setupPeerConnection();
             });
         }
@@ -3980,7 +3980,17 @@
             console.log('setupPeerConnection triggered. peerConn.open =', peerConn.open);
             document.getElementById('multiStatus').innerText = 'Initializing handshake...';
             
+            // Handshake timeout warning if strict NAT/firewalls delay WebRTC connection
+            var handshakeTimeout = setTimeout(function () {
+                if (peerConn && !peerConn.open) {
+                    console.warn("WebRTC handshake delayed. This typically happens when direct P2P is blocked by cell/router NATs.");
+                    document.getElementById('multiStatus').innerText = 'Handshake delayed. Try playing on the same Wi-Fi, or reload and retry! 🌸';
+                    document.getElementById('multiStatus').style.color = '#ffaa00';
+                }
+            }, 6000);
+            
             function handleConnectSuccess() {
+                clearTimeout(handshakeTimeout);
                 console.log('WebRTC P2P DataChannel fully opened!');
                 document.getElementById('multiStatus').innerText = 'Connected! Telemetry synced. 💖';
                 document.getElementById('multiStatus').style.color = '#00ff88';
@@ -4012,12 +4022,14 @@
             });
 
             peerConn.on('error', function (err) {
+                clearTimeout(handshakeTimeout);
                 console.error('DataConnection error event:', err);
                 document.getElementById('multiStatus').innerText = 'Handshake error: ' + err.message;
                 document.getElementById('multiStatus').style.color = '#ff4040';
             });
 
             peerConn.on('close', function () {
+                clearTimeout(handshakeTimeout);
                 console.log('WebRTC connection closed.');
                 document.getElementById('multiStatus').innerText = 'Partner disconnected. 🌸';
                 document.getElementById('multiStatus').style.color = '#ff4040';
