@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hollow-grove-v1.2';
+const CACHE_NAME = 'hollow-grove-v1.3';
 const ASSETS = [
   'index.html',
   'sketch.html',      // Prod link
@@ -10,8 +10,7 @@ const ASSETS = [
   'game.html',        // Prod link (if renamed)
   'compute-optimizer.js',
   'mobile-optimizer.js',
-  'apple-optimizer.js',
-  'analytics.js'
+  'apple-optimizer.js'
 ];
 
 // 1. INSTALLATION: Cache static assets with fail-safe resilience
