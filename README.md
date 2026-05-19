@@ -1,145 +1,101 @@
-# Numa's Space
+# 🌌 Numa's Space
 
-Numa's Space is a handcrafted static web experience built as a personal, dreamy dashboard for studying, relaxing, playing, sketching, planning, and stargazing. The project is designed to run directly from GitHub Pages or any static file host without a build step.
+<div align="center">
 
-The main entry point is `index.html`, with companion pages for the planner, sketchbook, grove, and custom 404 page. Styling, layout, animation, and most application logic are embedded directly in the HTML files, while shared optimization and analytics behavior lives in small standalone JavaScript files.
+[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](#)
+[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](#)
+[![JavaScript](https://img.shields.io/badge/ES6_JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](#)
+[![PWA](https://img.shields.io/badge/PWA_Ready-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)](#)
+[![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-181717?style=for-the-badge&logo=github&logoColor=white)](#)
 
-## Live Site
+A personal Web Application and Progressive Web App ecosystem featuring deep interactive elements, creative playgrounds, study engines, and celestial alignments.
 
-The project is configured around this GitHub Pages URL:
+[**Live Site 🚀**](https://letrollologist.github.io/numa.github.io/)
+</div>
 
-```text
-https://letrollologist.github.io/numa.github.io/
+---
+
+## 🌌 Repository Architecture
+
+```mermaid
+graph TD
+    A[index.html - Core SPA] --> B[grovein.html - The Grove]
+    A --> C[planner.html - Constellation Planner]
+    A --> D[sketchin.html - Sketchpad]
+    A --> E[converter.html - Time Aligner]
+    
+    subgraph PWA Layer [PWA Offline Infrastructure]
+        SW[service-worker.js v1.3] -->|Caches Assets| A
+        SW -->|Caches Assets| B
+        SW -->|Caches Assets| C
+        SW -->|Caches Assets| E
+    end
+    
+    subgraph Engine Optimizers [Client Optimization Pipeline]
+        CO[compute-optimizer.js]
+        MO[mobile-optimizer.js]
+        AO[apple-optimizer.js]
+    end
+    
+    A -.->|Ingests| Engine Optimizers
 ```
 
-Primary pages:
+---
 
-```text
-https://letrollologist.github.io/numa.github.io/index.html
-https://letrollologist.github.io/numa.github.io/planner.html
-https://letrollologist.github.io/numa.github.io/sketch.html
-https://letrollologist.github.io/numa.github.io/grove.html
-```
+## 🎨 Interactive Sectors (Modules)
 
-## Features
+| Sector | Concept | Visuals & System | Features |
+| :--- | :--- | :--- | :--- |
+| **🌌 The Core SPA** | Celestial Study Lounge | Glassmorphism, particles, smooth twilight animations | Custom study timers, timelapse backgrounds, music integration |
+| **🌿 The Grove** | Magical Atmospheric Garden | Ember, Moonlit, Mist interactive lighting nodes | Dynamic seed care cycles, garden ledger, gold coin ledger, fireflies |
+| **✍️ Sketchbook** | Smooth Vector Sketchpad | HTML5 Canvas, high-density grids | Bézier path smoothing, SVG vector export, layer system |
+| **✨ Planner** | Constellation Scheduler | Cosmic glass panels, Great Vibes typography | Dynamic chore tracking, daily star schedules, progress indicators |
+| **⏰ Time Aligner** | Multi-Zone Celestial Sync | Tri-Theme dual timelines | Dual slider synchronization, awake/sleep overlap calculations |
 
-- Personal home dashboard with animated atmosphere, world clocks, music controls, and a soft celestial visual style.
-- StudyBuddy tools for tasks, notes, study timing, streaks, goals, and local progress tracking.
-- Pong-style minigame with difficulty controls and score history.
-- Dreamland and stargazing sections with rich visual effects and astronomy-inspired content.
-- Interactive moon phase display and sky-themed UI elements.
-- Standalone planner in `planner.html`.
-- Standalone drawing/sketchbook experience in `sketch.html`.
-- Standalone grove/garden scene in `grove.html`.
-- Custom animated `404.html`.
-- Service worker caching for core offline assets.
-- Mobile, low-power, and iOS/WebKit optimization helpers.
-- Lightweight analytics ping for page/session metadata.
+---
 
-## Project Structure
+## ⚡ Client-Side Optimization Engines
 
-```text
-.
-|-- index.html                  # Main Numa's Space app
-|-- planner.html                # Standalone constellation planner
-|-- sketch.html                 # Standalone sketchbook/drawing tool
-|-- grove.html                  # Standalone grove/garden scene
-|-- 404.html                    # Custom not-found page
-|-- test.html                   # Experimental/test sketchbook page
-|-- service-worker.js           # Offline cache for core pages/assets
-|-- analytics.js                # Page/session metadata uplink
-|-- compute-optimizer.js        # Shared rendering/performance optimizer
-|-- mobile-optimizer.js         # Mobile and battery optimization layer
-|-- apple-optimizer.js          # iOS/WebKit safe-area, motion, and tap helpers
-|-- *.jpg / *.png / *.webm      # Local visual/media assets
-```
+To run premium rendering and real-time canvas layers on both low-spec mobile devices and high-DPI desktop machines, **Numa's Space** leverages three custom optimization engines:
 
-Some executable installer files are present in the working directory. They are not required to run the static site and should not be deployed as website assets unless intentionally needed.
+1. **`compute-optimizer.js` (Multi-Threading & Thread Pooling)**
+   * Manages tasks asynchronously.
+   * Leverages browser thread pooling to isolate complex particle and cosmic drawing calculations away from the main UI thread, keeping interface frame rates locked at 60 FPS.
+2. **`mobile-optimizer.js` (Hardware Adaptability)**
+   * Detects system memory thresholds and device parameters.
+   * Dynamically downsizes canvas scales, adjusts particle counts, and scales down resolution modifiers in real time to prevent thermal throttling on low-spec mobile units.
+3. **`apple-optimizer.js` (WebKit/iOS Hardware Support)**
+   * Tailors layout heights specifically to counteract mobile Safari’s dynamic viewport height (`100vh` scrolling bug).
+   * Overrides WebKit composition layers to bypass CPU bottlenecks, ensuring dynamic scrolling and glassmorphic panels glide flawlessly on iOS hardware.
 
-## How To Run Locally
+---
 
-Because this is a static site, there is no package install or build command required.
+## 🛠️ PWA Offline Support & Cache Eviction
 
-The simplest option is to open `index.html` directly in a browser.
+This workspace operates as a full PWA (Progressive Web App) managed by `service-worker.js`.
+* **Caching Strategy**: Leverages a reliable cache-first strategy with safe network fallback rules using `Promise.allSettled` to support local preview environments and Production GitHub Pages hosting seamlessly.
+* **Aggressive Versioning**: Utilizing custom versioned cache bounds (`CACHE_NAME = 'hollow-grove-v1.3'`), a push immediately sweeps deprecated browser assets, evicts stale layers, and claims active client tabs instantly.
 
-For behavior closer to GitHub Pages, especially for the service worker and root-relative favicon/manifest paths, run a local static server from the project root:
+---
 
-```powershell
-python -m http.server 8000
-```
+## 🚀 Setting Up Locally
 
-Then visit:
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/LeTrollologist/numa.github.io.git
+   cd numa.github.io
+   ```
+2. **Launch Local Server**:
+   Any standard static file hosting tool works. If using Node.js:
+   ```bash
+   npx http-server -p 8080
+   ```
+3. **Visit Numa's Space**:
+   Open `http://localhost:8080` in your web browser.
 
-```text
-http://localhost:8000/index.html
-```
+---
 
-You can also open the companion pages directly:
+## 📄 Licensing & Security
 
-```text
-http://localhost:8000/planner.html
-http://localhost:8000/sketch.html
-http://localhost:8000/grove.html
-```
-
-## Deployment
-
-This project is suitable for GitHub Pages.
-
-1. Commit the static files to the repository.
-2. In GitHub, open the repository settings.
-3. Go to Pages.
-4. Select the branch that contains `index.html`.
-5. Use the repository root as the Pages source.
-6. Save and wait for GitHub Pages to publish.
-
-No bundler, transpiler, package manager, or backend deployment is required for the front-end app.
-
-## Important Files
-
-### `index.html`
-
-The main application. It contains the home dashboard, navigation, music player, study tools, status diagnostics, minigame, dream/stargazing views, and most visual systems.
-
-It loads:
-
-```html
-<script src="compute-optimizer.js"></script>
-<script src="mobile-optimizer.js"></script>
-<script src="apple-optimizer.js"></script>
-```
-
-### `planner.html`
-
-A standalone planner page with the same visual language as the main site. It uses the shared optimization scripts and analytics script.
-
-### `sketch.html`
-
-A standalone sketchbook/drawing page. It includes JSZip from a CDN:
-
-```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-```
-
-This means ZIP/export-related functionality requires network access unless JSZip is vendored locally.
-
-### `grove.html`
-
-A standalone ambient grove/garden page. It uses shared optimization and analytics helpers.
-
-### `service-worker.js`
-
-Caches core project files:
-
-```js
-const ASSETS = [
-  'index.html',
-  'sketch.html',
-  'grove.html',
-  'planner.html',
-  'mobile-optimizer.js',
-  'apple-optimizer.js',
-];
-```
-
-If new required assets are added, include them in this list so they are available offline.
+* **Security**: Standard reporting guidelines are available inside [SECURITY.md](security.md).
+* **License**: Governed under the MIT License. See [LICENSE.md](license.md) for full terms.
