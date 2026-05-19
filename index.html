@@ -4063,7 +4063,7 @@
                     }
                 }
             } else {
-                // Guest receives full authoritive game state from the host
+                // Guest receives full authoritative game state and event notifications from the host
                 if (data.type === 'STATE') {
                     if (data.ball) ball = data.ball;
                     if (typeof data.pY === 'number') pY = data.pY;
@@ -4072,8 +4072,11 @@
                     if (typeof data.aScore === 'number') aScore = data.aScore;
                     if (typeof data.combo === 'number') combo = data.combo;
                     if (typeof data.shk === 'number') shk = data.shk;
-                    if (Array.isArray(data.parts)) parts = data.parts;
                     updScore();
+                } else if (data.type === 'IMPACT') {
+                    pImpact(data.x, data.y, data.col);
+                } else if (data.type === 'ENDGAME') {
+                    endGame(!data.won); // Guest won if Host did not win
                 }
             }
         }
@@ -4179,6 +4182,10 @@
                 } else {
                     title = 'Defeat! 🌸';
                     desc = 'Numa played exceptionally well.';
+                }
+                // Notify guest of game over from the authoritative Host
+                if (isHost && peerConn && peerConn.open) {
+                    peerConn.send({ type: 'ENDGAME', won: hostWon });
                 }
             } else {
                 title = won ? 'You Won! 🎉' : 'Good Try! 🌸';
@@ -4290,8 +4297,20 @@
                         ball.dy = ball.sp * Math.sin(ang);
                         ball.x = isP ? px + PW + ball.r : px - ball.r;
                         shk = 7;
-                        pImpact(ball.x, ball.y, isP ? '#ffb6d9' : '#ff6fab');
-                        if (combo >= 5) pImpact(ball.x, ball.y, 'rgba(255,220,60,0.9)');
+                        
+                        var c1 = isP ? '#ffb6d9' : '#ff6fab';
+                        pImpact(ball.x, ball.y, c1);
+                        if (isMultiplayer && isHost && peerConn && peerConn.open) {
+                            peerConn.send({ type: 'IMPACT', x: ball.x, y: ball.y, col: c1 });
+                        }
+                        
+                        if (combo >= 5) {
+                            var c2 = 'rgba(255,220,60,0.9)';
+                            pImpact(ball.x, ball.y, c2);
+                            if (isMultiplayer && isHost && peerConn && peerConn.open) {
+                                peerConn.send({ type: 'IMPACT', x: ball.x, y: ball.y, col: c2 });
+                            }
+                        }
                     }
                 }
             }
@@ -4310,7 +4329,7 @@
                 else resetBall();
             }
 
-            // 5. Host broadcasts the authoritative state to guest
+            // 5. Host broadcasts the authoritative state to guest (excluding particles to avoid bandwidth limit crash)
             if (isMultiplayer && isHost && peerConn && peerConn.open) {
                 peerConn.send({
                     type: 'STATE',
@@ -4320,10 +4339,7 @@
                     pScore: pScore,
                     aScore: aScore,
                     combo: combo,
-                    shk: shk,
-                    parts: parts.map(function (p) {
-                        return { x: p.x, y: p.y, vx: p.vx, vy: p.vy, life: p.life, col: p.col, sz: p.sz };
-                    })
+                    shk: shk
                 });
             }
         }
