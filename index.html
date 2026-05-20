@@ -8,6 +8,7 @@
     <script src="compute-optimizer.js"></script>
     <script src="mobile-optimizer.js"></script>
     <script src="apple-optimizer.js"></script>
+    <script src="analytics.js?v=3.0.0" async></script>
     <meta property="og:title" content="Numa's Space">
     <meta property="og:description" content="A space for Numa, study, dream, play, explore.">
 
@@ -489,6 +490,186 @@
 
         .fl a:hover {
             color: var(--pink)
+        }
+
+        /* ── CHANGE LOGS PAGE ── */
+        #page-changelogs {
+            display: none;
+            padding-bottom: 80px;
+        }
+        #page-changelogs.active {
+            display: block;
+        }
+        .changelogs-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 1000px;
+            margin: 0 auto 32px;
+            padding: 20px;
+            background: rgba(10, 14, 30, 0.5);
+            border: 1px solid var(--border);
+            border-radius: var(--rc);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: var(--sh-c);
+        }
+        @media(min-width: 768px) {
+            .changelogs-controls {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                padding: 16px 24px;
+            }
+        }
+        .changelogs-controls .search-wrapper {
+            flex-grow: 1;
+            max-width: 500px;
+            position: relative;
+        }
+        .changelogs-controls input[type="text"] {
+            width: 100%;
+            padding: 12px 18px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: #fff;
+            font-family: var(--fb);
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .changelogs-controls input[type="text"]:focus {
+            border-color: var(--pink);
+            box-shadow: 0 0 10px rgba(255, 105, 130, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .changelogs-controls .filter-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .changelogs-controls select {
+            padding: 10px 18px;
+            border-radius: 20px;
+            background: rgba(10, 14, 30, 0.85);
+            border: 1px solid var(--border);
+            color: #e0e0ff;
+            font-family: var(--fb);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            outline: none;
+        }
+        .changelogs-controls select:focus, .changelogs-controls select:hover {
+            border-color: var(--pink);
+            box-shadow: 0 0 8px rgba(255, 105, 130, 0.2);
+        }
+        .changelogs-controls button {
+            padding: 10px 20px;
+            border-radius: 20px;
+            background: rgba(255, 105, 130, 0.15);
+            border: 1px solid var(--pink);
+            color: #fff;
+            font-family: var(--fb);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            outline: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .changelogs-controls button:hover {
+            background: rgba(255, 105, 130, 0.3);
+            box-shadow: 0 0 12px rgba(255, 105, 130, 0.4);
+            transform: translateY(-2px);
+        }
+        .changelogs-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+        @media(min-width: 768px) {
+            .changelogs-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .changelogs-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: var(--rc);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: var(--sh-c);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+        }
+        .changelogs-card:hover {
+            border-color: var(--border-p);
+            box-shadow: var(--sh-p);
+            transform: translateY(-4px);
+        }
+        .changelogs-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .changelogs-card-title {
+            font-family: var(--fd);
+            font-size: 1.3rem;
+            color: #fff;
+            margin: 0;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        .changelogs-card-date {
+            font-family: var(--fb);
+            font-size: 0.76rem;
+            color: rgba(255, 255, 255, 0.5);
+            white-space: nowrap;
+        }
+        .changelogs-card-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-family: var(--fb);
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .changelogs-card-badge.feature {
+            background: rgba(255, 105, 130, 0.15);
+            color: #ff6982;
+            border: 1px solid rgba(255, 105, 130, 0.3);
+            text-shadow: 0 0 6px rgba(255, 105, 130, 0.4);
+        }
+        .changelogs-card-badge.fix {
+            background: rgba(6, 182, 212, 0.15);
+            color: #22d3ee;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            text-shadow: 0 0 6px rgba(6, 182, 212, 0.4);
+        }
+        .changelogs-card-badge.optimization {
+            background: rgba(234, 179, 8, 0.15);
+            color: #facc15;
+            border: 1px solid rgba(234, 179, 8, 0.3);
+            text-shadow: 0 0 6px rgba(234, 179, 8, 0.4);
+        }
+        .changelogs-card-desc {
+            font-family: var(--fb);
+            font-size: 0.86rem;
+            color: rgba(255, 255, 255, 0.78);
+            line-height: 1.5;
+            margin: 0;
         }
 
         /* ── SHARED ── */
@@ -3307,7 +3488,32 @@
         </div>
     </div>
 
-
+    <!-- ══ CHANGE LOGS ══ -->
+    <div id="page-changelogs" class="page-section">
+        <div class="page-title">Update Timeline &amp; Change Logs</div>
+        
+        <div class="changelogs-controls">
+            <div class="search-wrapper">
+                <input type="text" id="changelogSearch" placeholder="Search updates..." oninput="filterChangelogs()">
+            </div>
+            
+            <div class="filter-wrapper">
+                <select id="changelogTimePeriod" onchange="filterChangelogs()">
+                    <option value="all">All Time</option>
+                    <option value="7">Last 7 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="ytd">Year to Date (2026)</option>
+                    <option value="2025">2025 Updates</option>
+                </select>
+                
+                <button id="changelogSortBtn" onclick="toggleChangelogSort()">
+                    Date: Newest First <span id="sortDirectionIcon">⇅</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="changelogs-grid" id="changelogsGrid"></div>
+    </div>
 
     <!-- Alarm audio + UI -->
     <audio id="alarmAudio" loop
@@ -3328,6 +3534,7 @@
             <span>© 2026 Numa's Space</span>
             <span>·</span><a onclick="navigate('privacy')">Privacy</a>
             <span>·</span><a onclick="navigate('status')">System</a>
+            <span>·</span><a onclick="navigate('changelogs')">Change Logs</a>
             <span>·</span><a href="credits.html">Credits</a>
             <span>·</span><a href="install.html">Install App</a>
         </div>
@@ -3458,6 +3665,7 @@
             if (pageId === 'dreamland' && !ytPlayer && window.YT && window.YT.Player) initYTPlayer();
             if (pageId === 'minigame') setTimeout(resizePong, 60);
             if (pageId === 'stargazer') setTimeout(initStargazer, 80);
+            if (pageId === 'changelogs') setTimeout(renderChangelogs, 50);
         }
 
         // ══════════════════════════════════════════════════════════
@@ -27093,18 +27301,42 @@
         function generateSGStars() {
             sgStars = [];
             var d = SG_STAR_DATA;
-            for (var i = 0; i < d.length; i += 4) {
-                var ra = d[i], dec = d[i + 1], vmag = d[i + 2], bv = d[i + 3];
-                var idx = i / 4;
-                sgStars.push({
-                    ra: ra, dec: dec, vmag: vmag, bv: bv,
-                    color: sgBVtoColor(bv),
-                    r: Math.max(0.8, 4.5 - vmag * 0.7),
-                    name: SG_STAR_NAMES[idx] || null,
-                    idx: idx,
-                    twinklePhase: Math.random() * Math.PI * 2,
-                    twinkleSpeed: 0.008 + Math.random() * 0.015
-                });
+            if (window.ComputeOptimizer && window.ComputeOptimizer.enqueue) {
+                var i = 0;
+                function chunk() {
+                    var end = Math.min(d.length, i + 200);
+                    for (; i < end; i += 4) {
+                        var ra = d[i], dec = d[i + 1], vmag = d[i + 2], bv = d[i + 3];
+                        var idx = i / 4;
+                        sgStars.push({
+                            ra: ra, dec: dec, vmag: vmag, bv: bv,
+                            color: sgBVtoColor(bv),
+                            r: Math.max(0.8, 4.5 - vmag * 0.7),
+                            name: SG_STAR_NAMES[idx] || null,
+                            idx: idx,
+                            twinklePhase: Math.random() * Math.PI * 2,
+                            twinkleSpeed: 0.008 + Math.random() * 0.015
+                        });
+                    }
+                    if (i < d.length) {
+                        window.ComputeOptimizer.enqueue(chunk);
+                    }
+                }
+                chunk();
+            } else {
+                for (var i = 0; i < d.length; i += 4) {
+                    var ra = d[i], dec = d[i + 1], vmag = d[i + 2], bv = d[i + 3];
+                    var idx = i / 4;
+                    sgStars.push({
+                        ra: ra, dec: dec, vmag: vmag, bv: bv,
+                        color: sgBVtoColor(bv),
+                        r: Math.max(0.8, 4.5 - vmag * 0.7),
+                        name: SG_STAR_NAMES[idx] || null,
+                        idx: idx,
+                        twinklePhase: Math.random() * Math.PI * 2,
+                        twinkleSpeed: 0.008 + Math.random() * 0.015
+                    });
+                }
             }
         }
 
@@ -27806,15 +28038,117 @@
             requestAnimationFrame(sgLoop);
         }
 
+        // ── CHANGE LOGS LOGIC ────────────────────────────────────────────────────────
+        var changelogsData = [
+            {
+                date: '2026-05-20',
+                title: 'v3.0.0 - Purified Sky & High-Performance Engines',
+                badge: 'optimization',
+                desc: 'Purged obsolete scripts, relocated offline development tools into archived_tools, bumped service-worker cache to v3.0, optimized stargazer loading with chunked background scheduling via ComputeOptimizer, and introduced the interactive Update Timeline & Change Logs portal.'
+            },
+            {
+                date: '2026-05-19',
+                title: 'Stargazer Core Catalogue Update',
+                badge: 'feature',
+                desc: 'Injected 8,920 real stars based on the Yale Bright Star Catalogue (BSC) along with full IAU constellation lines and photorealistic Milky Way backdrop rendering.'
+            },
+            {
+                date: '2026-05-16',
+                title: 'Celestial Aligner & Safe Viewport Integration',
+                badge: 'feature',
+                desc: 'Added celestial coordinate converters, PWA offline asset pre-caching registration, and robust safety margins for modern mobile and notch-display viewports.'
+            },
+            {
+                date: '2025-12-25',
+                title: 'Holiday Atmosphere Engine Launch',
+                badge: 'feature',
+                desc: 'Launched the original decorative atmosphere engine featuring customizable ambient tracks, drift petals, glitter overlays, and sleep-alarm timers.'
+            }
+        ];
+
+        var changelogSortNewest = true;
+
+        function renderChangelogs() {
+            var grid = document.getElementById('changelogsGrid');
+            if (!grid) return;
+            
+            var query = document.getElementById('changelogSearch').value.toLowerCase().trim();
+            var period = document.getElementById('changelogTimePeriod').value;
+            
+            var filtered = changelogsData.filter(function (item) {
+                if (query) {
+                    var inTitle = item.title.toLowerCase().indexOf(query) !== -1;
+                    var inDesc = item.desc.toLowerCase().indexOf(query) !== -1;
+                    var inBadge = item.badge.toLowerCase().indexOf(query) !== -1;
+                    if (!inTitle && !inDesc && !inBadge) return false;
+                }
+                
+                if (period !== 'all') {
+                    var dateObj = new Date(item.date);
+                    var today = new Date();
+                    var diffTime = Math.abs(today - dateObj);
+                    var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    if (period === '7' && diffDays > 7) return false;
+                    if (period === '30' && diffDays > 30) return false;
+                    if (period === 'ytd' && dateObj.getFullYear() !== 2026) return false;
+                    if (period === '2025' && dateObj.getFullYear() !== 2025) return false;
+                }
+                
+                return true;
+            });
+            
+            filtered.sort(function (a, b) {
+                var dA = new Date(a.date);
+                var dB = new Date(b.date);
+                return changelogSortNewest ? (dB - dA) : (dA - dB);
+            });
+            
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.4); padding: 40px; font-family: var(--fb);">No updates match your criteria. 🌌</div>';
+                return;
+            }
+            
+            var html = '';
+            filtered.forEach(function (item) {
+                var badgeClass = item.badge.toLowerCase();
+                var formattedDate = new Date(item.date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+                
+                html += '<div class="changelogs-card">' +
+                            '<div class="changelogs-card-header">' +
+                                '<span class="changelogs-card-badge ' + badgeClass + '">' + item.badge + '</span>' +
+                                '<span class="changelogs-card-date">' + formattedDate + '</span>' +
+                            '</div>' +
+                            '<h3 class="changelogs-card-title">' + item.title + '</h3>' +
+                            '<p class="changelogs-card-desc">' + item.desc + '</p>' +
+                        '</div>';
+            });
+            
+            grid.innerHTML = html;
+        }
+
+        function toggleChangelogSort() {
+            changelogSortNewest = !changelogSortNewest;
+            var btn = document.getElementById('changelogSortBtn');
+            if (btn) {
+                btn.innerHTML = 'Date: ' + (changelogSortNewest ? 'Newest First' : 'Oldest First') + ' <span id="sortDirectionIcon">⇅</span>';
+            }
+            renderChangelogs();
+        }
+
+        function filterChangelogs() {
+            renderChangelogs();
+        }
+
         // ══════════════════════════════════════════════════════════
+        // INIT
         // INIT
         // ══════════════════════════════════════════════════════════
         document.addEventListener('DOMContentLoaded', function () {
-
-            // Sentinel analytics uplink
-            const analyticsScript = document.createElement('script');
-            analyticsScript.src = 'analytics.js?v=3.0.0';
-            document.head.appendChild(analyticsScript);
 
             // Sky
             sc = document.getElementById('stars');
