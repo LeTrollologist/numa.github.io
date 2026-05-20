@@ -104,13 +104,19 @@
         const path = window.location.pathname.toLowerCase();
         let sectorLabel = 'Core SPA';
 
-        if (path.includes('sketchin')) {
+        if (path.includes('sketch')) {
             sectorLabel = 'Sketchbook';
-        } else if (path.includes('grovein')) {
+        } else if (path.includes('grove')) {
             sectorLabel = 'Grove';
         } else if (path.includes('planner')) {
             sectorLabel = 'Planner';
-        } else if (path.includes('index') || path === '/' || path.includes('gamein')) {
+        } else if (path.includes('converter')) {
+            sectorLabel = 'Converter';
+        } else if (path.includes('credits')) {
+            sectorLabel = 'Credits';
+        } else if (path.includes('install')) {
+            sectorLabel = 'Installer';
+        } else {
             sectorLabel = 'Core SPA';
         }
 

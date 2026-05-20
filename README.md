@@ -1,4 +1,4 @@
-# 🌌 Numa's Space
+# 🌌 Hollow Grove v3.0 — Numa's Space
 
 <div align="center">
 
@@ -8,7 +8,7 @@
 [![PWA](https://img.shields.io/badge/PWA_Ready-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)](#)
 [![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-181717?style=for-the-badge&logo=github&logoColor=white)](#)
 
-A personal Progressive Web App ecosystem featuring celestial study tools, interactive creative playgrounds, atmospheric gardens, and multi-timezone synchronization — all rendered client-side with premium performance across every device.
+A personal Progressive Web App ecosystem featuring celestial study tools, interactive creative playgrounds, atmospheric gardens, and multi-timezone synchronization, all rendered client-side with premium performance across every device.
 
 **[Live Site 🚀](https://letrollologist.github.io/numa.github.io/)**
 
@@ -30,7 +30,7 @@ A personal Progressive Web App ecosystem featuring celestial study tools, intera
 
 ## 🌠 Overview
 
-Numa's Space is a fully client-side SPA (Single Page Application) designed as a personal productivity and creative environment. It blends celestial aesthetics with functional study tools, real-time canvas rendering, and offline-first architecture — all without a backend.
+ (Numa's Space v3.0) is functions primarily as a client-side SPA (Single Page Application) designed as a personal productivity and creative environment. It blends celestial aesthetics with functional study tools, real-time canvas rendering, and offline-first architecture — all without requiring a backend. 
 
 Key highlights:
 
@@ -38,6 +38,7 @@ Key highlights:
 - **PWA installable** — works offline, adds to home screen
 - **Cross-device optimized** — custom rendering engines for mobile, desktop, and iOS Safari
 - **Modular** — each sector (Grove, Planner, Sketchbook, etc.) is a self-contained experience
+- **Pure & Fast** — clean production repository with offline-tool isolation and premium Change Logs
 
 ---
 
@@ -49,11 +50,13 @@ graph TD
     A --> C[planner.html — Constellation Planner]
     A --> D[sketch.html — Sketchpad]
     A --> E[converter.html — Time Aligner]
+    A --> F[Update Timeline & Change Logs]
 
     subgraph PWA ["PWA Offline Infrastructure"]
-        SW[service-worker.js v1.3] -->|Cache-first strategy| A
+        SW[service-worker.js v3.0] -->|Cache-first strategy| A
         SW -->|Cache-first strategy| B
         SW -->|Cache-first strategy| C
+        SW -->|Cache-first strategy| D
         SW -->|Cache-first strategy| E
     end
 
@@ -63,7 +66,12 @@ graph TD
         AO[apple-optimizer.js — WebKit/iOS Support]
     end
 
+    subgraph Telemetry ["Sentinel Telemetry"]
+        AN[analytics.js — Telemetry Uplink]
+    end
+
     A -.->|Loads| Engines
+    A -.->|Uplink| Telemetry
 ```
 
 ---
@@ -77,13 +85,16 @@ The central hub. Features a glassmorphic UI with particle animations, timelapse 
 An interactive magical garden with dynamic lighting modes (Ember, Moonlit, Mist). Tends virtual seeds through day/night care cycles, tracks progress in a garden ledger, and rewards growth with a gold coin economy. Firefly animations complete the atmosphere.
 
 ### ✍️ Sketchbook — Vector Sketchpad
-A smooth HTML5 Canvas drawing tool with a high-density grid overlay. Supports Bézier path smoothing for fluid strokes, a layer system, and SVG vector export for lossless output at any resolution.
+A smooth HTML5 drawing tool with a high-density grid overlay. Supports Bézier path smoothing for fluid strokes, a layer system, and SVG vector export for lossless output at any resolution.
 
 ### ✨ Planner — Constellation Scheduler
-A cosmic task and schedule manager built around a glass-panel UI with Great Vibes typography. Tracks daily chores, star-themed to-do lists, and progress indicators in a visually cohesive calendar view.
+A cosmic task and schedule manager built around a glass-panel UI. Tracks daily chores, star-themed to-do lists, and progress indicators in a visually cohesive calendar view.
 
 ### ⏰ Time Aligner — Multi-Zone Sync
 A dual-timeline world clock with three visual themes. Synchronized sliders calculate awake/sleep overlap between two time zones, making it ideal for coordinating across regions.
+
+### 📊 Update Timeline & Change Logs
+A stunning, premium, glassmorphic Change Logs page embedded natively in the SPA. Supports real-time fuzzy search, date range filtering, and badge categorization (Feature, Fix, Optimization) with gorgeous glow effects.
 
 ---
 
@@ -111,7 +122,7 @@ Numa's Space is a full Progressive Web App powered by `service-worker.js`.
 | Feature | Detail |
 | :--- | :--- |
 | **Caching strategy** | Cache-first with `Promise.allSettled` network fallback |
-| **Cache version** | `hollow-grove-v1.3` — aggressive versioning evicts stale assets on deploy |
+| **Cache version** | `hollow-grove-v3.0` — aggressive versioning evicts stale assets on deploy |
 | **Client takeover** | New service worker immediately claims all open tabs on activation |
 | **Compatibility** | Works across local preview (`localhost`) and GitHub Pages production |
 
@@ -148,15 +159,20 @@ npx http-server -p 8080
 
 ```
 numa.github.io/
-├── index.html              # Core SPA entry point
-├── grovein.html            # The Grove module
+├── archived_tools/         # Offline data-generation scripts (astronomy / stars patchers)
+├── favicon/                # PWA icons and app manifest targets
+├── index.html              # Core SPA entry point (including Change Logs portal)
+├── grove.html              # The Grove module
 ├── planner.html            # Constellation Planner
-├── sketchin.html           # Sketchpad
+├── sketch.html             # Sketchpad
 ├── converter.html          # Time Aligner
-├── service-worker.js       # PWA offline caching
+├── install.html            # PWA standalone launcher/installer info
+├── credits.html            # Attributions & decorative design acknowledgements
+├── service-worker.js       # PWA offline caching infrastructure
 ├── compute-optimizer.js    # Thread pooling engine
 ├── mobile-optimizer.js     # Hardware adaptability engine
 ├── apple-optimizer.js      # WebKit/iOS fixes
+├── analytics.js            # Sentinel Telemetry uplink
 ├── SECURITY.md
 └── LICENSE.md
 ```
