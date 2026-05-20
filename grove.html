@@ -1199,7 +1199,7 @@
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             min-width: 150px;
-            z-index: 200;
+            z-index: 500;
             padding: 4px 0;
         }
         .mob-overflow.open { display: flex; flex-direction: column; }
@@ -1291,7 +1291,7 @@
             /* ── Sidebar (horizontal tray) ── */
             .sidebar {
                 width: 100%;
-                height: 210px;
+                height: 155px;
                 flex: none;
                 border-left: none;
                 border-top: 1px solid var(--border);
@@ -1308,9 +1308,9 @@
             .sidebar::-webkit-scrollbar { display: none; }
 
             .sbsec {
-                min-width: 180px;
+                min-width: 160px;
                 height: 100%;
-                padding: 8px 14px;
+                padding: 6px 12px;
                 border-bottom: none;
                 border-right: 1px solid rgba(168, 159, 216, .08);
                 display: flex;
@@ -1329,15 +1329,15 @@
                 margin-bottom: 5px;
             }
 
-            /* Touch-friendly care buttons (44px min) */
+            /* Touch-friendly care buttons (compact) */
             .abtn {
-                margin-bottom: 4px;
+                margin-bottom: 2px;
             }
 
             .ainn {
-                padding: 8px 10px;
-                font-size: .60rem;
-                min-height: 44px;
+                padding: 5px 10px;
+                font-size: .55rem;
+                min-height: 32px;
                 display: flex;
                 align-items: center;
             }
@@ -2433,12 +2433,27 @@
         function plantPos(idx) {
             const ga = document.getElementById('garden-area');
             const W = ga.clientWidth, H = ga.clientHeight;
-            const pos3 = [0.23, 0.51, 0.78];
-            const pos4 = [0.16, 0.38, 0.62, 0.84];
-            const pos5 = [0.12, 0.28, 0.44, 0.6, 0.76];
-            const pos6 = [0.1, 0.24, 0.38, 0.52, 0.66, 0.8];
-            const pos7 = [0.08, 0.2, 0.32, 0.44, 0.56, 0.68, 0.8];
-            const arr = G.plants.length <= 3 ? pos3 : G.plants.length === 4 ? pos4 : G.plants.length === 5 ? pos5 : G.plants.length === 6 ? pos6 : pos7;
+            const isMobile = W < 768;
+
+            // On mobile, tighten the outer margins so plants fill the width
+            // On desktop, keep the existing spacious layout
+            let arr;
+            if (isMobile) {
+                const n = G.plants.length;
+                // Even distribution with edge padding
+                const pad = n <= 3 ? 0.15 : n <= 5 ? 0.08 : 0.05;
+                arr = [];
+                for (let i = 0; i < n; i++) {
+                    arr.push(pad + (1 - 2 * pad) * (i / Math.max(1, n - 1)));
+                }
+            } else {
+                const pos3 = [0.23, 0.51, 0.78];
+                const pos4 = [0.16, 0.38, 0.62, 0.84];
+                const pos5 = [0.12, 0.28, 0.44, 0.6, 0.76];
+                const pos6 = [0.1, 0.24, 0.38, 0.52, 0.66, 0.8];
+                const pos7 = [0.08, 0.2, 0.32, 0.44, 0.56, 0.68, 0.8];
+                arr = G.plants.length <= 3 ? pos3 : G.plants.length === 4 ? pos4 : G.plants.length === 5 ? pos5 : G.plants.length === 6 ? pos6 : pos7;
+            }
             return { x: W * arr[idx], y: H * 0.81 };
         }
 
@@ -2453,6 +2468,7 @@
             const W = ga.clientWidth, H = ga.clientHeight;
             if (!W || !H) return;
             const svg = document.getElementById('plants-svg');
+            const isMobile = W < 768;
 
             // Rebuild entire SVG innerHTML so defs + plant groups parse correctly as SVG
             const DEFS = `<defs>
@@ -2469,6 +2485,8 @@
 
             // Scale per stage so seedlings are still clearly visible
             const PLANT_SCALE = [0, 2.2, 1.7, 1.3, 1.1, 1.0];
+            // On mobile, shrink plants based on how many there are
+            const mobileScaleFactor = isMobile ? (G.plants.length <= 3 ? 0.75 : G.plants.length <= 5 ? 0.6 : 0.5) : 1.0;
             // Glow color per plant type
             const GLOW_COL = { moonflower: 'rgba(167,139,250,0.18)', starbloom: 'rgba(56,189,248,0.18)', emberleaf: 'rgba(249,115,22,0.18)', bramble: 'rgba(217,70,239,0.22)', frostlily: 'rgba(186,230,253,0.22)', sunflare: 'rgba(253,224,71,0.22)' };
 
@@ -2478,8 +2496,8 @@
                 const avgH = plantAvgHealth(p);
                 const col = STAGE_COLS[p.stage];
                 const swCls = ['psa', 'psb', 'psc', 'psa'][i];
-                const sc = PLANT_SCALE[p.stage];
-                const glowR = [0, 38, 52, 68, 85, 105][p.stage];
+                const sc = PLANT_SCALE[p.stage] * mobileScaleFactor;
+                const glowR = [0, 38, 52, 68, 85, 105][p.stage] * mobileScaleFactor;
                 const glowCol = GLOW_COL[p.type] || 'rgba(168,159,216,0.18)';
 
                 // Outer group: position only
@@ -2495,12 +2513,14 @@
                 if (avgH < 20) plants += `<ellipse cx="0" cy="-20" rx="18" ry="4" fill="rgba(180,50,50,0.10)"/>`;
                 plants += `</g>`; // End outer group
 
-                const lx = pos.x, ly = pos.y + 30;
+                const lx = pos.x, ly = pos.y + (isMobile ? 18 : 30);
                 const fc = avgH < 30 ? '#f87171' : col;
-                labels += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" class="pname" fill="${fc}" onclick="openRename(${p.id})">${sanitize(p.name)}</text>`;
-                labels += `<text x="${lx.toFixed(1)}" y="${(ly + 14).toFixed(1)}" class="plvl">${STAGE_LBL[p.stage]}</text>`;
+                const labelFontSize = isMobile ? '.42rem' : undefined;
+                const stageFontSize = isMobile ? '.36rem' : undefined;
+                labels += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" class="pname" fill="${fc}"${labelFontSize ? ` style="font-size:${labelFontSize}"` : ''} onclick="openRename(${p.id})">${sanitize(p.name)}</text>`;
+                labels += `<text x="${lx.toFixed(1)}" y="${(ly + (isMobile ? 10 : 14)).toFixed(1)}" class="plvl"${stageFontSize ? ` style="font-size:${stageFontSize}"` : ''}>${STAGE_LBL[p.stage]}</text>`;
                 if (p.stage < 5) {
-                    const bw = 58, pct = Math.min(1, p.xp / XP_PER_STAGE[p.stage]), bx = lx - bw / 2, by = ly + 19;
+                    const bw = isMobile ? 38 : 58, pct = Math.min(1, p.xp / XP_PER_STAGE[p.stage]), bx = lx - bw / 2, by = ly + (isMobile ? 14 : 19);
                     labels += `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw}" height="3" rx="1.5" fill="rgba(168,159,216,.10)"/>`;
                     labels += `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${(bw * pct).toFixed(1)}" height="3" rx="1.5" fill="${fc}"/>`;
                 }
