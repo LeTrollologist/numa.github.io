@@ -1148,6 +1148,27 @@
             color: var(--muted);
         }
 
+        /* ── Data modal ── */
+        .data-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+        .data-actions button {
+            width: 100%; padding: 12px 16px; border: 1px solid var(--border);
+            background: transparent; color: var(--text); cursor: pointer;
+            font-family: 'Josefin Sans', sans-serif; font-size: .72rem;
+            letter-spacing: .12em; text-transform: uppercase;
+            transition: border-color .2s, background .2s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .data-actions button:hover { border-color: var(--accent); background: var(--accent-d); }
+        .data-paste-area {
+            width: 100%; min-height: 100px; max-height: 200px; margin-top: 10px; padding: 10px;
+            border: 1px solid var(--border); background: rgba(0,0,0,.4);
+            color: var(--text); font-family: 'Courier New', monospace; font-size: .7rem;
+            resize: vertical; scrollbar-width: thin;
+        }
+        .data-paste-area:focus { outline: none; border-color: var(--accent); }
+        .data-paste-row { display: flex; gap: 8px; margin-top: 8px; }
+        .data-paste-row button { flex: 1; }
+
         /* ── Mobile overflow menu (header) ── */
         .mob-menu-toggle {
             display: none;
@@ -1645,12 +1666,14 @@
 
 
 
+            <button class="hbtn" onclick="openDataModal()">⚙️</button>
             <button class="hbtn" onclick="window.location.href='index.html'">Home</button>
             <button class="mob-menu-toggle" onclick="toggleMobMenu()" aria-label="More options">⋯</button>
             <div class="mob-overflow" id="mob-overflow">
                 <button onclick="openMarket();closeMobMenu()">✦ Market</button>
                 <button onclick="openStats();closeMobMenu()">📊 Records</button>
                 <button onclick="openCodex();closeMobMenu()">📖 Codex</button>
+                <button onclick="openDataModal();closeMobMenu()">⚙️ Data</button>
                 <button onclick="window.location.href='index.html'">🏠 Home</button>
             </div>
         </header>
@@ -1862,6 +1885,25 @@
             <div class="nursery-preview" id="nursery-preview">Choose two compatible plants.</div>
             <button class="hbtn gold" style="width:100%; justify-content:center;"
                 onclick="crossPollinate()">Cross-Pollinate</button>
+        </div>
+    </div>
+
+    <!-- Data Modal -->
+    <div id="data-modal" class="modal">
+        <div class="mbox" style="max-width:420px">
+            <div class="mtitle">⚙️ Data & Sync <span class="mclose" onclick="closeModal('data-modal')">✕ Close</span></div>
+            <p style="color:var(--muted);font-size:.75rem;margin:6px 0 0">Export or import your grove data. Compatible with the Discord bot's <code>/grove import</code> command.</p>
+            <div class="data-actions">
+                <button onclick="doExport()">📥 Export to File</button>
+                <button onclick="doImport()">📤 Import from File</button>
+                <button onclick="doCopyJSON()">📋 Copy JSON to Clipboard</button>
+            </div>
+            <p style="color:var(--muted);font-size:.68rem;margin:18px 0 6px;text-transform:uppercase;letter-spacing:.1em">Paste JSON</p>
+            <textarea id="paste-json-area" class="data-paste-area" placeholder='Paste your grove JSON here...'></textarea>
+            <div class="data-paste-row">
+                <button class="data-actions" style="display:inline" onclick="doPasteImport()">Apply Pasted JSON</button>
+            </div>
+            <p id="data-modal-status" style="color:var(--accent);font-size:.7rem;margin-top:10px;min-height:1.2em"></p>
         </div>
     </div>
 
@@ -3245,6 +3287,51 @@
             inp.click();
         }
 
+        function openDataModal() { document.getElementById('data-modal').classList.add('open'); }
+
+        function doCopyJSON() {
+            const data = {
+                plants: G.plants, coins: G.coins, milestones: G.milestones,
+                log: G.log, inventory: G.inventory, upgrades: G.upgrades,
+                totalCare: G.totalCare, theme: G.theme, exportedAt: new Date().toISOString(),
+                wiltWardUntil: G.wiltWardUntil, nightbloomLeft: G.nightbloomLeft, cooldownHalf: G.cooldownHalf
+            };
+            const str = JSON.stringify(data, null, 2);
+            navigator.clipboard.writeText(str).then(() => {
+                const s = document.getElementById('data-modal-status');
+                s.textContent = '✅ JSON copied to clipboard!';
+                setTimeout(() => s.textContent = '', 3000);
+            }).catch(() => {
+                toast('Could not copy. Try selecting the text manually.');
+            });
+        }
+
+        function doPasteImport() {
+            const raw = document.getElementById('paste-json-area').value.trim();
+            const status = document.getElementById('data-modal-status');
+            if (!raw) { status.textContent = '❌ Paste your JSON first.'; return; }
+            try {
+                const d = JSON.parse(raw);
+                if (Array.isArray(d.plants) && d.plants.length) G.plants = d.plants.map(normalizePlant);
+                if (d.coins != null) G.coins = d.coins;
+                if (d.milestones) G.milestones = d.milestones;
+                if (d.log) G.log = d.log;
+                if (d.inventory) G.inventory = d.inventory;
+                if (d.upgrades) G.upgrades = d.upgrades;
+                if (d.totalCare) G.totalCare = d.totalCare;
+                if (d.wiltWardUntil) G.wiltWardUntil = d.wiltWardUntil;
+                if (d.nightbloomLeft) G.nightbloomLeft = d.nightbloomLeft;
+                if (d.cooldownHalf) G.cooldownHalf = d.cooldownHalf;
+                if (d.theme) setTheme(d.theme);
+                save(); renderPlants(); renderHealth(); renderPlantList(); updateBadge();
+                status.textContent = '✅ Grove imported successfully!';
+                document.getElementById('paste-json-area').value = '';
+                setTimeout(() => status.textContent = '', 4000);
+            } catch (err) {
+                status.textContent = '❌ Invalid JSON. Check for missing brackets or quotes.';
+            }
+        }
+
         /* ── KEYBOARD SHORTCUTS ── */
         document.addEventListener('keydown', e => {
             const tag = e.target.tagName.toLowerCase();
@@ -3254,7 +3341,7 @@
             if (e.key === 'p') doAction('pet');
             if (e.key === 's') doAction('sing');
             if (e.key === 'm') openMarket();
-            if (e.key === 'Escape') ['stats-modal', 'market-modal', 'event-modal', 'rename-modal', 'nursery-modal'].forEach(closeModal);
+            if (e.key === 'Escape') ['stats-modal', 'market-modal', 'event-modal', 'rename-modal', 'nursery-modal', 'data-modal'].forEach(closeModal);
         });
 
         /* ── RESIZE ── */
