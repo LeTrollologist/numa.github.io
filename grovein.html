@@ -316,6 +316,7 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            height: 100dvh; /* iOS Safari: excludes dynamic URL bar */
             width: 100%;
         }
 
@@ -817,11 +818,12 @@
             font-size: 1.0rem;
             color: var(--text);
             text-align: center;
-            max-width: 460px;
+            max-width: min(460px, calc(100vw - 32px));
             opacity: 0;
             pointer-events: none;
             transition: opacity .4s, transform .4s;
-            white-space: nowrap;
+            white-space: normal;
+            word-break: break-word;
         }
 
         #toast.up {
@@ -1146,50 +1148,152 @@
             color: var(--muted);
         }
 
+        /* ── Data modal ── */
+        .data-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+        .data-actions button {
+            width: 100%; padding: 12px 16px; border: 1px solid var(--border);
+            background: transparent; color: var(--text); cursor: pointer;
+            font-family: 'Josefin Sans', sans-serif; font-size: .72rem;
+            letter-spacing: .12em; text-transform: uppercase;
+            transition: border-color .2s, background .2s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .data-actions button:hover { border-color: var(--accent); background: var(--accent-d); }
+        .data-paste-area {
+            width: 100%; min-height: 100px; max-height: 200px; margin-top: 10px; padding: 10px;
+            border: 1px solid var(--border); background: rgba(0,0,0,.4);
+            color: var(--text); font-family: 'Courier New', monospace; font-size: .7rem;
+            resize: vertical; scrollbar-width: thin;
+        }
+        .data-paste-area:focus { outline: none; border-color: var(--accent); }
+        .data-paste-row { display: flex; gap: 8px; margin-top: 8px; }
+        .data-paste-row button { flex: 1; }
+
+        /* ── Mobile overflow menu (header) ── */
+        .mob-menu-toggle {
+            display: none;
+            font-family: 'Josefin Sans', sans-serif;
+            font-size: .72rem;
+            min-width: 44px;
+            min-height: 44px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            transition: all .22s;
+            flex-shrink: 0;
+            padding: 0;
+        }
+        .mob-menu-toggle:hover, .mob-menu-toggle:active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-d);
+        }
+        .mob-overflow {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 8px;
+            background: rgba(8, 10, 24, 0.98);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            min-width: 150px;
+            z-index: 500;
+            padding: 4px 0;
+        }
+        .mob-overflow.open { display: flex; flex-direction: column; }
+        .mob-overflow button {
+            font-family: 'Josefin Sans', sans-serif;
+            font-size: .62rem;
+            letter-spacing: .10em;
+            text-transform: uppercase;
+            padding: 12px 16px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            text-align: left;
+            transition: all .18s;
+            min-height: 44px;
+        }
+        .mob-overflow button:hover, .mob-overflow button:active {
+            color: var(--accent);
+            background: var(--accent-d);
+        }
+
         @media(max-width:768px) {
             :root {
                 --sat: env(safe-area-inset-top);
                 --sab: env(safe-area-inset-bottom);
+                --sal: env(safe-area-inset-left);
+                --sar: env(safe-area-inset-right);
             }
 
+            /* ── Header ── */
             header {
-                height: 44px;
+                height: calc(44px + var(--sat, 0px));
                 padding-top: var(--sat, 0px) !important;
                 flex-wrap: nowrap;
                 justify-content: space-between;
-                padding-left: 12px;
-                padding-right: 12px;
+                padding-left: max(12px, var(--sal, 0px));
+                padding-right: max(12px, var(--sar, 0px));
+                position: relative; /* for overflow menu positioning */
+                z-index: 100; /* Fix dropdown appearing behind other elements */
             }
 
-            .logo-sub, .hbtn:not(#audio-btn):not(.gold):not([onclick*="index.html"]) {
-                display: none; 
+            /* Hide desktop-only header items */
+            .logo-sub,
+            header > .coins-badge,
+            header > .mbadge,
+            header > #weather-badge,
+            header > .hsp:first-of-type,
+            header > .hbtn:not(#audio-btn):not(.mob-menu-toggle) {
+                display: none !important;
             }
 
+            .mob-menu-toggle { display: flex; align-items: center; justify-content: center; }
+
+            /* ── Info bar (coins + mastery on mobile) ── */
             .info-bar {
                 display: flex !important;
                 height: 32px;
                 background: rgba(10, 12, 30, 0.6);
                 border-bottom: 1px solid var(--border);
                 backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
                 align-items: center;
                 justify-content: center;
-                gap: 15px;
+                gap: 12px;
                 z-index: 10;
+                padding-left: max(8px, var(--sal, 0px));
+                padding-right: max(8px, var(--sar, 0px));
             }
 
+            .info-bar #weather-badge {
+                display: flex;
+                font-size: .55rem;
+                padding: 2px 8px;
+            }
+
+            /* ── Main layout ── */
             .main {
                 flex-direction: column;
+                flex: 1;
+                min-height: 0;
             }
 
             #garden-area {
-                height: calc(100vh - 44px - 32px - 190px - 24px); /* header + infobar + sidebar + statusbar */
-                flex: none;
+                flex: 1;
+                min-height: 0;
                 width: 100%;
             }
 
+            /* ── Sidebar (horizontal tray) ── */
             .sidebar {
                 width: 100%;
-                height: 190px;
+                height: 125px; /* Compact mobile sidebar */
+                flex: none;
                 border-left: none;
                 border-top: 1px solid var(--border);
                 flex-direction: row !important;
@@ -1199,17 +1303,22 @@
                 background: rgba(8, 10, 28, 0.98);
                 scrollbar-width: none;
                 -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x mandatory;
             }
+
+            .sidebar::-webkit-scrollbar { display: none; }
 
             .sbsec {
                 min-width: 160px;
                 height: 100%;
-                padding: 8px 12px;
+                padding: 6px 12px;
                 border-bottom: none;
                 border-right: 1px solid rgba(168, 159, 216, .08);
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
+                justify-content: flex-start;
+                scroll-snap-align: start;
+                flex-shrink: 0;
             }
 
             .sbsec:last-child {
@@ -1217,21 +1326,28 @@
             }
 
             .sblbl {
-                font-size: .5rem;
-                margin-bottom: 4px;
-            }
-
-            .abtn {
+                font-size: .55rem;
                 margin-bottom: 3px;
             }
 
-            .ainn {
-                padding: 5px 8px;
-                font-size: .58rem;
+            /* Touch-friendly care buttons (compact) */
+            .abtn {
+                margin-bottom: 2px;
             }
 
+            .ainn {
+                padding: 4px 8px;
+                font-size: .52rem;
+                min-height: 28px;
+                display: flex;
+                align-items: center;
+            }
+
+            /* ── Status bar ── */
             .statusbar {
                 padding-bottom: var(--sab, 0px);
+                padding-left: max(12px, var(--sal, 0px));
+                padding-right: max(12px, var(--sar, 0px));
                 height: calc(24px + var(--sab, 0px));
             }
 
@@ -1242,7 +1358,32 @@
                 border-color: rgba(168, 159, 216, 0.1);
             }
 
-            /* --- Mobile Bottom Sheets --- */
+            /* ── Touch-friendly plant rows ── */
+            .prow {
+                padding: 6px 10px;
+                min-height: 36px;
+                font-size: .75rem;
+            }
+
+            .prow-rename, .prow-sell {
+                min-width: 36px;
+                min-height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* ── Health panel compact ── */
+            .health-panel {
+                padding: 4px 0;
+            }
+
+            .hp-row {
+                gap: 5px;
+                margin-bottom: 3px;
+            }
+
+            /* ── Mobile Bottom Sheets ── */
             .modal {
                 justify-content: flex-end;
                 padding: 0;
@@ -1255,6 +1396,7 @@
                 border-right: none;
                 border-radius: 24px 24px 0 0;
                 max-height: 85vh;
+                max-height: 85dvh;
                 padding: 24px 20px calc(var(--sab, 0px) + 20px);
                 background: rgba(8, 10, 24, 0.98);
             }
@@ -1268,8 +1410,18 @@
                 to { transform: translateY(0); }
             }
 
+            /* ── Modal close button (touch target) ── */
+            .mclose {
+                min-width: 44px;
+                min-height: 44px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* ── Market grid ── */
             .mkt-grid {
-                grid-template-columns: 1fr; /* Single column for better readability on small sheets */
+                grid-template-columns: 1fr;
                 gap: 10px;
             }
 
@@ -1277,7 +1429,8 @@
                 display: flex;
                 align-items: center;
                 gap: 12px;
-                padding: 10px 14px;
+                padding: 12px 14px;
+                min-height: 44px;
             }
 
             .mkt-icon {
@@ -1287,6 +1440,52 @@
 
             .mkt-info {
                 flex: 1;
+            }
+
+            /* ── Event buttons (touch) ── */
+            .ev-btn {
+                min-height: 44px;
+                padding: 12px 14px;
+            }
+
+            /* ── Toast fix ── */
+            #toast {
+                bottom: calc(210px + var(--sab, 0px) + 30px);
+                font-size: 0.88rem;
+            }
+
+            /* ── SVG plant labels scale ── */
+            .pname {
+                font-size: 9px;
+            }
+            .plvl {
+                font-size: 7px;
+            }
+
+            /* ── Theme buttons (touch) ── */
+            .thbtn {
+                min-height: 36px;
+                padding: 8px 0;
+            }
+
+            /* ── Inventory items (touch) ── */
+            .inv-item {
+                min-height: 40px;
+                padding: 8px 12px;
+            }
+
+            /* ── Header action buttons (touchable) ── */
+            .hbtn {
+                min-width: 44px;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Quote text (bottom sidebar section) */
+            .qtext {
+                font-size: .72rem;
             }
         }
 
@@ -1365,29 +1564,78 @@
             margin-bottom: 14px;
         }
         
-        #weather-badge {
+        #weather-badge, #weather-badge-mobile {
             font-size: .62rem; letter-spacing: .08em; color: var(--accent);
             padding: 4px 10px; border-radius: 20px; background: rgba(168, 159, 216, 0.1);
-            display: flex; align-items: center; gap: 6px;
+            display: flex; align-items: center; gap: 5px;
         }
-        #weather-badge::before { content: '☁'; font-size: .75rem; }
-        body.weather-rain #weather-badge::before { content: '🌧'; }
-        body.weather-stars #weather-badge::before { content: '✨'; color: var(--gold); }
-        body.weather-clear #weather-badge::before { content: '☀️'; }
-        body.weather-fog #weather-badge { filter: blur(0.5px); }
+        #weather-badge svg, #weather-badge-mobile svg {
+            flex-shrink: 0;
+            vertical-align: middle;
+        }
+        body.weather-fog #weather-badge, body.weather-fog #weather-badge-mobile { filter: blur(0.5px); }
+
+        /* Sky phase indicator */
+        #sky-phase-icon {
+            font-size: .58rem; letter-spacing: .08em; color: var(--muted);
+            display: flex; align-items: center; gap: 4px;
+        }
+        #sky-phase-icon svg { flex-shrink: 0; }
 
         @media(max-width:440px) {
+            .sidebar {
+                height: 240px;
+            }
             .sbsec {
-                min-width: 190px;
+                min-width: 200px;
             }
             .logo {
-                font-size: 0.85rem;
+                font-size: 0.82rem;
             }
             .nursery-select-row {
                 grid-template-columns: 1fr;
             }
             .nursery-cross {
                 line-height: 1;
+            }
+            .info-bar {
+                gap: 8px;
+            }
+            .info-bar .coins-badge,
+            .info-bar .mbadge {
+                font-size: 0.50rem;
+                padding: 2px 6px;
+            }
+            #toast {
+                bottom: calc(240px + var(--sab, 0px) + 30px);
+            }
+        }
+
+        /* ── iPhone SE / ultra-small screens ── */
+        @media(max-width:375px) {
+            .sidebar {
+                height: 200px;
+            }
+            .sbsec {
+                min-width: 170px;
+                padding: 6px 10px;
+            }
+            .ainn {
+                padding: 6px 8px;
+                font-size: .55rem;
+            }
+            .logo {
+                font-size: 0.78rem;
+            }
+            .pname {
+                font-size: 8px;
+            }
+        }
+
+        /* ── PWA Standalone mode ── */
+        @media(display-mode: standalone) {
+            header {
+                padding-top: env(safe-area-inset-top, 0px) !important;
             }
         }
     </style>
@@ -1420,12 +1668,24 @@
 
 
 
+            <button class="hbtn" onclick="openDataModal()">⚙️</button>
             <button class="hbtn" onclick="window.location.href='index.html'">Home</button>
+            <button class="mob-menu-toggle" onclick="toggleMobMenu()" aria-label="More options">⋯</button>
+            <div class="mob-overflow" id="mob-overflow">
+                <button onclick="openMarket();closeMobMenu()">✦ Market</button>
+                <button onclick="openStats();closeMobMenu()">📊 Records</button>
+                <button onclick="openCodex();closeMobMenu()">📖 Codex</button>
+                <button onclick="openDataModal();closeMobMenu()">⚙️ Data</button>
+                <button onclick="window.location.href='index.html'">🏠 Home</button>
+            </div>
         </header>
         <div class="info-bar">
             <!-- Badges move here on mobile via CSS/DOM -->
             <div class="coins-badge" id="coins-badge-mobile">0</div>
             <div class="mbadge" id="mbadge-mobile">Mastery · 3</div>
+            <div id="weather-badge-mobile">Syncing...</div>
+            <div id="sky-phase-icon"></div>
+            <div id="season-badge-mobile" class="mbadge"></div>
         </div>
         <div class="main">
             <div id="garden-area">
@@ -1630,6 +1890,25 @@
         </div>
     </div>
 
+    <!-- Data Modal -->
+    <div id="data-modal" class="modal">
+        <div class="mbox" style="max-width:420px">
+            <div class="mtitle">⚙️ Data & Sync <span class="mclose" onclick="closeModal('data-modal')">✕ Close</span></div>
+            <p style="color:var(--muted);font-size:.75rem;margin:6px 0 0">Export or import your grove data. Compatible with the Discord bot's <code>/grove import</code> command.</p>
+            <div class="data-actions">
+                <button onclick="doExport()">📥 Export to File</button>
+                <button onclick="doImport()">📤 Import from File</button>
+                <button onclick="doCopyJSON()">📋 Copy JSON to Clipboard</button>
+            </div>
+            <p style="color:var(--muted);font-size:.68rem;margin:18px 0 6px;text-transform:uppercase;letter-spacing:.1em">Paste JSON</p>
+            <textarea id="paste-json-area" class="data-paste-area" placeholder='Paste your grove JSON here...'></textarea>
+            <div class="data-paste-row">
+                <button class="data-actions" style="display:inline" onclick="doPasteImport()">Apply Pasted JSON</button>
+            </div>
+            <p id="data-modal-status" style="color:var(--accent);font-size:.7rem;margin-top:10px;min-height:1.2em"></p>
+        </div>
+    </div>
+
     <script>
         /* ── WEATHER MANAGER ── */
         class WeatherManager {
@@ -1647,8 +1926,22 @@
                 this.state = states[Math.floor(Math.random() * states.length)];
                 this.timer = 8 + Math.random() * 12; // 8-20 mins
                 document.body.className = document.body.className.replace(/weather-\w+/g, '') + ' weather-' + this.state;
+
+                const WEATHER_SVG = {
+                    clear: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fde047" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>',
+                    rain:  '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"><path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/><path d="M8 19v2M12 19v2M16 19v2" stroke-dasharray="1 2"/></svg>',
+                    fog:   '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"><path d="M4 10h16M4 14h12M6 18h10"/></svg>',
+                    stars: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5z"/><circle cx="19" cy="15" r="1.2" fill="#fbbf24"/><circle cx="7" cy="18" r="0.8" fill="#a78bfa"/></svg>'
+                };
+
+                const label = this.state.charAt(0).toUpperCase() + this.state.slice(1);
+                const svgHtml = WEATHER_SVG[this.state] || '';
+
                 const badge = document.getElementById('weather-badge');
-                if (badge) badge.textContent = this.state.charAt(0).toUpperCase() + this.state.slice(1);
+                if (badge) badge.innerHTML = svgHtml + ' ' + label;
+                const mobBadge = document.getElementById('weather-badge-mobile');
+                if (mobBadge) mobBadge.innerHTML = svgHtml + ' ' + label;
+
                 this.render();
                 if (typeof addLog === 'function') addLog(`Sky Synchronized: ${this.state}`);
             }
@@ -1686,43 +1979,84 @@
             }
         }
 
-        /* ── SKY MANAGER (Day/Night Cycle) ── */
+        /* ── IST Time Helper (UTC+5:30) ── */
+        function getISTDate() {
+            const now = new Date();
+            const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+            return new Date(utc + 19800000); // +5:30 in ms
+        }
+        function getISTHour() { return getISTDate().getHours(); }
+        function getISTMinutes() { return getISTDate().getMinutes(); }
+
+        /* ── SKY MANAGER (Day/Night Cycle — IST) ── */
         class SkyManager {
             constructor() {
                 this.overlay = document.createElement('div');
                 this.overlay.id = 'sky-overlay';
                 this.overlay.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:1;transition:background 10s ease;';
                 document.body.appendChild(this.overlay);
+                this.phase = '';
                 this.update();
             }
             update() {
-                const hour = new Date().getHours();
+                const hour = getISTHour();
+                const min = getISTMinutes();
+                const t = hour + min / 60; // fractional hour
                 let bg = '';
                 let ambient = 1.0;
-                
-                if (hour >= 5 && hour < 8) { // Dawn
+                let phase = 'day';
+
+                if (t >= 5 && t < 7) {           // Dawn (5:00–7:00 IST)
                     bg = 'rgba(255, 154, 158, 0.15)';
-                    ambient = 0.9;
-                } else if (hour >= 8 && hour < 17) { // Day
+                    ambient = 0.85;
+                    phase = 'dawn';
+                } else if (t >= 7 && t < 17) {    // Day (7:00–17:00 IST)
                     bg = 'transparent';
                     ambient = 1.0;
-                } else if (hour >= 17 && hour < 20) { // Dusk
+                    phase = 'day';
+                } else if (t >= 17 && t < 19.5) { // Dusk (17:00–19:30 IST)
                     bg = 'rgba(51, 8, 103, 0.25)';
-                    ambient = 0.8;
-                } else { // Night
+                    ambient = 0.75;
+                    phase = 'dusk';
+                } else {                           // Night (19:30–5:00 IST)
                     bg = 'rgba(0, 0, 20, 0.45)';
-                    ambient = 0.6;
+                    ambient = 0.55;
+                    phase = 'night';
                 }
-                
+
+                this.phase = phase;
                 this.overlay.style.background = bg;
                 document.documentElement.style.setProperty('--ambient-light', ambient);
-                const isNight = hour < 6 || hour > 19;
+                const isNight = phase === 'night' || phase === 'dusk';
                 document.body.setAttribute('data-time-phase', isNight ? 'night' : 'day');
-                // Update status text
+
+                // Update status text with IST time
                 const statusText = document.getElementById('status-text');
+                const hh = String(hour).padStart(2, '0');
+                const mm = String(min).padStart(2, '0');
+                const phaseMsg = {
+                    dawn:  'Dawn breaks over the grove…',
+                    day:   'Sunlight warms the grove…',
+                    dusk:  'Twilight settles over the grove…',
+                    night: 'The grove rests under starlight…'
+                };
                 if (statusText) {
-                    statusText.textContent = isNight ? 'The grove is quiet tonight…' : 'The grove is quiet today…';
+                    statusText.textContent = `${phaseMsg[phase]}  ·  ${hh}:${mm} IST`;
                 }
+
+                // Update sky icon in weather badge area
+                this.updateSkyIcon(phase);
+            }
+            updateSkyIcon(phase) {
+                const svgs = {
+                    dawn:  '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="14" r="4"/><path d="M12 6v2M5.6 9.6l1.4 1.4M3 16h2M19 16h2M17 9.6l-1.4 1.4"/><line x1="4" y1="20" x2="20" y2="20" stroke-dasharray="2 2"/></svg>',
+                    day:   '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fde047" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>',
+                    dusk:  '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#c084fc" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="14" r="4"/><path d="M12 6v2M5.6 9.6l1.4 1.4M17 9.6l-1.4 1.4"/><line x1="4" y1="20" x2="20" y2="20" stroke-dasharray="2 2"/></svg>',
+                    night: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a78bfa" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.79A9 9 0 0 1 11.21 3a7 7 0 1 0 9.79 9.79z"/><circle cx="18" cy="5" r="0.8" fill="#fde047"/><circle cx="20" cy="9" r="0.5" fill="#fde047"/></svg>'
+                };
+                // Inject into the sky-phase display on the info-bar
+                const el = document.getElementById('sky-phase-icon');
+                if (el) el.innerHTML = (svgs[phase] || '') + ' <span>' + phase.charAt(0).toUpperCase() + phase.slice(1) + '</span>';
             }
         }
 
@@ -2101,12 +2435,27 @@
         function plantPos(idx) {
             const ga = document.getElementById('garden-area');
             const W = ga.clientWidth, H = ga.clientHeight;
-            const pos3 = [0.23, 0.51, 0.78];
-            const pos4 = [0.16, 0.38, 0.62, 0.84];
-            const pos5 = [0.12, 0.28, 0.44, 0.6, 0.76];
-            const pos6 = [0.1, 0.24, 0.38, 0.52, 0.66, 0.8];
-            const pos7 = [0.08, 0.2, 0.32, 0.44, 0.56, 0.68, 0.8];
-            const arr = G.plants.length <= 3 ? pos3 : G.plants.length === 4 ? pos4 : G.plants.length === 5 ? pos5 : G.plants.length === 6 ? pos6 : pos7;
+            const isMobile = W < 768;
+
+            // On mobile, tighten the outer margins so plants fill the width
+            // On desktop, keep the existing spacious layout
+            let arr;
+            if (isMobile) {
+                const n = G.plants.length;
+                // Even distribution with edge padding
+                const pad = n <= 3 ? 0.15 : n <= 5 ? 0.08 : 0.05;
+                arr = [];
+                for (let i = 0; i < n; i++) {
+                    arr.push(pad + (1 - 2 * pad) * (i / Math.max(1, n - 1)));
+                }
+            } else {
+                const pos3 = [0.23, 0.51, 0.78];
+                const pos4 = [0.16, 0.38, 0.62, 0.84];
+                const pos5 = [0.12, 0.28, 0.44, 0.6, 0.76];
+                const pos6 = [0.1, 0.24, 0.38, 0.52, 0.66, 0.8];
+                const pos7 = [0.08, 0.2, 0.32, 0.44, 0.56, 0.68, 0.8];
+                arr = G.plants.length <= 3 ? pos3 : G.plants.length === 4 ? pos4 : G.plants.length === 5 ? pos5 : G.plants.length === 6 ? pos6 : pos7;
+            }
             return { x: W * arr[idx], y: H * 0.81 };
         }
 
@@ -2121,6 +2470,7 @@
             const W = ga.clientWidth, H = ga.clientHeight;
             if (!W || !H) return;
             const svg = document.getElementById('plants-svg');
+            const isMobile = W < 768;
 
             // Rebuild entire SVG innerHTML so defs + plant groups parse correctly as SVG
             const DEFS = `<defs>
@@ -2137,6 +2487,8 @@
 
             // Scale per stage so seedlings are still clearly visible
             const PLANT_SCALE = [0, 2.2, 1.7, 1.3, 1.1, 1.0];
+            // On mobile, shrink plants based on how many there are (more compact to prevent overlap)
+            const mobileScaleFactor = isMobile ? (G.plants.length <= 3 ? 0.65 : G.plants.length <= 5 ? 0.5 : 0.4) : 1.0;
             // Glow color per plant type
             const GLOW_COL = { moonflower: 'rgba(167,139,250,0.18)', starbloom: 'rgba(56,189,248,0.18)', emberleaf: 'rgba(249,115,22,0.18)', bramble: 'rgba(217,70,239,0.22)', frostlily: 'rgba(186,230,253,0.22)', sunflare: 'rgba(253,224,71,0.22)' };
 
@@ -2146,8 +2498,8 @@
                 const avgH = plantAvgHealth(p);
                 const col = STAGE_COLS[p.stage];
                 const swCls = ['psa', 'psb', 'psc', 'psa'][i];
-                const sc = PLANT_SCALE[p.stage];
-                const glowR = [0, 38, 52, 68, 85, 105][p.stage];
+                const sc = PLANT_SCALE[p.stage] * mobileScaleFactor;
+                const glowR = [0, 38, 52, 68, 85, 105][p.stage] * mobileScaleFactor;
                 const glowCol = GLOW_COL[p.type] || 'rgba(168,159,216,0.18)';
 
                 // Outer group: position only
@@ -2163,12 +2515,14 @@
                 if (avgH < 20) plants += `<ellipse cx="0" cy="-20" rx="18" ry="4" fill="rgba(180,50,50,0.10)"/>`;
                 plants += `</g>`; // End outer group
 
-                const lx = pos.x, ly = pos.y + 30;
+                const lx = pos.x, ly = pos.y + (isMobile ? 18 : 30);
                 const fc = avgH < 30 ? '#f87171' : col;
-                labels += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" class="pname" fill="${fc}" onclick="openRename(${p.id})">${sanitize(p.name)}</text>`;
-                labels += `<text x="${lx.toFixed(1)}" y="${(ly + 14).toFixed(1)}" class="plvl">${STAGE_LBL[p.stage]}</text>`;
+                const labelFontSize = isMobile ? '.42rem' : undefined;
+                const stageFontSize = isMobile ? '.36rem' : undefined;
+                labels += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" class="pname" fill="${fc}"${labelFontSize ? ` style="font-size:${labelFontSize}"` : ''} onclick="openRename(${p.id})">${sanitize(p.name)}</text>`;
+                labels += `<text x="${lx.toFixed(1)}" y="${(ly + (isMobile ? 10 : 14)).toFixed(1)}" class="plvl"${stageFontSize ? ` style="font-size:${stageFontSize}"` : ''}>${STAGE_LBL[p.stage]}</text>`;
                 if (p.stage < 5) {
-                    const bw = 58, pct = Math.min(1, p.xp / XP_PER_STAGE[p.stage]), bx = lx - bw / 2, by = ly + 19;
+                    const bw = isMobile ? 38 : 58, pct = Math.min(1, p.xp / XP_PER_STAGE[p.stage]), bx = lx - bw / 2, by = ly + (isMobile ? 14 : 19);
                     labels += `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw}" height="3" rx="1.5" fill="rgba(168,159,216,.10)"/>`;
                     labels += `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${(bw * pct).toFixed(1)}" height="3" rx="1.5" fill="${fc}"/>`;
                 }
@@ -2955,6 +3309,51 @@
             inp.click();
         }
 
+        function openDataModal() { document.getElementById('data-modal').classList.add('open'); }
+
+        function doCopyJSON() {
+            const data = {
+                plants: G.plants, coins: G.coins, milestones: G.milestones,
+                log: G.log, inventory: G.inventory, upgrades: G.upgrades,
+                totalCare: G.totalCare, theme: G.theme, exportedAt: new Date().toISOString(),
+                wiltWardUntil: G.wiltWardUntil, nightbloomLeft: G.nightbloomLeft, cooldownHalf: G.cooldownHalf
+            };
+            const str = JSON.stringify(data, null, 2);
+            navigator.clipboard.writeText(str).then(() => {
+                const s = document.getElementById('data-modal-status');
+                s.textContent = '✅ JSON copied to clipboard!';
+                setTimeout(() => s.textContent = '', 3000);
+            }).catch(() => {
+                toast('Could not copy. Try selecting the text manually.');
+            });
+        }
+
+        function doPasteImport() {
+            const raw = document.getElementById('paste-json-area').value.trim();
+            const status = document.getElementById('data-modal-status');
+            if (!raw) { status.textContent = '❌ Paste your JSON first.'; return; }
+            try {
+                const d = JSON.parse(raw);
+                if (Array.isArray(d.plants) && d.plants.length) G.plants = d.plants.map(normalizePlant);
+                if (d.coins != null) G.coins = d.coins;
+                if (d.milestones) G.milestones = d.milestones;
+                if (d.log) G.log = d.log;
+                if (d.inventory) G.inventory = d.inventory;
+                if (d.upgrades) G.upgrades = d.upgrades;
+                if (d.totalCare) G.totalCare = d.totalCare;
+                if (d.wiltWardUntil) G.wiltWardUntil = d.wiltWardUntil;
+                if (d.nightbloomLeft) G.nightbloomLeft = d.nightbloomLeft;
+                if (d.cooldownHalf) G.cooldownHalf = d.cooldownHalf;
+                if (d.theme) setTheme(d.theme);
+                save(); renderPlants(); renderHealth(); renderPlantList(); updateBadge();
+                status.textContent = '✅ Grove imported successfully!';
+                document.getElementById('paste-json-area').value = '';
+                setTimeout(() => status.textContent = '', 4000);
+            } catch (err) {
+                status.textContent = '❌ Invalid JSON. Check for missing brackets or quotes.';
+            }
+        }
+
         /* ── KEYBOARD SHORTCUTS ── */
         document.addEventListener('keydown', e => {
             const tag = e.target.tagName.toLowerCase();
@@ -2964,7 +3363,7 @@
             if (e.key === 'p') doAction('pet');
             if (e.key === 's') doAction('sing');
             if (e.key === 'm') openMarket();
-            if (e.key === 'Escape') ['stats-modal', 'market-modal', 'event-modal', 'rename-modal', 'nursery-modal'].forEach(closeModal);
+            if (e.key === 'Escape') ['stats-modal', 'market-modal', 'event-modal', 'rename-modal', 'nursery-modal', 'data-modal'].forEach(closeModal);
         });
 
         /* ── RESIZE ── */
@@ -3104,30 +3503,51 @@ function showMasteryEvent(plant, isAge) {
 setInterval(checkMasteryMilestones, 60000); // check every minute
 document.addEventListener('DOMContentLoaded', checkMasteryMilestones);
 
-// ── SEASONAL GARDEN ROTATION ──
+// ── SEASONAL GARDEN ROTATION (IST-based) ──
 const SEASONS = ['Spring', 'Summer', 'Autumn', 'Winter'];
+const SEASON_SVG = {
+    Spring: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#86efac" stroke-width="1.8" stroke-linecap="round"><path d="M12 22V12"/><path d="M8 8c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4-4-1.8-4-4z"/><path d="M7 13c-1.5 1-2 3-1 4.5"/><path d="M17 13c1.5 1 2 3 1 4.5"/></svg>',
+    Summer: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>',
+    Autumn: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#f97316" stroke-width="1.8" stroke-linecap="round"><path d="M11 19c0-4 2-7 5-9 1-1 2-2 2-4 0-3-3-5-6-4-3 1-5 4-5 7v6"/><path d="M8 22c0-2 1-4 3-5"/><path d="M14 6c-1 2-1 4 0 6"/></svg>',
+    Winter: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#bae6fd" stroke-width="1.6" stroke-linecap="round"><path d="M12 2v20M2 12h20"/><path d="M6 6l12 12M18 6L6 18"/><path d="M12 5l-2 2 2 2 2-2-2-2M12 17l-2 2 2 2 2-2-2-2M5 12l-2-2 2-2 2 2-2 2M19 12l2-2-2-2-2 2 2 2"/></svg>'
+};
+const SEASON_COLOR = { Spring: '#86efac', Summer: '#fbbf24', Autumn: '#f97316', Winter: '#bae6fd' };
+
 function getCurrentSeason() {
-    // Use real date for now: rotate every 7 days
-    const start = new Date(2026, 0, 1); // Jan 1, 2026
-    const now = new Date();
-    const days = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+    const ist = getISTDate();
+    const start = new Date(2026, 0, 1);
+    const days = Math.floor((ist - start) / (1000 * 60 * 60 * 24));
     return SEASONS[Math.floor(days / 7) % 4];
 }
 
 function updateSeasonUI() {
+    const season = getCurrentSeason();
+    const svg = SEASON_SVG[season] || '';
+    const col = SEASON_COLOR[season] || 'var(--accent)';
+
+    // Desktop header badge
     let badge = document.getElementById('season-badge');
     if (!badge) {
         badge = document.createElement('div');
         badge.id = 'season-badge';
         badge.className = 'mbadge';
+        badge.style.cssText = 'display:flex;align-items:center;gap:4px;';
         document.querySelector('header').appendChild(badge);
     }
-    badge.textContent = getCurrentSeason();
+    badge.innerHTML = svg + ' <span style="color:' + col + '">' + season + '</span>';
+
+    // Mobile info-bar badge
+    const mobBadge = document.getElementById('season-badge-mobile');
+    if (mobBadge) {
+        mobBadge.innerHTML = svg + ' <span style="color:' + col + '">' + season + '</span>';
+        mobBadge.style.display = 'flex';
+        mobBadge.style.alignItems = 'center';
+        mobBadge.style.gap = '4px';
+    }
 }
 
 function applySeasonalEffects() {
     const season = getCurrentSeason();
-    // Example: boost growth in Spring, happiness in Summer, etc.
     G.season = season;
     G.plants.forEach(p => {
         if (!p.seasonal) p.seasonal = {};
@@ -3142,10 +3562,27 @@ function applySeasonalEffects() {
 setInterval(() => {
     updateSeasonUI();
     applySeasonalEffects();
-}, 60000); // update every minute
+}, 60000);
 document.addEventListener('DOMContentLoaded', () => {
     updateSeasonUI();
     applySeasonalEffects();
+});
+/* ── Mobile overflow menu toggle ── */
+function toggleMobMenu() {
+    const el = document.getElementById('mob-overflow');
+    if (el) el.classList.toggle('open');
+}
+function closeMobMenu() {
+    const el = document.getElementById('mob-overflow');
+    if (el) el.classList.remove('open');
+}
+// Close overflow menu when tapping outside
+document.addEventListener('click', function(e) {
+    const menu = document.getElementById('mob-overflow');
+    const toggle = document.querySelector('.mob-menu-toggle');
+    if (menu && menu.classList.contains('open') && !menu.contains(e.target) && e.target !== toggle) {
+        menu.classList.remove('open');
+    }
 });
     </script>
 </body>
