@@ -1930,9 +1930,11 @@
     <!-- Data Modal -->
     <div id="data-modal" class="modal">
         <div class="mbox" style="max-width:420px">
-            <div class="mtitle">⚙️ Data & Sync <span class="mclose" onclick="closeModal('data-modal')">✕ Close</span></div>
+            <div class="mtitle">📊 Data & Sync <span class="mclose" onclick="closeModal('data-modal')">✖ Close</span></div>
             <p style="color:var(--muted);font-size:.75rem;margin:6px 0 0">Export or import your grove data. Compatible with the Discord bot's <code>/grove import</code> command.</p>
             <div class="data-actions">
+                <button onclick="doCloudSave()" style="border-color: var(--gold); color: var(--gold);">☁️ Save to Cloud Database</button>
+                <button onclick="doCloudLoad()" style="border-color: var(--gold); color: var(--gold);">☁️ Load from Cloud Database</button>
                 <button onclick="doExport()">📥 Export to File</button>
                 <button onclick="doImport()">📤 Import from File</button>
                 <button onclick="doCopyJSON()">📋 Copy JSON to Clipboard</button>
@@ -3337,6 +3339,37 @@
         }
 
         /* ── EXPORT / IMPORT ── */
+        async function doCloudSave() {
+            const token = localStorage.getItem('discord_token');
+            if (!token) {
+                toast('Not logged in. Click Login with Discord first.');
+                return;
+            }
+            try {
+                toast('Saving to cloud...');
+                await save();
+                toast('Successfully saved to cloud database!');
+            } catch (e) {
+                toast('Failed to save to cloud.');
+            }
+        }
+
+        async function doCloudLoad() {
+            const token = localStorage.getItem('discord_token');
+            if (!token) {
+                toast('Not logged in. Click Login with Discord first.');
+                return;
+            }
+            try {
+                toast('Loading from cloud...');
+                await loadSave();
+                renderAll();
+                toast('Successfully loaded from cloud database!');
+            } catch (e) {
+                toast('Failed to load from cloud.');
+            }
+        }
+
         function doExport() {
             const blob = new Blob([JSON.stringify({
                 plants: G.plants, coins: G.coins, milestones: G.milestones,
