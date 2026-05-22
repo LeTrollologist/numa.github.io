@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hollow-grove-v3.9';
+const CACHE_NAME = 'hollow-grove-v4.0';
 const ASSETS = [
   'index.html',
   'sketch.html',
@@ -56,6 +56,13 @@ self.addEventListener('activate', e => {
 
 // 3. RETRIEVAL: Serve cached assets first, with network fallback
 self.addEventListener('fetch', e => {
+  const url = new URL(e.request.url);
+  
+  // Bypass Service Worker for localhost, Render APIs, or non-GET requests to prevent CORS/PNA blocks
+  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname.includes('onrender.com') || url.pathname.startsWith('/api') || e.request.method !== 'GET') {
+    return;
+  }
+
   e.respondWith(
     caches.match(e.request).then(res => {
       return res || fetch(e.request);
