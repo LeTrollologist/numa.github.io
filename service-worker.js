@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hollow-grove-v4.0';
+const CACHE_NAME = 'hollow-grove-v4.1';
 const ASSETS = [
   'index.html',
   'sketch.html',
