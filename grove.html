@@ -2180,6 +2180,7 @@
             addLog(`Hybrid plant "${hybridName}" successfully germinated from ${p1.name} & ${p2.name}.`);
             closeModal('nursery-modal');
             renderPlants(); renderPlantList(); updateBadge(); save();
+            syncAction('breed_nursery', { newPlant: newPlant });
         }
 
 
@@ -2688,6 +2689,7 @@
             renderPlants(); renderHealth(); renderPlantList(); updateBadge();
             checkMilestones();
             save();
+            syncAction('care', { careType: action });
         }
 
         function checkLevelUp(p, pos) {
@@ -2760,6 +2762,7 @@
 
             renderPlants(); renderHealth(); renderPlantList(); updateBadge();
             save();
+            syncAction('game_tick');
         }
 
         /* ── EVENTS ── */
@@ -2784,9 +2787,11 @@
         /* Event effects */
         function healAll(stat, amount) {
             G.plants.forEach(p => p.health[stat] = Math.min(100, p.health[stat] + amount));
+            syncAction('heal_all', { stat: stat, amount: amount });
         }
         function giveCoins(n) {
             G.coins += n;
+            syncAction('earn_coins', { amount: n, reason: 'event' });
             // coin pop visual
             const ga = document.getElementById('garden-area');
             const el = document.createElement('div');
@@ -2884,6 +2889,7 @@
                 toast(`${item.name} added to inventory.`);
             }
             updateBadge(); renderMarket(); save();
+            syncAction('buy_item', { id: id, price: item.price, type: item.type });
         }
         function useItem(id) {
             if (!(G.inventory[id] > 0)) return;
@@ -2923,6 +2929,7 @@
             spawnParticles('bloom', document.getElementById('garden-area').clientWidth / 2,
                 document.getElementById('garden-area').clientHeight / 2, 30);
             renderPlants(); renderHealth(); renderPlantList(); renderMarket(); updateBadge(); save();
+            syncAction('use_item', { id: id });
         }
 
         /* ── RENAME ── */
@@ -2966,6 +2973,8 @@
                 renderPlantList();
                 updateUI();
                 toast(`Sold ${p.name} for ${value} coins!`);
+                save();
+                syncAction('sell_plant', { id: id, value: value });
             }
         }
 
@@ -3147,6 +3156,7 @@
             toast(`A ${newPlant.name} seedling has emerged!`);
             addLog(`Cross-pollinated ${PLANT_META[pA.type].emoji} ${pA.name} and ${PLANT_META[pB.type].emoji} ${pB.name} to create ${PLANT_META[hybridType].emoji} ${newPlant.name}.`);
             save();
+            syncAction('buy_nursery', { cost: NURSERY_COST, newPlant: newPlant });
         }
 
         /* ── MILESTONES ── */
@@ -3256,7 +3266,32 @@
         
         const API_BASE = 'https://nodejs-backend-1arp.onrender.com';
         
-        async function save() {
+        async function syncAction(action, payload = {}) {
+            try {
+                const token = localStorage.getItem('discord_token');
+                if (!token) return;
+                const res = await fetch(`${API_BASE}/api/v1/grove/action`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ action, payload })
+                });
+                if (res.ok) {
+                    const resData = await res.json();
+                    if (resData.ok && resData.data) {
+                        const d = resData.data;
+                        if (d.coins != null) G.coins = d.coins;
+                        if (d.inventory) G.inventory = d.inventory;
+                        if (Array.isArray(d.plants) && d.plants.length) G.plants = d.plants;
+                        if (Array.isArray(d.log) && d.log.length) G.log = d.log;
+                        if (d.totalCare) G.totalCare = d.totalCare;
+                        save(true); // Save locally without syncing
+                        render();
+                    }
+                }
+            } catch (e) { console.error('Action Sync Error', e); }
+        }
+
+        async function save(localOnly = false) {
             try {
                 const data = {
                     plants: G.plants, coins: G.coins, cd: G.cd, lastTick: G.lastTick,
@@ -3266,14 +3301,9 @@
                     wiltWardUntil: G.wiltWardUntil, nightbloomLeft: G.nightbloomLeft, cooldownHalf: G.cooldownHalf
                 };
                 localStorage.setItem('grove_v5', JSON.stringify(data));
-                const token = localStorage.getItem('discord_token');
-                if (token) {
-                    fetch(`${API_BASE}/api/v1/grove/sync`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify({ data })
-                    });
-                }
+                
+                // We no longer sync the full payload to the server.
+                // The Action API handles all database updates.
             } catch (e) { }
         }
         
