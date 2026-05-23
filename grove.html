@@ -3363,7 +3363,7 @@
             try {
                 toast('Loading from cloud...');
                 await loadSave();
-                renderAll();
+                renderPlants(); renderHealth(); renderPlantList(); updateBadge();
                 toast('Successfully loaded from cloud database!');
             } catch (e) {
                 toast('Failed to load from cloud.');
