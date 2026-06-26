@@ -855,9 +855,9 @@
 
         <!-- Mobile Navigation Tabs -->
         <div class="mobile-tabs">
-            <button class="mobile-tab active" data-tab="east" onclick="switchMobileTab('east')">USA</button>
+            <button class="mobile-tab active" data-tab="east" onclick="switchMobileTab('east')">UK</button>
             <button class="mobile-tab" data-tab="dub" onclick="switchMobileTab('dub')">Dubai</button>
-            <button class="mobile-tab" data-tab="sister" onclick="switchMobileTab('sister')">Sister</button>
+            <button class="mobile-tab" data-tab="sister" onclick="switchMobileTab('sister')">Cara 🌸</button>
             <button class="mobile-tab" data-tab="ist" onclick="switchMobileTab('ist')">IST</button>
             <button class="mobile-tab" data-tab="timeline" onclick="switchMobileTab('timeline')">Timeline</button>
         </div>
@@ -868,12 +868,12 @@
             <!-- Left Wing -->
             <div class="wing-column">
                 
-                <!-- CARD 1: US Eastern -->
+                <!-- CARD 1: UK London -->
                 <div class="input-card east">
                     <div class="card-header-row">
                         <div class="card-title east">
-                            <span>US Eastern</span>
-                            <span class="timezone-offset" id="east-offset">EDT (UTC-4)</span>
+                            <span>UK London</span>
+                            <span class="timezone-offset" id="east-offset">GMT/BST</span>
                         </div>
                         <span class="live-clock" id="east-live-clock">--:--:--</span>
                     </div>
@@ -959,9 +959,9 @@
             <!-- Central Timeline Column -->
             <div class="timeline-container timeline-card" id="card-timeline">
                 <div class="timeline-header">
-                    <div class="timeline-col-title east">Eastern</div>
+                    <div class="timeline-col-title east">London</div>
                     <div class="timeline-col-title dub">Dubai</div>
-                    <div class="timeline-col-title sister">Sister</div>
+                    <div class="timeline-col-title sister">Cara 🌸</div>
                     <div class="timeline-col-title ist">IST</div>
                 </div>
 
@@ -981,11 +981,11 @@
             <!-- Right Wing -->
             <div class="wing-column">
 
-                <!-- CARD 3: Sister's Time -->
+                <!-- CARD 3: Cara -->
                 <div class="input-card sister">
                     <div class="card-header-row">
                         <div class="card-title sister">
-                            <span>Sister's Time 🌸</span>
+                            <span>Cara 🌸</span>
                             <span class="timezone-offset" id="sister-offset">-- (UTC--)</span>
                         </div>
                         <span class="live-clock" id="sister-live-clock">--:--:--</span>
@@ -1092,9 +1092,9 @@
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <div style="display: flex; gap: 6px;">
                                 <select id="calc-zone" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); color: #ffffff; font-family: var(--font-ui); border-radius: 8px; padding: 4px; font-size: 0.72rem; flex: 1; outline:none;">
-                                    <option value="America/New_York">US Eastern</option>
+                                    <option value="Europe/London">UK London</option>
                                     <option value="Asia/Dubai">Dubai</option>
-                                    <option value="Europe/Rome">Sister's Time</option>
+                                    <option value="Europe/Rome">Cara 🌸</option>
                                     <option value="Asia/Kolkata">IST</option>
                                 </select>
                                 <input type="number" id="calc-hour" placeholder="Hr" min="1" max="12" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); color: #ffffff; width: 38px; text-align: center; border-radius: 8px; font-family: var(--font-mono); font-size: 0.8rem; outline:none;">
@@ -1218,7 +1218,11 @@
                     var m = date.getMonth();
                     return (m >= 2 && m <= 9) ? 120 : 60;
                 }
-                return -300;
+                if (timeZone.includes('London')) {
+                    var lm = date.getMonth();
+                    return (lm >= 2 && lm <= 9) ? 60 : 0;
+                }
+                return 0;
             }
         }
 
@@ -1229,7 +1233,7 @@
         }
 
         function getOffsetDiff(targetTz) {
-            var offsetEast = getOffsetMinutes('America/New_York', baseDate);
+            var offsetEast = getOffsetMinutes('Europe/London', baseDate);
             var offsetTarget = getOffsetMinutes(targetTz, baseDate);
             return offsetTarget - offsetEast;
         }
@@ -1438,11 +1442,11 @@
 
         // Master sync update
         function updateAllZonesFromEast() {
-            var offsetEast = getOffsetMinutes('America/New_York', baseDate);
+            var offsetEast = getOffsetMinutes('Europe/London', baseDate);
             document.getElementById('east-offset').textContent = formatOffset(offsetEast);
 
             var tzList = [
-                { id: 'east', tz: 'America/New_York' },
+                { id: 'east', tz: 'Europe/London' },
                 { id: 'dub', tz: 'Asia/Dubai' },
                 { id: 'sister', tz: 'Europe/Rome' },
                 { id: 'ist', tz: 'Asia/Kolkata' }
@@ -1503,7 +1507,7 @@
             parent.innerHTML = '';
 
             var activeHour = Math.floor(eastMins / 60);
-            var offsetEast = getOffsetMinutes('America/New_York', baseDate);
+            var offsetEast = getOffsetMinutes('Europe/London', baseDate);
             var offsetDub = getOffsetMinutes('Asia/Dubai', baseDate);
             var offsetSis = getOffsetMinutes('Europe/Rome', baseDate);
             var offsetIst = getOffsetMinutes('Asia/Kolkata', baseDate);
@@ -1609,7 +1613,7 @@
         function updateLiveClocks() {
             var now = new Date();
             var config = [
-                { id: 'east-live-clock', tz: 'America/New_York' },
+                { id: 'east-live-clock', tz: 'Europe/London' },
                 { id: 'dub-live-clock', tz: 'Asia/Dubai' },
                 { id: 'sister-live-clock', tz: 'Europe/Rome' },
                 { id: 'ist-live-clock', tz: 'Asia/Kolkata' }
@@ -1629,9 +1633,14 @@
             var now = new Date();
             var utcMins = now.getUTCHours() * 60 + now.getUTCMinutes();
             
-            // Quad overlap: 12:00 PM (720 mins) to 4:30 PM (990 mins) UTC
-            var startMins = 720;
-            var endMins = 990;
+            var zones = ['Europe/London', 'Asia/Dubai', 'Europe/Rome', 'Asia/Kolkata'];
+            var startMins = 0;
+            var endMins = 1440;
+            zones.forEach(function (tz) {
+                var offset = getOffsetMinutes(tz, now);
+                startMins = Math.max(startMins, 7 * 60 - offset);
+                endMins = Math.min(endMins, 23 * 60 - offset);
+            });
             
             var countdownEl = document.getElementById('overlap-countdown');
             if (!countdownEl) return;

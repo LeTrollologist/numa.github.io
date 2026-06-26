@@ -3214,11 +3214,11 @@
         <div class="dashboard">
             <div class="world-clocks">
                 <div class="clock-box">
-                    <div class="clock-label">United States 🇺🇸</div>
+                    <div class="clock-label">United Kingdom 🇬🇧</div>
                     <div class="clock-time" id="time-est">--:--:-- --</div>
                 </div>
                 <div class="clock-box">
-                    <div class="clock-label" id="time-ita-label">Sister's Time 🌸</div>
+                    <div class="clock-label" id="time-ita-label">Cara 🌸</div>
                     <div class="clock-time" id="time-ita" style="font-size:inherit">--:--:-- --</div>
                 </div>
                 <div class="clock-box">
@@ -3637,7 +3637,7 @@
         var sgTrackTime = 0;     // timestamp of anchor
 
         // Dates
-        var est = { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+        var est = { timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
         var istO = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
         var itaO = { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
 
@@ -28234,9 +28234,9 @@
                         var utcDate = new Date(utcString);
                         var diffHours = Math.round((localDate - utcDate) / 3600000);
                         var sign = diffHours >= 0 ? '+' : '';
-                        e3Label.innerText = "Sister's Time 🌸 (UTC" + sign + diffHours + ")";
+                        e3Label.innerText = "Cara 🌸 (UTC" + sign + diffHours + ")";
                     } catch (e) {
-                        e3Label.innerText = "Sister's Time 🌸";
+                        e3Label.innerText = "Cara 🌸";
                     }
                 }
                 checkAlarm();

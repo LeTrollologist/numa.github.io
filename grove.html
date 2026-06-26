@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://raw.githubusercontent.com; connect-src 'self' https://analytics-server-bdrm.onrender.com https://nodejs-backend-1arp.onrender.com; media-src 'self' https://res.cloudinary.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://raw.githubusercontent.com https://cdn.discordapp.com; connect-src 'self' https://analytics-server-bdrm.onrender.com https://nodejs-backend-1arp.onrender.com https://discord.com; media-src 'self' https://res.cloudinary.com;">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Grove · Numa's Garden</title>
@@ -1247,6 +1247,7 @@
             header > .coins-badge,
             header > .mbadge,
             header > #weather-badge,
+            header > .discord-badge,
             header > .hsp:first-of-type,
             header > .hbtn:not(#audio-btn):not(.mob-menu-toggle) {
                 display: none !important;
@@ -1575,6 +1576,22 @@
         }
         body.weather-fog #weather-badge, body.weather-fog #weather-badge-mobile { filter: blur(0.5px); }
 
+        .discord-badge {
+            display: none; align-items: center; gap: 7px; max-width: 180px;
+            border: 1px solid var(--border); border-radius: 999px;
+            padding: 4px 9px; color: var(--muted); font-size: .62rem;
+            letter-spacing: .08em; background: rgba(88, 101, 242, .08);
+        }
+        .discord-badge.is-visible { display: flex; }
+        .discord-badge img { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; }
+        .discord-badge span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .mob-discord-user {
+            display: none; color: var(--accent); font-size: .62rem;
+            letter-spacing: .08em; padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .mob-discord-user.is-visible { display: block; }
+
         /* Sky phase indicator */
         #sky-phase-icon {
             font-size: .58rem; letter-spacing: .08em; color: var(--muted);
@@ -1698,6 +1715,11 @@
             <div class="hsp"></div>
             <div class="coins-badge" id="coins-badge">0</div>
             <div class="mbadge" id="mbadge">Mastery · 0</div>
+            <div class="discord-badge" id="discord-user-badge">
+                <img id="discord-user-avatar" alt="">
+                <span id="discord-user-name">Discord</span>
+            </div>
+            <button class="hbtn" id="discord-logout-btn" onclick="logoutDiscord()" style="display:none">Logout</button>
             <button class="hbtn" id="audio-btn" onclick="toggleAudio()" title="Toggle Audio">🎵 Off</button>
             <button class="hbtn gold" onclick="openMarket()">Market</button>
             <button class="hbtn" onclick="openStats()">Records</button>
@@ -1709,10 +1731,12 @@
             <button class="hbtn" onclick="window.location.href='index.html'">Home</button>
             <button class="mob-menu-toggle" onclick="toggleMobMenu()" aria-label="More options">⋯</button>
             <div class="mob-overflow" id="mob-overflow">
+                <div class="mob-discord-user" id="discord-user-mobile"></div>
                 <button onclick="openMarket();closeMobMenu()">✦ Market</button>
                 <button onclick="openStats();closeMobMenu()">📊 Records</button>
                 <button onclick="openCodex();closeMobMenu()">📖 Codex</button>
                 <button onclick="openDataModal();closeMobMenu()">⚙️ Data</button>
+                <button onclick="logoutDiscord();closeMobMenu()">Logout</button>
                 <button onclick="window.location.href='index.html'">🏠 Home</button>
             </div>
         </header>
@@ -1942,7 +1966,7 @@
             <p style="color:var(--muted);font-size:.68rem;margin:18px 0 6px;text-transform:uppercase;letter-spacing:.1em">Paste JSON</p>
             <textarea id="paste-json-area" class="data-paste-area" placeholder='Paste your grove JSON here...'></textarea>
             <div class="data-paste-row">
-                <button class="data-actions" style="display:inline" onclick="doPasteImport()">Apply Pasted JSON</button>
+                <button type="button" onclick="doPasteImport()">Apply Pasted JSON</button>
             </div>
             <p id="data-modal-status" style="color:var(--accent);font-size:.7rem;margin-top:10px;min-height:1.2em"></p>
         </div>
@@ -3499,6 +3523,72 @@
         /* ── RESIZE ── */
         let resizeTO;
         /* ── AUDIO ENGINE ── */
+        function discordAvatarUrl(user) {
+            if (!user || !user.id || !user.avatar) return '';
+            const ext = user.avatar.startsWith('a_') ? 'gif' : 'png';
+            return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${ext}?size=64`;
+        }
+
+        function setDiscordUser(user) {
+            if (!user) return;
+            const name = user.global_name || user.username || 'Discord';
+            const badge = document.getElementById('discord-user-badge');
+            const avatar = document.getElementById('discord-user-avatar');
+            const label = document.getElementById('discord-user-name');
+            const mobile = document.getElementById('discord-user-mobile');
+            const logoutBtn = document.getElementById('discord-logout-btn');
+
+            if (label) label.textContent = name;
+            if (mobile) {
+                mobile.textContent = `Signed in as ${name}`;
+                mobile.classList.add('is-visible');
+            }
+            if (avatar) {
+                const src = discordAvatarUrl(user);
+                avatar.style.display = src ? 'block' : 'none';
+                if (src) avatar.src = src;
+            }
+            if (badge) badge.classList.add('is-visible');
+            if (logoutBtn) logoutBtn.style.display = 'inline-flex';
+            localStorage.setItem('discord_user', JSON.stringify(user));
+        }
+
+        async function fetchDiscordUser() {
+            const token = localStorage.getItem('discord_token');
+            if (!token) return null;
+            const logoutBtn = document.getElementById('discord-logout-btn');
+            if (logoutBtn) logoutBtn.style.display = 'inline-flex';
+            try {
+                const res = await fetch('https://discord.com/api/users/@me', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (res.status === 401) {
+                    localStorage.removeItem('discord_token');
+                    localStorage.removeItem('discord_user');
+                    return null;
+                }
+                if (!res.ok) return null;
+                const user = await res.json();
+                setDiscordUser(user);
+                return user;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function logoutDiscord() {
+            localStorage.removeItem('discord_token');
+            localStorage.removeItem('discord_user');
+            window.location.reload();
+        }
+
+        function showAuthOverlay() {
+            document.getElementById('auth-overlay').style.display = 'flex';
+            const client_id = '1075277522519982172';
+            const redir = encodeURIComponent('https://letrollologist.github.io/numa.github.io/grove.html');
+            document.getElementById('discord-login-btn').href = `https://discord.com/api/oauth2/authorize?client_id=${client_id}&redirect_uri=${redir}&response_type=token&scope=identify`;
+        }
+
         const AUDIO_SRCS = {
             bg: "https://letrollologist.github.io/numa.github.io/forestnight.ogg",
             water: "https://res.cloudinary.com/dwpisauuy/video/upload/v1777850244/496739__16gpanskakomarkova_marina__13-1-watering-kettle_jamzib.wav",
@@ -3567,14 +3657,25 @@
                 if (params.has('access_token')) {
                     localStorage.setItem('discord_token', params.get('access_token'));
                     window.location.hash = '';
+                } else if (params.has('error')) {
+                    localStorage.removeItem('discord_token');
+                    localStorage.removeItem('discord_user');
+                    window.location.hash = '';
                 }
             }
-            
+
             if (!localStorage.getItem('discord_token')) {
-                document.getElementById('auth-overlay').style.display = 'flex';
-                const client_id = '1075277522519982172';
-                const redir = encodeURIComponent('https://letrollologist.github.io/numa.github.io/grove.html');
-                document.getElementById('discord-login-btn').href = `https://discord.com/api/oauth2/authorize?client_id=${client_id}&redirect_uri=${redir}&response_type=token&scope=identify`;
+                showAuthOverlay();
+                return;
+            }
+
+            try {
+                const cachedUser = JSON.parse(localStorage.getItem('discord_user') || 'null');
+                if (cachedUser) setDiscordUser(cachedUser);
+            } catch (e) { }
+            await fetchDiscordUser();
+            if (!localStorage.getItem('discord_token')) {
+                showAuthOverlay();
                 return;
             }
 
