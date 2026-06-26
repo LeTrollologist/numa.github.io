@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://raw.githubusercontent.com https://cdn.discordapp.com; connect-src 'self' https://analytics-server-bdrm.onrender.com https://nodejs-backend-1arp.onrender.com https://discord.com; media-src 'self' https://res.cloudinary.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://raw.githubusercontent.com; connect-src 'self' https://analytics-server-bdrm.onrender.com; media-src 'self' https://res.cloudinary.com;">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Grove · Numa's Garden</title>
@@ -1247,7 +1247,6 @@
             header > .coins-badge,
             header > .mbadge,
             header > #weather-badge,
-            header > .discord-badge,
             header > .hsp:first-of-type,
             header > .hbtn:not(#audio-btn):not(.mob-menu-toggle) {
                 display: none !important;
@@ -1576,22 +1575,6 @@
         }
         body.weather-fog #weather-badge, body.weather-fog #weather-badge-mobile { filter: blur(0.5px); }
 
-        .discord-badge {
-            display: none; align-items: center; gap: 7px; max-width: 180px;
-            border: 1px solid var(--border); border-radius: 999px;
-            padding: 4px 9px; color: var(--muted); font-size: .62rem;
-            letter-spacing: .08em; background: rgba(88, 101, 242, .08);
-        }
-        .discord-badge.is-visible { display: flex; }
-        .discord-badge img { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; }
-        .discord-badge span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .mob-discord-user {
-            display: none; color: var(--accent); font-size: .62rem;
-            letter-spacing: .08em; padding: 10px 16px;
-            border-bottom: 1px solid var(--border);
-        }
-        .mob-discord-user.is-visible { display: block; }
-
         /* Sky phase indicator */
         #sky-phase-icon {
             font-size: .58rem; letter-spacing: .08em; color: var(--muted);
@@ -1655,46 +1638,10 @@
                 padding-top: env(safe-area-inset-top, 0px) !important;
             }
         }
-    
-        #auth-overlay {
-            position: fixed; inset: 0; z-index: 10000;
-            background: rgba(4, 6, 14, 0.95);
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: var(--text); font-family: 'Josefin Sans', sans-serif;
-            transition: opacity 0.4s ease;
-        }
-        .auth-box {
-            background: var(--panel); border: 1px solid var(--accent); padding: 30px;
-            text-align: center; box-shadow: 0 0 20px rgba(168, 159, 216, 0.15);
-            border-radius: 8px; max-width: 90%; width: 320px;
-        }
-        .auth-title { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); margin-bottom: 10px; letter-spacing: 0.1em; }
-        .auth-sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 25px; line-height: 1.5; }
-        .auth-btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-            background: #5865F2; color: #ffffff; border: none; padding: 10px 20px;
-            font-family: 'Josefin Sans', sans-serif; font-size: 0.85rem; text-transform: uppercase;
-            letter-spacing: 0.1em; cursor: pointer; border-radius: 4px; text-decoration: none; width: 100%;
-        }
-        .auth-btn:hover { background: #4752C4; }
-        .auth-btn svg { width: 20px; height: 20px; fill: currentColor; }
-
     </style>
 </head>
 
 <body>
-
-<div id="auth-overlay" style="display: none;">
-    <div class="auth-box">
-        <div class="auth-title">The Grove</div>
-        <div class="auth-sub">Log in with Discord to sync your garden across your devices and Discord.</div>
-        <a id="discord-login-btn" href="#" class="auth-btn">
-            <svg viewBox="0 0 127.14 96.36"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.16,46,96.06,53,91,65.69,84.69,65.69Z"/></svg>
-            Login with Discord
-        </a>
-    </div>
-</div>
 
     <canvas id="stars-cvs" class="bgcvs"></canvas>
     <svg id="forest-svg" xmlns="http://www.w3.org/2000/svg"></svg>
@@ -1715,11 +1662,6 @@
             <div class="hsp"></div>
             <div class="coins-badge" id="coins-badge">0</div>
             <div class="mbadge" id="mbadge">Mastery · 0</div>
-            <div class="discord-badge" id="discord-user-badge">
-                <img id="discord-user-avatar" alt="">
-                <span id="discord-user-name">Discord</span>
-            </div>
-            <button class="hbtn" id="discord-logout-btn" onclick="logoutDiscord()" style="display:none">Logout</button>
             <button class="hbtn" id="audio-btn" onclick="toggleAudio()" title="Toggle Audio">🎵 Off</button>
             <button class="hbtn gold" onclick="openMarket()">Market</button>
             <button class="hbtn" onclick="openStats()">Records</button>
@@ -1731,12 +1673,10 @@
             <button class="hbtn" onclick="window.location.href='index.html'">Home</button>
             <button class="mob-menu-toggle" onclick="toggleMobMenu()" aria-label="More options">⋯</button>
             <div class="mob-overflow" id="mob-overflow">
-                <div class="mob-discord-user" id="discord-user-mobile"></div>
                 <button onclick="openMarket();closeMobMenu()">✦ Market</button>
                 <button onclick="openStats();closeMobMenu()">📊 Records</button>
                 <button onclick="openCodex();closeMobMenu()">📖 Codex</button>
                 <button onclick="openDataModal();closeMobMenu()">⚙️ Data</button>
-                <button onclick="logoutDiscord();closeMobMenu()">Logout</button>
                 <button onclick="window.location.href='index.html'">🏠 Home</button>
             </div>
         </header>
@@ -1954,11 +1894,9 @@
     <!-- Data Modal -->
     <div id="data-modal" class="modal">
         <div class="mbox" style="max-width:420px">
-            <div class="mtitle">📊 Data & Sync <span class="mclose" onclick="closeModal('data-modal')">✖ Close</span></div>
-            <p style="color:var(--muted);font-size:.75rem;margin:6px 0 0">Export or import your grove data. Compatible with the Discord bot's <code>/grove import</code> command.</p>
+            <div class="mtitle">📊 Data <span class="mclose" onclick="closeModal('data-modal')">✖ Close</span></div>
+            <p style="color:var(--muted);font-size:.75rem;margin:6px 0 0">Export, import, or copy your local grove data.</p>
             <div class="data-actions">
-                <button onclick="doCloudSave()" style="border-color: var(--gold); color: var(--gold);">☁️ Save to Cloud Database</button>
-                <button onclick="doCloudLoad()" style="border-color: var(--gold); color: var(--gold);">☁️ Load from Cloud Database</button>
                 <button onclick="doExport()">📥 Export to File</button>
                 <button onclick="doImport()">📤 Import from File</button>
                 <button onclick="doCopyJSON()">📋 Copy JSON to Clipboard</button>
@@ -2204,7 +2142,6 @@
             addLog(`Hybrid plant "${hybridName}" successfully germinated from ${p1.name} & ${p2.name}.`);
             closeModal('nursery-modal');
             renderPlants(); renderPlantList(); updateBadge(); save();
-            syncAction('breed_nursery', { newPlant: newPlant });
         }
 
 
@@ -2713,7 +2650,6 @@
             renderPlants(); renderHealth(); renderPlantList(); updateBadge();
             checkMilestones();
             save();
-            syncAction('care', { careType: action });
         }
 
         function checkLevelUp(p, pos) {
@@ -2786,7 +2722,6 @@
 
             renderPlants(); renderHealth(); renderPlantList(); updateBadge();
             save();
-            syncAction('game_tick');
         }
 
         /* ── EVENTS ── */
@@ -2811,11 +2746,9 @@
         /* Event effects */
         function healAll(stat, amount) {
             G.plants.forEach(p => p.health[stat] = Math.min(100, p.health[stat] + amount));
-            syncAction('heal_all', { stat: stat, amount: amount });
         }
         function giveCoins(n) {
             G.coins += n;
-            syncAction('earn_coins', { amount: n, reason: 'event' });
             // coin pop visual
             const ga = document.getElementById('garden-area');
             const el = document.createElement('div');
@@ -2913,7 +2846,6 @@
                 toast(`${item.name} added to inventory.`);
             }
             updateBadge(); renderMarket(); save();
-            syncAction('buy_item', { id: id, price: item.price, type: item.type });
         }
         function useItem(id) {
             if (!(G.inventory[id] > 0)) return;
@@ -2953,7 +2885,6 @@
             spawnParticles('bloom', document.getElementById('garden-area').clientWidth / 2,
                 document.getElementById('garden-area').clientHeight / 2, 30);
             renderPlants(); renderHealth(); renderPlantList(); renderMarket(); updateBadge(); save();
-            syncAction('use_item', { id: id });
         }
 
         /* ── RENAME ── */
@@ -2998,7 +2929,6 @@
                 updateUI();
                 toast(`Sold ${p.name} for ${value} coins!`);
                 save();
-                syncAction('sell_plant', { id: id, value: value });
             }
         }
 
@@ -3180,7 +3110,6 @@
             toast(`A ${newPlant.name} seedling has emerged!`);
             addLog(`Cross-pollinated ${PLANT_META[pA.type].emoji} ${pA.name} and ${PLANT_META[pB.type].emoji} ${pB.name} to create ${PLANT_META[hybridType].emoji} ${newPlant.name}.`);
             save();
-            syncAction('buy_nursery', { cost: NURSERY_COST, newPlant: newPlant });
         }
 
         /* ── MILESTONES ── */
@@ -3286,36 +3215,7 @@
         }
 
         /* ── SAVE / LOAD ── */
-        
-        
-        const API_BASE = 'https://nodejs-backend-1arp.onrender.com';
-        
-        async function syncAction(action, payload = {}) {
-            try {
-                const token = localStorage.getItem('discord_token');
-                if (!token) return;
-                const res = await fetch(`${API_BASE}/api/v1/grove/action`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ action, payload })
-                });
-                if (res.ok) {
-                    const resData = await res.json();
-                    if (resData.ok && resData.data) {
-                        const d = resData.data;
-                        if (d.coins != null) G.coins = d.coins;
-                        if (d.inventory) G.inventory = d.inventory;
-                        if (Array.isArray(d.plants) && d.plants.length) G.plants = d.plants;
-                        if (Array.isArray(d.log) && d.log.length) G.log = d.log;
-                        if (d.totalCare) G.totalCare = d.totalCare;
-                        save(true); // Save locally without syncing
-                        render();
-                    }
-                }
-            } catch (e) { console.error('Action Sync Error', e); }
-        }
-
-        async function save(localOnly = false) {
+        async function save() {
             try {
                 const data = {
                     plants: G.plants, coins: G.coins, cd: G.cd, lastTick: G.lastTick,
@@ -3325,29 +3225,11 @@
                     wiltWardUntil: G.wiltWardUntil, nightbloomLeft: G.nightbloomLeft, cooldownHalf: G.cooldownHalf
                 };
                 localStorage.setItem('grove_v5', JSON.stringify(data));
-                
-                // We no longer sync the full payload to the server.
-                // The Action API handles all database updates.
             } catch (e) { }
         }
-        
+
         async function loadSave() {
             try {
-                const token = localStorage.getItem('discord_token');
-                if (token) {
-                    const res = await fetch(`${API_BASE}/api/v1/grove/sync`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (res.ok) {
-                        const payload = await res.json();
-                        if (payload.ok && payload.data) {
-                            localStorage.setItem('grove_v5', JSON.stringify(payload.data));
-                        }
-                    } else if (res.status === 401) {
-                        localStorage.removeItem('discord_token'); // token expired
-                        window.location.reload();
-                    }
-                }
                 const raw = localStorage.getItem('grove_v5'); if (!raw) return false;
                 const d = JSON.parse(raw);
                 if (Array.isArray(d.plants) && d.plants.length) G.plants = d.plants.map(normalizePlant);
@@ -3393,37 +3275,6 @@
         }
 
         /* ── EXPORT / IMPORT ── */
-        async function doCloudSave() {
-            const token = localStorage.getItem('discord_token');
-            if (!token) {
-                toast('Not logged in. Click Login with Discord first.');
-                return;
-            }
-            try {
-                toast('Saving to cloud...');
-                await save();
-                toast('Successfully saved to cloud database!');
-            } catch (e) {
-                toast('Failed to save to cloud.');
-            }
-        }
-
-        async function doCloudLoad() {
-            const token = localStorage.getItem('discord_token');
-            if (!token) {
-                toast('Not logged in. Click Login with Discord first.');
-                return;
-            }
-            try {
-                toast('Loading from cloud...');
-                await loadSave();
-                renderPlants(); renderHealth(); renderPlantList(); updateBadge();
-                toast('Successfully loaded from cloud database!');
-            } catch (e) {
-                toast('Failed to load from cloud.');
-            }
-        }
-
         function doExport() {
             const blob = new Blob([JSON.stringify({
                 plants: G.plants, coins: G.coins, milestones: G.milestones,
@@ -3523,72 +3374,6 @@
         /* ── RESIZE ── */
         let resizeTO;
         /* ── AUDIO ENGINE ── */
-        function discordAvatarUrl(user) {
-            if (!user || !user.id || !user.avatar) return '';
-            const ext = user.avatar.startsWith('a_') ? 'gif' : 'png';
-            return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${ext}?size=64`;
-        }
-
-        function setDiscordUser(user) {
-            if (!user) return;
-            const name = user.global_name || user.username || 'Discord';
-            const badge = document.getElementById('discord-user-badge');
-            const avatar = document.getElementById('discord-user-avatar');
-            const label = document.getElementById('discord-user-name');
-            const mobile = document.getElementById('discord-user-mobile');
-            const logoutBtn = document.getElementById('discord-logout-btn');
-
-            if (label) label.textContent = name;
-            if (mobile) {
-                mobile.textContent = `Signed in as ${name}`;
-                mobile.classList.add('is-visible');
-            }
-            if (avatar) {
-                const src = discordAvatarUrl(user);
-                avatar.style.display = src ? 'block' : 'none';
-                if (src) avatar.src = src;
-            }
-            if (badge) badge.classList.add('is-visible');
-            if (logoutBtn) logoutBtn.style.display = 'inline-flex';
-            localStorage.setItem('discord_user', JSON.stringify(user));
-        }
-
-        async function fetchDiscordUser() {
-            const token = localStorage.getItem('discord_token');
-            if (!token) return null;
-            const logoutBtn = document.getElementById('discord-logout-btn');
-            if (logoutBtn) logoutBtn.style.display = 'inline-flex';
-            try {
-                const res = await fetch('https://discord.com/api/users/@me', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                if (res.status === 401) {
-                    localStorage.removeItem('discord_token');
-                    localStorage.removeItem('discord_user');
-                    return null;
-                }
-                if (!res.ok) return null;
-                const user = await res.json();
-                setDiscordUser(user);
-                return user;
-            } catch (e) {
-                return null;
-            }
-        }
-
-        function logoutDiscord() {
-            localStorage.removeItem('discord_token');
-            localStorage.removeItem('discord_user');
-            window.location.reload();
-        }
-
-        function showAuthOverlay() {
-            document.getElementById('auth-overlay').style.display = 'flex';
-            const client_id = '1075277522519982172';
-            const redir = encodeURIComponent('https://letrollologist.github.io/numa.github.io/grove.html');
-            document.getElementById('discord-login-btn').href = `https://discord.com/api/oauth2/authorize?client_id=${client_id}&redirect_uri=${redir}&response_type=token&scope=identify`;
-        }
-
         const AUDIO_SRCS = {
             bg: "https://letrollologist.github.io/numa.github.io/forestnight.ogg",
             water: "https://res.cloudinary.com/dwpisauuy/video/upload/v1777850244/496739__16gpanskakomarkova_marina__13-1-watering-kettle_jamzib.wav",
@@ -3648,37 +3433,8 @@
         });
 
         /* ── INIT ── */
-        
+
         async function init() {
-            // Check auth redirect
-            const hash = window.location.hash.substring(1);
-            if (hash) {
-                const params = new URLSearchParams(hash);
-                if (params.has('access_token')) {
-                    localStorage.setItem('discord_token', params.get('access_token'));
-                    window.location.hash = '';
-                } else if (params.has('error')) {
-                    localStorage.removeItem('discord_token');
-                    localStorage.removeItem('discord_user');
-                    window.location.hash = '';
-                }
-            }
-
-            if (!localStorage.getItem('discord_token')) {
-                showAuthOverlay();
-                return;
-            }
-
-            try {
-                const cachedUser = JSON.parse(localStorage.getItem('discord_user') || 'null');
-                if (cachedUser) setDiscordUser(cachedUser);
-            } catch (e) { }
-            await fetchDiscordUser();
-            if (!localStorage.getItem('discord_token')) {
-                showAuthOverlay();
-                return;
-            }
-
             const loaded = await loadSave();
             applyOfflineTick();
 
