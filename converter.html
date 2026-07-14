@@ -817,23 +817,8 @@
     <!-- Stars Parallax Background -->
     <canvas id="stars-canvas"></canvas>
 
-    <!-- Discord OAuth Gate overlay -->
-    <div id="discordGate" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#04060e;z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:20px;padding:20px;text-align:center;">
-        <canvas id="gate-stars-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.4;"></canvas>
-        <div style="position:relative;z-index:1;background:rgba(5,8,22,0.93);border:1px solid rgba(168,159,216,0.14);border-radius:24px;padding:40px 30px;max-width:440px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;gap:24px;backdrop-filter:blur(25px);-webkit-backdrop-filter:blur(25px);">
-            <div style="font-family:'Cinzel',serif;font-size:1.8rem;color:#ffffff;letter-spacing:1px;text-align:center;line-height:1.2;">Celestial Aligner</div>
-            <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:3px;color:#a89fd8;margin-top:-10px;">Authorized Access Only</div>
-            <div style="font-size:0.9rem;color:rgba(255,255,255,0.7);line-height:1.6;margin:10px 0;">This synchronization terminal requires verification. Connect your Discord entity to decrypt the celestial alignments.</div>
-            <div id="discordAuthError" style="display:none;color:#ff6fab;font-size:0.85rem;background:rgba(255,111,171,0.1);border:1px solid rgba(255,111,171,0.25);padding:10px 15px;border-radius:12px;width:100%;"></div>
-            <a id="discordLoginBtn" href="#" style="display:flex;align-items:center;justify-content:center;gap:12px;background:#5865F2;color:#ffffff;font-family:'Josefin Sans',sans-serif;font-weight:600;font-size:0.95rem;text-decoration:none;padding:14px 28px;border-radius:999px;width:100%;box-shadow:0 4px 15px rgba(88,101,242,0.4);transition:all 0.3s ease;">
-                <svg width="20" height="16" viewBox="0 0 71 55" fill="currentColor"><path d="M60.1 4.9A58.5 58.5 0 0 0 45.5.4a40.7 40.7 0 0 0-1.8 3.7 54.1 54.1 0 0 0-16.3 0A40 40 0 0 0 25.6.4 58.4 58.4 0 0 0 11 4.9C1.6 19-1 32.8.3 46.4a59 59 0 0 0 18 9.1 43.8 43.8 0 0 0 3.8-6.2 38.4 38.4 0 0 1-6-2.9l1.4-1.1a42 42 0 0 0 36.1 0l1.5 1.1a38.3 38.3 0 0 1-6 2.9 43.6 43.6 0 0 0 3.8 6.2 58.7 58.7 0 0 0 18-9.1C72 30.6 68.3 16.9 60.1 4.9Z"/></svg>
-                Login with Discord
-            </a>
-        </div>
-    </div>
-
     <!-- App Container -->
-    <div class="app-container" style="display:none;">
+    <div class="app-container">
 
         <!-- Header -->
         <header>
@@ -1133,62 +1118,14 @@
         const AI_WORKER_URL = 'https://ai-proxy-4lt3.onrender.com';
         let aiSession = null;
 
-        function initDiscordAuth() {
-            if (window.location.hash.startsWith('#session=')) {
-                const token = window.location.hash.slice('#session='.length);
-                try {
-                    const payload = JSON.parse(atob(token.split('.')[0]));
-                    if (payload.exp > Date.now()) {
-                        aiSession = { token, ...payload };
-                        sessionStorage.setItem('aiSession', JSON.stringify(aiSession));
-                    }
-                } catch(e) {}
-                history.replaceState(null, '', window.location.pathname + window.location.search);
-            }
-
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('auth') === 'denied') {
-                const err = document.getElementById('discordAuthError');
-                if (err) {
-                    err.textContent = '⚠️ Your Discord account is not authorized.';
-                    err.style.display = 'block';
-                }
-                history.replaceState(null, '', window.location.pathname);
-            }
-
-            if (!aiSession) {
-                try {
-                    const saved = sessionStorage.getItem('aiSession');
-                    if (saved) {
-                        const s = JSON.parse(saved);
-                        if (s.exp > Date.now()) aiSession = s;
-                        else sessionStorage.removeItem('aiSession');
-                    }
-                } catch(e) {}
-            }
-
-            const loginBtn = document.getElementById('discordLoginBtn');
-            if (loginBtn) {
-                loginBtn.href = AI_WORKER_URL + '/auth/discord?redirect=' + encodeURIComponent(window.location.href);
-            }
-
-            const gate = document.getElementById('discordGate');
-            const mainApp = document.querySelector('.app-container');
-            if (aiSession) {
-                if (gate) gate.style.display = 'none';
-                if (mainApp) mainApp.style.display = 'flex';
-                // Initialize after auth
-                loadFromURL();
-                renderCalendar();
-                updateAllZonesFromEast();
-                updateLiveClocks();
-                setInterval(updateLiveClocks, 1000);
-                setInterval(updateOverlapCountdown, 30000);
-                updateOverlapCountdown();
-            } else {
-                if (gate) gate.style.display = 'flex';
-                if (mainApp) mainApp.style.display = 'none';
-            }
+        function initApp() {
+            loadFromURL();
+            renderCalendar();
+            updateAllZonesFromEast();
+            updateLiveClocks();
+            setInterval(updateLiveClocks, 1000);
+            setInterval(updateOverlapCountdown, 30000);
+            updateOverlapCountdown();
         }
 
         // Theme Switcher
@@ -1834,7 +1771,7 @@
         })();
 
         // Start initialization
-        initDiscordAuth();
+        initApp();
     </script>
 </body>
 
