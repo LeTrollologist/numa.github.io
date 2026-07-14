@@ -492,6 +492,210 @@
             color: var(--pink)
         }
 
+        /* ── CHANGE LOGS PAGE ── */
+        #page-changelogs {
+            display: none;
+            padding-bottom: 80px;
+        }
+
+        #page-changelogs.active {
+            display: block;
+        }
+
+        .changelogs-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 1000px;
+            margin: 0 auto 32px;
+            padding: 20px;
+            background: rgba(10, 14, 30, 0.5);
+            border: 1px solid var(--border);
+            border-radius: var(--rc);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: var(--sh-c);
+        }
+
+        @media(min-width: 768px) {
+            .changelogs-controls {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                padding: 16px 24px;
+            }
+        }
+
+        .changelogs-controls .search-wrapper {
+            flex-grow: 1;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .changelogs-controls input[type="text"] {
+            width: 100%;
+            padding: 12px 18px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: #fff;
+            font-family: var(--fb);
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .changelogs-controls input[type="text"]:focus {
+            border-color: var(--pink);
+            box-shadow: 0 0 10px rgba(255, 105, 130, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .changelogs-controls .filter-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .changelogs-controls select {
+            padding: 10px 18px;
+            border-radius: 20px;
+            background: rgba(10, 14, 30, 0.85);
+            border: 1px solid var(--border);
+            color: #e0e0ff;
+            font-family: var(--fb);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .changelogs-controls select:focus,
+        .changelogs-controls select:hover {
+            border-color: var(--pink);
+            box-shadow: 0 0 8px rgba(255, 105, 130, 0.2);
+        }
+
+        .changelogs-controls button {
+            padding: 10px 20px;
+            border-radius: 20px;
+            background: rgba(255, 105, 130, 0.15);
+            border: 1px solid var(--pink);
+            color: #fff;
+            font-family: var(--fb);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            outline: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .changelogs-controls button:hover {
+            background: rgba(255, 105, 130, 0.3);
+            box-shadow: 0 0 12px rgba(255, 105, 130, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .changelogs-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        @media(min-width: 768px) {
+            .changelogs-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .changelogs-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: var(--rc);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: var(--sh-c);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+        }
+
+        .changelogs-card:hover {
+            border-color: var(--border-p);
+            box-shadow: var(--sh-p);
+            transform: translateY(-4px);
+        }
+
+        .changelogs-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .changelogs-card-title {
+            font-family: var(--fd);
+            font-size: 1.3rem;
+            color: #fff;
+            margin: 0;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+
+        .changelogs-card-date {
+            font-family: var(--fb);
+            font-size: 0.76rem;
+            color: rgba(255, 255, 255, 0.5);
+            white-space: nowrap;
+        }
+
+        .changelogs-card-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-family: var(--fb);
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .changelogs-card-badge.feature {
+            background: rgba(255, 105, 130, 0.15);
+            color: #ff6982;
+            border: 1px solid rgba(255, 105, 130, 0.3);
+            text-shadow: 0 0 6px rgba(255, 105, 130, 0.4);
+        }
+
+        .changelogs-card-badge.fix {
+            background: rgba(6, 182, 212, 0.15);
+            color: #22d3ee;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            text-shadow: 0 0 6px rgba(6, 182, 212, 0.4);
+        }
+
+        .changelogs-card-badge.optimization {
+            background: rgba(234, 179, 8, 0.15);
+            color: #facc15;
+            border: 1px solid rgba(234, 179, 8, 0.3);
+            text-shadow: 0 0 6px rgba(234, 179, 8, 0.4);
+        }
+
+        .changelogs-card-desc {
+            font-family: var(--fb);
+            font-size: 0.86rem;
+            color: rgba(255, 255, 255, 0.78);
+            line-height: 1.5;
+            margin: 0;
+        }
+
         /* ── SHARED ── */
         .glass-card {
             background: var(--glass);
@@ -1014,6 +1218,8 @@
             border-color: var(--border-p);
             box-shadow: var(--sh-p)
         }
+
+
 
         .contact-card:hover .snapchat svg {
             fill: #FFFC00;
@@ -3051,7 +3257,7 @@
         <div class="page-title">Reach Me ✨</div>
         <div class="alt-counter" id="contact-counter"></div>
         <div class="contact-container">
-            </div>
+
             <div class="contact-card" onclick="copyText(event,'audaxrein',this)">
                 <div class="card-icon snapchat">
                     <svg viewBox="0 0 448 512">
@@ -3293,6 +3499,33 @@
         </div>
     </div>
 
+    <!-- ══ CHANGE LOGS ══ -->
+    <div id="page-changelogs" class="page-section">
+        <div class="page-title">Update Timeline &amp; Change Logs</div>
+
+        <div class="changelogs-controls">
+            <div class="search-wrapper">
+                <input type="text" id="changelogSearch" placeholder="Search updates..." oninput="filterChangelogs()">
+            </div>
+
+            <div class="filter-wrapper">
+                <select id="changelogTimePeriod" onchange="filterChangelogs()">
+                    <option value="all">All Time</option>
+                    <option value="7">Last 7 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="ytd">Year to Date (2026)</option>
+                    <option value="2025">2025 Updates</option>
+                </select>
+
+                <button id="changelogSortBtn" onclick="toggleChangelogSort()">
+                    Date: Newest First <span id="sortDirectionIcon">⇅</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="changelogs-grid" id="changelogsGrid"></div>
+    </div>
+
     <!-- Alarm audio + UI -->
     <audio id="alarmAudio" loop
         src="https://letrollologist.github.io/numa.github.io/freesound_community-alarm-clock-90867.mp3"></audio>
@@ -3312,6 +3545,7 @@
             <span>© 2026 Numa's Space</span>
             <span>·</span><a onclick="navigate('privacy')">Privacy</a>
             <span>·</span><a onclick="navigate('status')">System</a>
+            <span>·</span><a onclick="navigate('changelogs')">Change Logs</a>
             <span>·</span><a href="credits.html">Credits</a>
             <span>·</span><a href="install.html">Install App</a>
         </div>
@@ -3442,6 +3676,7 @@
             if (pageId === 'dreamland' && !ytPlayer && window.YT && window.YT.Player) initYTPlayer();
             if (pageId === 'minigame') setTimeout(resizePong, 60);
             if (pageId === 'stargazer') setTimeout(initStargazer, 80);
+            if (pageId === 'changelogs') setTimeout(renderChangelogs, 50);
         }
 
         // ══════════════════════════════════════════════════════════
