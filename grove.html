@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://raw.githubusercontent.com; connect-src 'self' https://analytics-server-bdrm.onrender.com https://nodejs-backend-1arp.onrender.com; media-src 'self' https://res.cloudinary.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://raw.githubusercontent.com; connect-src 'self' https://analytics-server-bdrm.onrender.com; media-src 'self' https://res.cloudinary.com;">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Grove · Numa's Garden</title>
@@ -1638,46 +1638,10 @@
                 padding-top: env(safe-area-inset-top, 0px) !important;
             }
         }
-    
-        #auth-overlay {
-            position: fixed; inset: 0; z-index: 10000;
-            background: rgba(4, 6, 14, 0.95);
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: var(--text); font-family: 'Josefin Sans', sans-serif;
-            transition: opacity 0.4s ease;
-        }
-        .auth-box {
-            background: var(--panel); border: 1px solid var(--accent); padding: 30px;
-            text-align: center; box-shadow: 0 0 20px rgba(168, 159, 216, 0.15);
-            border-radius: 8px; max-width: 90%; width: 320px;
-        }
-        .auth-title { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); margin-bottom: 10px; letter-spacing: 0.1em; }
-        .auth-sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 25px; line-height: 1.5; }
-        .auth-btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-            background: #5865F2; color: #ffffff; border: none; padding: 10px 20px;
-            font-family: 'Josefin Sans', sans-serif; font-size: 0.85rem; text-transform: uppercase;
-            letter-spacing: 0.1em; cursor: pointer; border-radius: 4px; text-decoration: none; width: 100%;
-        }
-        .auth-btn:hover { background: #4752C4; }
-        .auth-btn svg { width: 20px; height: 20px; fill: currentColor; }
-
     </style>
 </head>
 
 <body>
-
-<div id="auth-overlay" style="display: none;">
-    <div class="auth-box">
-        <div class="auth-title">The Grove</div>
-        <div class="auth-sub">Log in with Discord to sync your garden across your devices and Discord.</div>
-        <a id="discord-login-btn" href="#" class="auth-btn">
-            <svg viewBox="0 0 127.14 96.36"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.16,46,96.06,53,91,65.69,84.69,65.69Z"/></svg>
-            Login with Discord
-        </a>
-    </div>
-</div>
 
     <canvas id="stars-cvs" class="bgcvs"></canvas>
     <svg id="forest-svg" xmlns="http://www.w3.org/2000/svg"></svg>
@@ -1930,11 +1894,9 @@
     <!-- Data Modal -->
     <div id="data-modal" class="modal">
         <div class="mbox" style="max-width:420px">
-            <div class="mtitle">📊 Data & Sync <span class="mclose" onclick="closeModal('data-modal')">✖ Close</span></div>
-            <p style="color:var(--muted);font-size:.75rem;margin:6px 0 0">Export or import your grove data. Compatible with the Discord bot's <code>/grove import</code> command.</p>
+            <div class="mtitle">📊 Data <span class="mclose" onclick="closeModal('data-modal')">✖ Close</span></div>
+            <p style="color:var(--muted);font-size:.75rem;margin:6px 0 0">Export, import, or copy your local grove data.</p>
             <div class="data-actions">
-                <button onclick="doCloudSave()" style="border-color: var(--gold); color: var(--gold);">☁️ Save to Cloud Database</button>
-                <button onclick="doCloudLoad()" style="border-color: var(--gold); color: var(--gold);">☁️ Load from Cloud Database</button>
                 <button onclick="doExport()">📥 Export to File</button>
                 <button onclick="doImport()">📤 Import from File</button>
                 <button onclick="doCopyJSON()">📋 Copy JSON to Clipboard</button>
@@ -1942,7 +1904,7 @@
             <p style="color:var(--muted);font-size:.68rem;margin:18px 0 6px;text-transform:uppercase;letter-spacing:.1em">Paste JSON</p>
             <textarea id="paste-json-area" class="data-paste-area" placeholder='Paste your grove JSON here...'></textarea>
             <div class="data-paste-row">
-                <button class="data-actions" style="display:inline" onclick="doPasteImport()">Apply Pasted JSON</button>
+                <button type="button" onclick="doPasteImport()">Apply Pasted JSON</button>
             </div>
             <p id="data-modal-status" style="color:var(--accent);font-size:.7rem;margin-top:10px;min-height:1.2em"></p>
         </div>
@@ -2180,7 +2142,6 @@
             addLog(`Hybrid plant "${hybridName}" successfully germinated from ${p1.name} & ${p2.name}.`);
             closeModal('nursery-modal');
             renderPlants(); renderPlantList(); updateBadge(); save();
-            syncAction('breed_nursery', { newPlant: newPlant });
         }
 
 
@@ -2689,7 +2650,6 @@
             renderPlants(); renderHealth(); renderPlantList(); updateBadge();
             checkMilestones();
             save();
-            syncAction('care', { careType: action });
         }
 
         function checkLevelUp(p, pos) {
@@ -2762,7 +2722,6 @@
 
             renderPlants(); renderHealth(); renderPlantList(); updateBadge();
             save();
-            syncAction('game_tick');
         }
 
         /* ── EVENTS ── */
@@ -2787,11 +2746,9 @@
         /* Event effects */
         function healAll(stat, amount) {
             G.plants.forEach(p => p.health[stat] = Math.min(100, p.health[stat] + amount));
-            syncAction('heal_all', { stat: stat, amount: amount });
         }
         function giveCoins(n) {
             G.coins += n;
-            syncAction('earn_coins', { amount: n, reason: 'event' });
             // coin pop visual
             const ga = document.getElementById('garden-area');
             const el = document.createElement('div');
@@ -2889,7 +2846,6 @@
                 toast(`${item.name} added to inventory.`);
             }
             updateBadge(); renderMarket(); save();
-            syncAction('buy_item', { id: id, price: item.price, type: item.type });
         }
         function useItem(id) {
             if (!(G.inventory[id] > 0)) return;
@@ -2929,7 +2885,6 @@
             spawnParticles('bloom', document.getElementById('garden-area').clientWidth / 2,
                 document.getElementById('garden-area').clientHeight / 2, 30);
             renderPlants(); renderHealth(); renderPlantList(); renderMarket(); updateBadge(); save();
-            syncAction('use_item', { id: id });
         }
 
         /* ── RENAME ── */
@@ -2974,7 +2929,6 @@
                 updateUI();
                 toast(`Sold ${p.name} for ${value} coins!`);
                 save();
-                syncAction('sell_plant', { id: id, value: value });
             }
         }
 
@@ -3156,7 +3110,6 @@
             toast(`A ${newPlant.name} seedling has emerged!`);
             addLog(`Cross-pollinated ${PLANT_META[pA.type].emoji} ${pA.name} and ${PLANT_META[pB.type].emoji} ${pB.name} to create ${PLANT_META[hybridType].emoji} ${newPlant.name}.`);
             save();
-            syncAction('buy_nursery', { cost: NURSERY_COST, newPlant: newPlant });
         }
 
         /* ── MILESTONES ── */
@@ -3262,36 +3215,7 @@
         }
 
         /* ── SAVE / LOAD ── */
-        
-        
-        const API_BASE = 'https://nodejs-backend-1arp.onrender.com';
-        
-        async function syncAction(action, payload = {}) {
-            try {
-                const token = localStorage.getItem('discord_token');
-                if (!token) return;
-                const res = await fetch(`${API_BASE}/api/v1/grove/action`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ action, payload })
-                });
-                if (res.ok) {
-                    const resData = await res.json();
-                    if (resData.ok && resData.data) {
-                        const d = resData.data;
-                        if (d.coins != null) G.coins = d.coins;
-                        if (d.inventory) G.inventory = d.inventory;
-                        if (Array.isArray(d.plants) && d.plants.length) G.plants = d.plants;
-                        if (Array.isArray(d.log) && d.log.length) G.log = d.log;
-                        if (d.totalCare) G.totalCare = d.totalCare;
-                        save(true); // Save locally without syncing
-                        render();
-                    }
-                }
-            } catch (e) { console.error('Action Sync Error', e); }
-        }
-
-        async function save(localOnly = false) {
+        async function save() {
             try {
                 const data = {
                     plants: G.plants, coins: G.coins, cd: G.cd, lastTick: G.lastTick,
@@ -3301,29 +3225,11 @@
                     wiltWardUntil: G.wiltWardUntil, nightbloomLeft: G.nightbloomLeft, cooldownHalf: G.cooldownHalf
                 };
                 localStorage.setItem('grove_v5', JSON.stringify(data));
-                
-                // We no longer sync the full payload to the server.
-                // The Action API handles all database updates.
             } catch (e) { }
         }
-        
+
         async function loadSave() {
             try {
-                const token = localStorage.getItem('discord_token');
-                if (token) {
-                    const res = await fetch(`${API_BASE}/api/v1/grove/sync`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (res.ok) {
-                        const payload = await res.json();
-                        if (payload.ok && payload.data) {
-                            localStorage.setItem('grove_v5', JSON.stringify(payload.data));
-                        }
-                    } else if (res.status === 401) {
-                        localStorage.removeItem('discord_token'); // token expired
-                        window.location.reload();
-                    }
-                }
                 const raw = localStorage.getItem('grove_v5'); if (!raw) return false;
                 const d = JSON.parse(raw);
                 if (Array.isArray(d.plants) && d.plants.length) G.plants = d.plants.map(normalizePlant);
@@ -3369,37 +3275,6 @@
         }
 
         /* ── EXPORT / IMPORT ── */
-        async function doCloudSave() {
-            const token = localStorage.getItem('discord_token');
-            if (!token) {
-                toast('Not logged in. Click Login with Discord first.');
-                return;
-            }
-            try {
-                toast('Saving to cloud...');
-                await save();
-                toast('Successfully saved to cloud database!');
-            } catch (e) {
-                toast('Failed to save to cloud.');
-            }
-        }
-
-        async function doCloudLoad() {
-            const token = localStorage.getItem('discord_token');
-            if (!token) {
-                toast('Not logged in. Click Login with Discord first.');
-                return;
-            }
-            try {
-                toast('Loading from cloud...');
-                await loadSave();
-                renderPlants(); renderHealth(); renderPlantList(); updateBadge();
-                toast('Successfully loaded from cloud database!');
-            } catch (e) {
-                toast('Failed to load from cloud.');
-            }
-        }
-
         function doExport() {
             const blob = new Blob([JSON.stringify({
                 plants: G.plants, coins: G.coins, milestones: G.milestones,
@@ -3558,26 +3433,8 @@
         });
 
         /* ── INIT ── */
-        
-        async function init() {
-            // Check auth redirect
-            const hash = window.location.hash.substring(1);
-            if (hash) {
-                const params = new URLSearchParams(hash);
-                if (params.has('access_token')) {
-                    localStorage.setItem('discord_token', params.get('access_token'));
-                    window.location.hash = '';
-                }
-            }
-            
-            if (!localStorage.getItem('discord_token')) {
-                document.getElementById('auth-overlay').style.display = 'flex';
-                const client_id = '1075277522519982172';
-                const redir = encodeURIComponent('https://letrollologist.github.io/numa.github.io/grove.html');
-                document.getElementById('discord-login-btn').href = `https://discord.com/api/oauth2/authorize?client_id=${client_id}&redirect_uri=${redir}&response_type=token&scope=identify`;
-                return;
-            }
 
+        async function init() {
             const loaded = await loadSave();
             applyOfflineTick();
 
