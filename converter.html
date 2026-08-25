@@ -35,9 +35,10 @@
             --gold: #c9a84c;
             --gold-d: rgba(201, 168, 76, 0.14);
 
-            --east-glow: var(--accent);
+            --uk-glow: var(--accent);
             --ist-glow: var(--gold);
             --dub-glow: #00f0ff;
+            --cara-glow: #ffb6d9;
             --sis-glow: #ffb6d9;
             --glass: var(--panel);
             --font-display: 'Cinzel', serif;
@@ -53,7 +54,7 @@
             --accent-d: rgba(126, 184, 247, 0.15);
             --border: rgba(126, 184, 247, 0.13);
             --border-h: rgba(126, 184, 247, 0.30);
-            --east-glow: var(--accent);
+            --uk-glow: var(--accent);
             --ist-glow: #bf5eff;
         }
 
@@ -63,7 +64,7 @@
             --accent-d: rgba(240, 169, 106, 0.14);
             --border: rgba(240, 169, 106, 0.13);
             --border-h: rgba(240, 169, 106, 0.30);
-            --east-glow: var(--accent);
+            --uk-glow: var(--accent);
             --ist-glow: var(--gold);
         }
 
@@ -282,8 +283,8 @@
             flex-shrink: 0;
         }
 
-        .input-card.east { border-left: 3px solid var(--east-glow); }
-        .input-card.east:focus-within { border-color: var(--east-glow); box-shadow: 0 0 25px var(--accent-d); }
+        .input-card.uk { border-left: 3px solid var(--uk-glow); }
+        .input-card.uk:focus-within { border-color: var(--uk-glow); box-shadow: 0 0 25px var(--accent-d); }
 
         .input-card.dub { border-left: 3px solid var(--dub-glow); }
         .input-card.dub:focus-within { border-color: var(--dub-glow); box-shadow: 0 0 25px rgba(0,240,255,0.08); }
@@ -291,8 +292,8 @@
         .input-card.ist { border-right: 3px solid var(--ist-glow); }
         .input-card.ist:focus-within { border-color: var(--ist-glow); box-shadow: 0 0 25px rgba(201,168,76,0.08); }
 
-        .input-card.sister { border-right: 3px solid var(--sis-glow); }
-        .input-card.sister:focus-within { border-color: var(--sis-glow); box-shadow: 0 0 25px rgba(255,182,217,0.08); }
+        .input-card.cara { border-right: 3px solid var(--cara-glow); }
+        .input-card.cara:focus-within { border-color: var(--cara-glow); box-shadow: 0 0 25px rgba(255,182,217,0.08); }
 
         .card-header-row {
             display: flex;
@@ -311,10 +312,10 @@
             gap: 4px;
         }
 
-        .card-title.east { color: var(--east-glow); }
+        .card-title.uk { color: var(--uk-glow); }
         .card-title.dub { color: var(--dub-glow); }
         .card-title.ist { color: var(--ist-glow); }
-        .card-title.sister { color: var(--sis-glow); }
+        .card-title.cara { color: var(--cara-glow); }
 
         .timezone-offset {
             font-family: var(--font-mono);
@@ -351,10 +352,10 @@
             animation: pulse-glow 2s infinite;
         }
 
-        .east .live-clock::before { background: var(--east-glow); box-shadow: 0 0 8px var(--east-glow); }
+        .uk .live-clock::before { background: var(--uk-glow); box-shadow: 0 0 8px var(--uk-glow); }
         .dub .live-clock::before { background: var(--dub-glow); box-shadow: 0 0 8px var(--dub-glow); }
         .ist .live-clock::before { background: var(--ist-glow); box-shadow: 0 0 8px var(--ist-glow); }
-        .sister .live-clock::before { background: var(--sis-glow); box-shadow: 0 0 8px var(--sis-glow); }
+        .cara .live-clock::before { background: var(--cara-glow); box-shadow: 0 0 8px var(--cara-glow); }
 
         @keyframes pulse-glow {
             0%, 100% { opacity: 0.3; }
@@ -443,10 +444,10 @@
             transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .east .ampm-slider { background: linear-gradient(135deg, var(--east-glow), #a224ff); }
+        .uk .ampm-slider { background: linear-gradient(135deg, var(--uk-glow), #a224ff); }
         .dub .ampm-slider { background: linear-gradient(135deg, var(--dub-glow), #0055ff); }
         .ist .ampm-slider { background: linear-gradient(135deg, var(--ist-glow), #ffb6d9); }
-        .sister .ampm-slider { background: linear-gradient(135deg, var(--sis-glow), #ff007f); }
+        .cara .ampm-slider { background: linear-gradient(135deg, var(--cara-glow), #ff007f); }
 
         .ampm-slider.pm { transform: translateX(100%); }
 
@@ -504,10 +505,10 @@
             cursor: pointer;
         }
 
-        .east .custom-slider::-webkit-slider-thumb { background: var(--east-glow); box-shadow: 0 0 8px var(--east-glow); }
+        .uk .custom-slider::-webkit-slider-thumb { background: var(--uk-glow); box-shadow: 0 0 8px var(--uk-glow); }
         .dub .custom-slider::-webkit-slider-thumb { background: var(--dub-glow); box-shadow: 0 0 8px var(--dub-glow); }
         .ist .custom-slider::-webkit-slider-thumb { background: var(--ist-glow); box-shadow: 0 0 8px var(--ist-glow); }
-        .sister .custom-slider::-webkit-slider-thumb { background: var(--sis-glow); box-shadow: 0 0 8px var(--sis-glow); }
+        .cara .custom-slider::-webkit-slider-thumb { background: var(--cara-glow); box-shadow: 0 0 8px var(--cara-glow); }
 
         /* Calendar Styling */
         .calendar-box {
@@ -591,7 +592,7 @@
         }
 
         .cal-cell:hover { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
-        .cal-cell.active { background: var(--east-glow); color: #ffffff; font-weight: bold; }
+        .cal-cell.active { background: var(--uk-glow); color: #ffffff; font-weight: bold; }
         .cal-cell.other-month { color: rgba(255, 255, 255, 0.15); }
 
         /* ── CENTRAL COLUMN TIMELINE ── */
@@ -626,9 +627,9 @@
             text-transform: uppercase;
         }
 
-        .timeline-col-title.east { color: var(--east-glow); }
+        .timeline-col-title.uk { color: var(--uk-glow); }
         .timeline-col-title.dub { color: var(--dub-glow); }
-        .timeline-col-title.sister { color: var(--sis-glow); }
+        .timeline-col-title.cara { color: var(--cara-glow); }
         .timeline-col-title.ist { color: var(--ist-glow); }
 
         .timeline-scroll {
@@ -704,7 +705,7 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, var(--east-glow), var(--dub-glow), var(--sis-glow), var(--ist-glow));
+            background: linear-gradient(90deg, var(--uk-glow), var(--dub-glow), var(--cara-glow), var(--ist-glow));
             box-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
             z-index: 5;
             pointer-events: none;
@@ -840,9 +841,9 @@
 
         <!-- Mobile Navigation Tabs -->
         <div class="mobile-tabs">
-            <button class="mobile-tab active" data-tab="east" onclick="switchMobileTab('east')">USA</button>
+            <button class="mobile-tab active" data-tab="uk" onclick="switchMobileTab('uk')">UK</button>
             <button class="mobile-tab" data-tab="dub" onclick="switchMobileTab('dub')">Dubai</button>
-            <button class="mobile-tab" data-tab="sister" onclick="switchMobileTab('sister')">Sister</button>
+            <button class="mobile-tab" data-tab="cara" onclick="switchMobileTab('cara')">Cara 🌸</button>
             <button class="mobile-tab" data-tab="ist" onclick="switchMobileTab('ist')">IST</button>
             <button class="mobile-tab" data-tab="timeline" onclick="switchMobileTab('timeline')">Timeline</button>
         </div>
@@ -853,46 +854,46 @@
             <!-- Left Wing -->
             <div class="wing-column">
                 
-                <!-- CARD 1: US Eastern -->
-                <div class="input-card east">
+                <!-- CARD 1: UK Time -->
+                <div class="input-card uk">
                     <div class="card-header-row">
-                        <div class="card-title east">
-                            <span>US Eastern</span>
-                            <span class="timezone-offset" id="east-offset">EDT (UTC-4)</span>
+                        <div class="card-title uk">
+                            <span>UK Time</span>
+                            <span class="timezone-offset" id="uk-offset">GMT (UTC+0)</span>
                         </div>
-                        <span class="live-clock" id="east-live-clock">--:--:--</span>
+                        <span class="live-clock" id="uk-live-clock">--:--:--</span>
                     </div>
 
                     <div class="time-box">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <span class="time-label">Set Time</span>
-                            <span class="time-label" id="east-phase" style="color:var(--east-glow);text-transform:none;font-weight:500;">Daylight ☀️</span>
+                            <span class="time-label" id="uk-phase" style="color:var(--uk-glow);text-transform:none;font-weight:500;">Daylight ☀️</span>
                         </div>
                         <div class="time-inputs">
-                            <input type="text" class="num-input" id="east-hour" maxlength="2" value="09" oninput="handleTimeInput(this, 'hour')" onblur="formatTimeInput(this, 'hour')">
+                            <input type="text" class="num-input" id="uk-hour" maxlength="2" value="09" oninput="handleTimeInput(this, 'hour')" onblur="formatTimeInput(this, 'hour')">
                             <span class="separator">:</span>
-                            <input type="text" class="num-input" id="east-min" maxlength="2" value="00" oninput="handleTimeInput(this, 'min')" onblur="formatTimeInput(this, 'min')">
+                            <input type="text" class="num-input" id="uk-min" maxlength="2" value="00" oninput="handleTimeInput(this, 'min')" onblur="formatTimeInput(this, 'min')">
 
-                            <div class="ampm-toggle" onclick="toggleAmPm('east')">
-                                <div class="ampm-slider" id="east-ampm-slider"></div>
-                                <div class="ampm-btn active" id="east-am-btn">AM</div>
-                                <div class="ampm-btn" id="east-pm-btn">PM</div>
+                            <div class="ampm-toggle" onclick="toggleAmPm('uk')">
+                                <div class="ampm-slider" id="uk-ampm-slider"></div>
+                                <div class="ampm-btn active" id="uk-am-btn">AM</div>
+                                <div class="ampm-btn" id="uk-pm-btn">PM</div>
                             </div>
                         </div>
                         <div class="presets-row" style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
-                            <button class="preset-chip" onclick="setPreset('east', 540)">9 AM</button>
-                            <button class="preset-chip" onclick="setPreset('east', 720)">Noon</button>
-                            <button class="preset-chip" onclick="setPreset('east', 1080)">6 PM</button>
-                            <button class="preset-chip" onclick="setPreset('east', 1320)">10 PM</button>
+                            <button class="preset-chip" onclick="setPreset('uk', 540)">9 AM</button>
+                            <button class="preset-chip" onclick="setPreset('uk', 720)">Noon</button>
+                            <button class="preset-chip" onclick="setPreset('uk', 1080)">6 PM</button>
+                            <button class="preset-chip" onclick="setPreset('uk', 1320)">10 PM</button>
                         </div>
                     </div>
 
                     <div class="slider-box">
                         <div class="slider-header">
                             <span>Timeline Slide</span>
-                            <span id="east-slider-val">9:00 AM</span>
+                            <span id="uk-slider-val">9:00 AM</span>
                         </div>
-                        <input type="range" class="custom-slider" id="east-slider" min="0" max="1439" value="540" oninput="syncFromEastSlider()">
+                        <input type="range" class="custom-slider" id="uk-slider" min="0" max="1439" value="540" oninput="syncFromUkSlider()">
                     </div>
                 </div>
 
@@ -901,7 +902,7 @@
                     <div class="card-header-row">
                         <div class="card-title dub">
                             <span>Dubai</span>
-                            <span class="timezone-offset">GST (UTC+4)</span>
+                            <span class="timezone-offset" id="dub-offset">GST (UTC+4)</span>
                         </div>
                         <span class="live-clock" id="dub-live-clock">--:--:--</span>
                     </div>
@@ -912,7 +913,7 @@
                             <span class="time-label" id="dub-phase" style="color:var(--dub-glow);text-transform:none;font-weight:500;">Daylight ☀️</span>
                         </div>
                         <div class="time-inputs">
-                            <input type="text" class="num-input" id="dub-hour" maxlength="2" value="05" oninput="handleTimeInput(this, 'hour')" onblur="formatTimeInput(this, 'hour')">
+                            <input type="text" class="num-input" id="dub-hour" maxlength="2" value="01" oninput="handleTimeInput(this, 'hour')" onblur="formatTimeInput(this, 'hour')">
                             <span class="separator">:</span>
                             <input type="text" class="num-input" id="dub-min" maxlength="2" value="00" oninput="handleTimeInput(this, 'min')" onblur="formatTimeInput(this, 'min')">
 
@@ -933,9 +934,9 @@
                     <div class="slider-box">
                         <div class="slider-header">
                             <span>Timeline Slide</span>
-                            <span id="dub-slider-val">5:00 PM</span>
+                            <span id="dub-slider-val">1:00 PM</span>
                         </div>
-                        <input type="range" class="custom-slider" id="dub-slider" min="0" max="1439" value="1020" oninput="syncFromDubaiSlider()">
+                        <input type="range" class="custom-slider" id="dub-slider" min="0" max="1439" value="780" oninput="syncFromDubaiSlider()">
                     </div>
                 </div>
 
@@ -944,9 +945,9 @@
             <!-- Central Timeline Column -->
             <div class="timeline-container timeline-card" id="card-timeline">
                 <div class="timeline-header">
-                    <div class="timeline-col-title east">Eastern</div>
+                    <div class="timeline-col-title uk">UK</div>
                     <div class="timeline-col-title dub">Dubai</div>
-                    <div class="timeline-col-title sister">Sister</div>
+                    <div class="timeline-col-title cara">Cara 🌸</div>
                     <div class="timeline-col-title ist">IST</div>
                 </div>
 
@@ -966,46 +967,46 @@
             <!-- Right Wing -->
             <div class="wing-column">
 
-                <!-- CARD 3: Sister's Time -->
-                <div class="input-card sister">
+                <!-- CARD 3: Cara 🌸 -->
+                <div class="input-card cara">
                     <div class="card-header-row">
-                        <div class="card-title sister">
-                            <span>Sister's Time 🌸</span>
-                            <span class="timezone-offset" id="sister-offset">-- (UTC--)</span>
+                        <div class="card-title cara">
+                            <span>Cara 🌸</span>
+                            <span class="timezone-offset" id="cara-offset">CET (UTC+1)</span>
                         </div>
-                        <span class="live-clock" id="sister-live-clock">--:--:--</span>
+                        <span class="live-clock" id="cara-live-clock">--:--:--</span>
                     </div>
 
                     <div class="time-box">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <span class="time-label">Set Time</span>
-                            <span class="time-label" id="sister-phase" style="color:var(--sis-glow);text-transform:none;font-weight:500;">Daylight ☀️</span>
+                            <span class="time-label" id="cara-phase" style="color:var(--cara-glow);text-transform:none;font-weight:500;">Daylight ☀️</span>
                         </div>
                         <div class="time-inputs">
-                            <input type="text" class="num-input" id="sister-hour" maxlength="2" value="03" oninput="handleTimeInput(this, 'hour')" onblur="formatTimeInput(this, 'hour')">
+                            <input type="text" class="num-input" id="cara-hour" maxlength="2" value="10" oninput="handleTimeInput(this, 'hour')" onblur="formatTimeInput(this, 'hour')">
                             <span class="separator">:</span>
-                            <input type="text" class="num-input" id="sister-min" maxlength="2" value="00" oninput="handleTimeInput(this, 'min')" onblur="formatTimeInput(this, 'min')">
+                            <input type="text" class="num-input" id="cara-min" maxlength="2" value="00" oninput="handleTimeInput(this, 'min')" onblur="formatTimeInput(this, 'min')">
 
-                            <div class="ampm-toggle" onclick="toggleAmPm('sister')">
-                                <div class="ampm-slider pm" id="sister-ampm-slider"></div>
-                                <div class="ampm-btn" id="sister-am-btn">AM</div>
-                                <div class="ampm-btn active" id="sister-pm-btn">PM</div>
+                            <div class="ampm-toggle" onclick="toggleAmPm('cara')">
+                                <div class="ampm-slider" id="cara-ampm-slider"></div>
+                                <div class="ampm-btn active" id="cara-am-btn">AM</div>
+                                <div class="ampm-btn" id="cara-pm-btn">PM</div>
                             </div>
                         </div>
                         <div class="presets-row" style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
-                            <button class="preset-chip" onclick="setPreset('sister', 540)">9 AM</button>
-                            <button class="preset-chip" onclick="setPreset('sister', 720)">Noon</button>
-                            <button class="preset-chip" onclick="setPreset('sister', 1080)">6 PM</button>
-                            <button class="preset-chip" onclick="setPreset('sister', 1320)">10 PM</button>
+                            <button class="preset-chip" onclick="setPreset('cara', 540)">9 AM</button>
+                            <button class="preset-chip" onclick="setPreset('cara', 720)">Noon</button>
+                            <button class="preset-chip" onclick="setPreset('cara', 1080)">6 PM</button>
+                            <button class="preset-chip" onclick="setPreset('cara', 1320)">10 PM</button>
                         </div>
                     </div>
 
                     <div class="slider-box">
                         <div class="slider-header">
                             <span>Timeline Slide</span>
-                            <span id="sister-slider-val">3:00 PM</span>
+                            <span id="cara-slider-val">10:00 AM</span>
                         </div>
-                        <input type="range" class="custom-slider" id="sister-slider" min="0" max="1439" value="900" oninput="syncFromSisterSlider()">
+                        <input type="range" class="custom-slider" id="cara-slider" min="0" max="1439" value="600" oninput="syncFromCaraSlider()">
                     </div>
                 </div>
 
@@ -1014,7 +1015,7 @@
                     <div class="card-header-row">
                         <div class="card-title ist">
                             <span>IST Time</span>
-                            <span class="timezone-offset">IST (UTC+5.5)</span>
+                            <span class="timezone-offset" id="ist-offset">IST (UTC+5:30)</span>
                         </div>
                         <span class="live-clock" id="ist-live-clock">--:--:--</span>
                     </div>
@@ -1077,9 +1078,9 @@
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <div style="display: flex; gap: 6px;">
                                 <select id="calc-zone" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); color: #ffffff; font-family: var(--font-ui); border-radius: 8px; padding: 4px; font-size: 0.72rem; flex: 1; outline:none;">
-                                    <option value="America/New_York">US Eastern</option>
+                                    <option value="Europe/London">UK Time</option>
                                     <option value="Asia/Dubai">Dubai</option>
-                                    <option value="Europe/Rome">Sister's Time</option>
+                                    <option value="Europe/Rome">Cara 🌸</option>
                                     <option value="Asia/Kolkata">IST</option>
                                 </select>
                                 <input type="number" id="calc-hour" placeholder="Hr" min="1" max="12" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); color: #ffffff; width: 38px; text-align: center; border-radius: 8px; font-family: var(--font-mono); font-size: 0.8rem; outline:none;">
@@ -1113,15 +1114,12 @@
         var hour24Mode = false;
         var calCurrentMonth = baseDate.getMonth();
         var calCurrentYear = baseDate.getFullYear();
-        var activeMinutesEast = 540; // 9:00 AM
-
-        const AI_WORKER_URL = 'https://ai-proxy-4lt3.onrender.com';
-        let aiSession = null;
+        var activeMinutesUk = 540; // 9:00 AM UK
 
         function initApp() {
             loadFromURL();
             renderCalendar();
-            updateAllZonesFromEast();
+            updateAllZonesFromUk();
             updateLiveClocks();
             setInterval(updateLiveClocks, 1000);
             setInterval(updateOverlapCountdown, 30000);
@@ -1135,13 +1133,13 @@
             document.querySelectorAll('.thbtn').forEach(function (btn) {
                 btn.classList.toggle('on', btn.getAttribute('data-t') === t);
             });
-            updateAllZonesFromEast();
+            updateAllZonesFromUk();
         }
 
-        // dynamic offsets calculator
+        // Dynamic offsets calculator (handles Daylight Saving Times accurately)
         function getOffsetMinutes(timeZone, date) {
             try {
-                var formatter = new Intl.DateTimeFormat('en-US', { timeZone, year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false });
+                var formatter = new Intl.DateTimeFormat('en-US', { timeZone: timeZone, year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false });
                 var parts = formatter.formatToParts(date);
                 var map = {};
                 parts.forEach(p => map[p.type] = p.value);
@@ -1149,26 +1147,36 @@
                 var utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds()));
                 return Math.round((tzDate - utcDate) / 60000);
             } catch(e) {
+                if (timeZone.includes('London')) {
+                    var m = date.getMonth();
+                    return (m >= 2 && m <= 9) ? 60 : 0;
+                }
                 if (timeZone.includes('Kolkata')) return 330;
                 if (timeZone.includes('Dubai')) return 240;
                 if (timeZone.includes('Rome')) {
                     var m = date.getMonth();
                     return (m >= 2 && m <= 9) ? 120 : 60;
                 }
-                return -300;
+                return 0;
             }
         }
 
         function formatOffset(mins) {
-            var hrs = mins / 60;
-            var sign = hrs >= 0 ? '+' : '';
-            return 'UTC' + sign + hrs;
+            var sign = mins >= 0 ? '+' : '-';
+            var absMins = Math.abs(mins);
+            var hrs = Math.floor(absMins / 60);
+            var remM = absMins % 60;
+            if (remM === 0) {
+                return 'UTC' + sign + hrs;
+            } else {
+                return 'UTC' + sign + hrs + ':' + (remM < 10 ? '0' : '') + remM;
+            }
         }
 
         function getOffsetDiff(targetTz) {
-            var offsetEast = getOffsetMinutes('America/New_York', baseDate);
+            var offsetUk = getOffsetMinutes('Europe/London', baseDate);
             var offsetTarget = getOffsetMinutes(targetTz, baseDate);
-            return offsetTarget - offsetEast;
+            return offsetTarget - offsetUk;
         }
 
         // Text input validation
@@ -1221,18 +1229,19 @@
             var localMins = h * 60 + m;
             document.getElementById(zone + '-slider').value = localMins;
 
-            if (zone === 'east') {
-                activeMinutesEast = localMins;
+            if (zone === 'uk') {
+                activeMinutesUk = localMins;
             } else {
                 var tzMap = {
-                    ist: 'Asia/Kolkata',
+                    uk: 'Europe/London',
                     dub: 'Asia/Dubai',
-                    sister: 'Europe/Rome'
+                    cara: 'Europe/Rome',
+                    ist: 'Asia/Kolkata'
                 };
                 var diff = getOffsetDiff(tzMap[zone]);
-                activeMinutesEast = (localMins - diff + 2880) % 1440;
+                activeMinutesUk = (localMins - diff + 2880) % 1440;
             }
-            updateAllZonesFromEast();
+            updateAllZonesFromUk();
         }
 
         // Calendar
@@ -1279,7 +1288,7 @@
                         document.getElementById('cal-date-str').textContent = baseDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
                         document.getElementById('calendarOverlay').style.display = 'none';
                         renderCalendar();
-                        updateAllZonesFromEast();
+                        updateAllZonesFromUk();
                     };
                     grid.appendChild(el);
                 })(d);
@@ -1320,7 +1329,7 @@
                 el.style.display = hour24Mode ? 'none' : 'flex';
             });
 
-            updateAllZonesFromEast();
+            updateAllZonesFromUk();
             updateLiveClocks();
         }
 
@@ -1335,64 +1344,67 @@
 
         // Presets Set
         function setPreset(zone, mins) {
-            if (zone === 'east') {
-                activeMinutesEast = mins;
+            if (zone === 'uk') {
+                activeMinutesUk = mins;
             } else {
                 var tzMap = {
-                    ist: 'Asia/Kolkata',
+                    uk: 'Europe/London',
                     dub: 'Asia/Dubai',
-                    sister: 'Europe/Rome'
+                    cara: 'Europe/Rome',
+                    ist: 'Asia/Kolkata'
                 };
                 var diff = getOffsetDiff(tzMap[zone]);
-                activeMinutesEast = (mins - diff + 2880) % 1440;
+                activeMinutesUk = (mins - diff + 2880) % 1440;
             }
-            updateAllZonesFromEast();
+            updateAllZonesFromUk();
         }
 
         // Sliders syncing
-        function syncFromEastSlider() {
-            activeMinutesEast = parseInt(document.getElementById('east-slider').value, 10);
-            updateAllZonesFromEast();
+        function syncFromUkSlider() {
+            activeMinutesUk = parseInt(document.getElementById('uk-slider').value, 10);
+            updateAllZonesFromUk();
         }
         function syncFromDubaiSlider() {
             var dubMins = parseInt(document.getElementById('dub-slider').value, 10);
             var diff = getOffsetDiff('Asia/Dubai');
-            activeMinutesEast = (dubMins - diff + 2880) % 1440;
-            updateAllZonesFromEast();
+            activeMinutesUk = (dubMins - diff + 2880) % 1440;
+            updateAllZonesFromUk();
         }
-        function syncFromSisterSlider() {
-            var sisterMins = parseInt(document.getElementById('sister-slider').value, 10);
+        function syncFromCaraSlider() {
+            var caraMins = parseInt(document.getElementById('cara-slider').value, 10);
             var diff = getOffsetDiff('Europe/Rome');
-            activeMinutesEast = (sisterMins - diff + 2880) % 1440;
-            updateAllZonesFromEast();
+            activeMinutesUk = (caraMins - diff + 2880) % 1440;
+            updateAllZonesFromUk();
         }
         function syncFromIstSlider() {
             var istMins = parseInt(document.getElementById('ist-slider').value, 10);
             var diff = getOffsetDiff('Asia/Kolkata');
-            activeMinutesEast = (istMins - diff + 2880) % 1440;
-            updateAllZonesFromEast();
+            activeMinutesUk = (istMins - diff + 2880) % 1440;
+            updateAllZonesFromUk();
         }
 
         // Master sync update
-        function updateAllZonesFromEast() {
-            var offsetEast = getOffsetMinutes('America/New_York', baseDate);
-            document.getElementById('east-offset').textContent = formatOffset(offsetEast);
+        function updateAllZonesFromUk() {
+            var offsetUk = getOffsetMinutes('Europe/London', baseDate);
+            var ukName = offsetUk === 60 ? 'BST' : 'GMT';
+            document.getElementById('uk-offset').textContent = ukName + ' (' + formatOffset(offsetUk) + ')';
 
             var tzList = [
-                { id: 'east', tz: 'America/New_York' },
+                { id: 'uk', tz: 'Europe/London' },
                 { id: 'dub', tz: 'Asia/Dubai' },
-                { id: 'sister', tz: 'Europe/Rome' },
+                { id: 'cara', tz: 'Europe/Rome' },
                 { id: 'ist', tz: 'Asia/Kolkata' }
             ];
 
             tzList.forEach(function (item) {
                 var diff = getOffsetDiff(item.tz);
-                var localMins = (activeMinutesEast + diff + 2880) % 1440;
+                var localMins = (activeMinutesUk + diff + 2880) % 1440;
 
-                // Label offsets dynamically to prevent sister doxing
-                if (item.id === 'sister') {
-                    var sisOffset = getOffsetMinutes('Europe/Rome', baseDate);
-                    document.getElementById('sister-offset').textContent = formatOffset(sisOffset);
+                // Update Cara offset dynamically
+                if (item.id === 'cara') {
+                    var caraOffset = getOffsetMinutes('Europe/Rome', baseDate);
+                    var caraName = caraOffset === 120 ? 'CEST' : 'CET';
+                    document.getElementById('cara-offset').textContent = caraName + ' (' + formatOffset(caraOffset) + ')';
                 }
 
                 // Update slider and label
@@ -1429,76 +1441,79 @@
             document.getElementById('cal-date-str').textContent = baseDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
             // Re-render Central Timeline
-            renderTimelineRows(activeMinutesEast);
-            positionTimelinePointer(activeMinutesEast);
+            renderTimelineRows(activeMinutesUk);
+            positionTimelinePointer(activeMinutesUk);
         }
 
         // Timeline building
-        function renderTimelineRows(eastMins) {
+        function renderTimelineRows(ukMins) {
             var parent = document.getElementById('timelineRows');
             if(!parent) return;
             parent.innerHTML = '';
 
-            var activeHour = Math.floor(eastMins / 60);
-            var offsetEast = getOffsetMinutes('America/New_York', baseDate);
+            var activeHour = Math.floor(ukMins / 60);
+            var offsetUk = getOffsetMinutes('Europe/London', baseDate);
             var offsetDub = getOffsetMinutes('Asia/Dubai', baseDate);
-            var offsetSis = getOffsetMinutes('Europe/Rome', baseDate);
+            var offsetCara = getOffsetMinutes('Europe/Rome', baseDate);
             var offsetIst = getOffsetMinutes('Asia/Kolkata', baseDate);
 
             for (var h = 0; h < 24; h++) {
                 var row = document.createElement('div');
                 row.className = 'hour-row';
 
-                var utcBaseMins = h * 60 - offsetEast;
+                var utcBaseMins = h * 60 - offsetUk;
                 
+                var uMins = (utcBaseMins + offsetUk + 2880) % 1440;
                 var dMins = (utcBaseMins + offsetDub + 2880) % 1440;
-                var sMins = (utcBaseMins + offsetSis + 2880) % 1440;
+                var cMins = (utcBaseMins + offsetCara + 2880) % 1440;
                 var iMins = (utcBaseMins + offsetIst + 2880) % 1440;
 
+                var uh = Math.floor(uMins / 60);
                 var dh = Math.floor(dMins / 60);
-                var sh = Math.floor(sMins / 60);
+                var ch = Math.floor(cMins / 60);
                 var ih = Math.floor(iMins / 60);
 
+                var uM = uMins % 60;
                 var dM = dMins % 60;
-                var sM = sMins % 60;
+                var cM = cMins % 60;
                 var iM = iMins % 60;
 
                 // sleep zones definitions: 11pm (23) to 7am (7)
-                var eSleep = (h < 7 || h >= 23);
+                var uSleep = (uh < 7 || uh >= 23);
                 var dSleep = (dh < 7 || dh >= 23);
-                var sSleep = (sh < 7 || sh >= 23);
+                var cSleep = (ch < 7 || ch >= 23);
                 var iSleep = (ih < 7 || ih >= 23);
 
-                var isGolden = (!eSleep && !dSleep && !sSleep && !iSleep);
+                var isGolden = (!uSleep && !dSleep && !cSleep && !iSleep);
 
                 if (isGolden) row.classList.add('golden-zone');
-                else if (eSleep && dSleep && sSleep && iSleep) row.classList.add('night-zone');
+                else if (uSleep && dSleep && cSleep && iSleep) row.classList.add('night-zone');
                 else row.classList.add('day-zone');
 
                 if (h === activeHour) row.classList.add('active');
 
-                var eastDate = new Date(baseDate);
+                var ukDate = new Date(baseDate);
                 var dubDate = new Date(baseDate);
-                var sisDate = new Date(baseDate);
+                var caraDate = new Date(baseDate);
                 var istDate = new Date(baseDate);
 
-                if (h * 60 + offsetDub - offsetEast >= 1440) dubDate.setDate(dubDate.getDate() + 1);
-                if (h * 60 + offsetSis - offsetEast >= 1440) sisDate.setDate(sisDate.getDate() + 1);
-                if (h * 60 + offsetIst - offsetEast >= 1440) istDate.setDate(istDate.getDate() + 1);
+                if (h * 60 + offsetDub - offsetUk >= 1440) dubDate.setDate(dubDate.getDate() + 1);
+                if (h * 60 + offsetCara - offsetUk >= 1440) caraDate.setDate(caraDate.getDate() + 1);
+                if (h * 60 + offsetIst - offsetUk >= 1440) istDate.setDate(istDate.getDate() + 1);
 
                 row.innerHTML = `
                     <div class="hour-cell">
                         ${isGolden ? '<span class="golden-badge">Overlap</span>' : ''}
-                        <div class="hour-time">${formatCellHour(h)}</div>
-                        <div class="hour-date">${eastDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</div>
+                        <div class="hour-time">${formatCellHour(uh, uM)}</div>
+                        <div class="hour-date">${ukDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</div>
                     </div>
                     <div class="hour-cell">
                         <div class="hour-time">${formatCellHour(dh, dM)}</div>
                         <div class="hour-date">${dubDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</div>
                     </div>
                     <div class="hour-cell">
-                        <div class="hour-time">${formatCellHour(sh, sM)}</div>
-                        <div class="hour-date">${sisDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</div>
+                        <div class="hour-time">${formatCellHour(ch, cM)}</div>
+                        <div class="hour-date">${caraDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</div>
                     </div>
                     <div class="hour-cell">
                         <div class="hour-time">${formatCellHour(ih, iM)}</div>
@@ -1508,8 +1523,8 @@
 
                 (function (selectedHour) {
                     row.onclick = function () {
-                        activeMinutesEast = selectedHour * 60;
-                        updateAllZonesFromEast();
+                        activeMinutesUk = selectedHour * 60;
+                        updateAllZonesFromUk();
                     };
                 })(h);
 
@@ -1528,13 +1543,13 @@
             }
         }
 
-        function positionTimelinePointer(eastMins) {
+        function positionTimelinePointer(ukMins) {
             var scrollContainer = document.getElementById('timelineScroll');
             var pointer = document.getElementById('timelinePointer');
             if(!scrollContainer || !pointer) return;
 
             var totalHeight = 24 * 64;
-            var topPx = (eastMins / 1440) * totalHeight;
+            var topPx = (ukMins / 1440) * totalHeight;
             pointer.style.top = topPx + 'px';
 
             var containerHeight = scrollContainer.clientHeight;
@@ -1546,9 +1561,9 @@
         function updateLiveClocks() {
             var now = new Date();
             var config = [
-                { id: 'east-live-clock', tz: 'America/New_York' },
+                { id: 'uk-live-clock', tz: 'Europe/London' },
                 { id: 'dub-live-clock', tz: 'Asia/Dubai' },
-                { id: 'sister-live-clock', tz: 'Europe/Rome' },
+                { id: 'cara-live-clock', tz: 'Europe/Rome' },
                 { id: 'ist-live-clock', tz: 'Asia/Kolkata' }
             ];
 
@@ -1561,27 +1576,53 @@
             });
         }
 
-        // Overlap countdown
+        // Dynamic Overlap countdown for UK, Dubai, Cara, and IST
         function updateOverlapCountdown() {
             var now = new Date();
-            var utcMins = now.getUTCHours() * 60 + now.getUTCMinutes();
+            var currentUtcMins = now.getUTCHours() * 60 + now.getUTCMinutes();
             
-            // Quad overlap: 12:00 PM (720 mins) to 4:30 PM (990 mins) UTC
-            var startMins = 720;
-            var endMins = 990;
-            
+            var offUk = getOffsetMinutes('Europe/London', now);
+            var offDub = getOffsetMinutes('Asia/Dubai', now);
+            var offCara = getOffsetMinutes('Europe/Rome', now);
+            var offIst = getOffsetMinutes('Asia/Kolkata', now);
+
+            // Find overlap minutes in UTC where all 4 zones are within 07:00 to 23:00 local time
+            var isMinuteOverlap = function(utcM) {
+                var hUk = Math.floor(((utcM + offUk + 2880) % 1440) / 60);
+                var hDub = Math.floor(((utcM + offDub + 2880) % 1440) / 60);
+                var hCara = Math.floor(((utcM + offCara + 2880) % 1440) / 60);
+                var hIst = Math.floor(((utcM + offIst + 2880) % 1440) / 60);
+                return (hUk >= 7 && hUk < 23) && (hDub >= 7 && hDub < 23) && (hCara >= 7 && hCara < 23) && (hIst >= 7 && hIst < 23);
+            };
+
             var countdownEl = document.getElementById('overlap-countdown');
             if (!countdownEl) return;
-            
-            if (utcMins >= startMins && utcMins <= endMins) {
-                var diff = endMins - utcMins;
-                var h = Math.floor(diff / 60);
-                var m = diff % 60;
+
+            if (isMinuteOverlap(currentUtcMins)) {
+                // Find end of overlap window
+                var remaining = 0;
+                for (var i = 1; i <= 1440; i++) {
+                    var testM = (currentUtcMins + i) % 1440;
+                    if (!isMinuteOverlap(testM)) {
+                        remaining = i;
+                        break;
+                    }
+                }
+                var h = Math.floor(remaining / 60);
+                var m = remaining % 60;
                 countdownEl.innerHTML = `<span style="color:#00f0ff;font-weight:bold;">🔥 Active Now!</span> ${h}h ${m}m remaining`;
             } else {
-                var diff = utcMins < startMins ? (startMins - utcMins) : ((1440 - utcMins) + startMins);
-                var h = Math.floor(diff / 60);
-                var m = diff % 60;
+                // Find start of next overlap window
+                var untilStart = 0;
+                for (var i = 1; i <= 1440; i++) {
+                    var testM = (currentUtcMins + i) % 1440;
+                    if (isMinuteOverlap(testM)) {
+                        untilStart = i;
+                        break;
+                    }
+                }
+                var h = Math.floor(untilStart / 60);
+                var m = untilStart % 60;
                 countdownEl.innerHTML = `Starts in <span style="color:#ffb6d9;font-weight:bold;">${h}h ${m}m</span>`;
             }
         }
@@ -1622,7 +1663,7 @@
 
         // Share URL
         function shareState() {
-            var shareUrl = window.location.origin + window.location.pathname + '#date=' + baseDate.toISOString().split('T')[0] + '&eastMins=' + activeMinutesEast;
+            var shareUrl = window.location.origin + window.location.pathname + '#date=' + baseDate.toISOString().split('T')[0] + '&ukMins=' + activeMinutesUk;
             navigator.clipboard.writeText(shareUrl).then(function() {
                 alert('🛸 Cosmic alignment URL copied to clipboard!');
             });
@@ -1633,14 +1674,14 @@
                 var hash = window.location.hash.slice(1);
                 var params = new URLSearchParams(hash);
                 var dateParam = params.get('date');
-                var minsParam = params.get('eastMins');
+                var minsParam = params.get('ukMins') || params.get('eastMins');
                 if (dateParam) {
                     baseDate = new Date(dateParam);
                     calCurrentMonth = baseDate.getMonth();
                     calCurrentYear = baseDate.getFullYear();
                 }
                 if (minsParam) {
-                    activeMinutesEast = parseInt(minsParam, 10);
+                    activeMinutesUk = parseInt(minsParam, 10);
                 }
             }
         }
@@ -1656,9 +1697,9 @@
             });
 
             var activeEl;
-            if (tabName === 'east') activeEl = document.querySelector('.input-card.east');
+            if (tabName === 'uk') activeEl = document.querySelector('.input-card.uk');
             else if (tabName === 'dub') activeEl = document.querySelector('.input-card.dub');
-            else if (tabName === 'sister') activeEl = document.querySelector('.input-card.sister');
+            else if (tabName === 'cara') activeEl = document.querySelector('.input-card.cara');
             else if (tabName === 'ist') activeEl = document.querySelector('.input-card.ist');
             else if (tabName === 'timeline') activeEl = document.querySelector('.timeline-card');
 
@@ -1668,19 +1709,20 @@
 
             if (tabName === 'timeline') {
                 setTimeout(function () {
-                    positionTimelinePointer(activeMinutesEast);
+                    positionTimelinePointer(activeMinutesUk);
                 }, 50);
             }
         }
 
         if (window.innerWidth <= 1024) {
-            var first = document.querySelector('.input-card.east');
+            var first = document.querySelector('.input-card.uk');
             if (first) first.classList.add('active-panel');
         }
 
         // Dynamic Space Background Stars
         (function () {
             var canvas = document.getElementById('stars-canvas');
+            if (!canvas) return;
             var ctx = canvas.getContext('2d');
             var stars = [];
 
@@ -1709,52 +1751,6 @@
                 ctx.fillStyle = '#ffffff';
                 stars.forEach(function (s) {
                     s.a += s.dir * 0.005;
-                    if (s.a <= 0.1 || s.a >= 0.9) s.dir *= -1;
-                    ctx.globalAlpha = s.a;
-                    ctx.beginPath();
-                    ctx.arc(s.x, s.y, s.sz, 0, Math.PI * 2);
-                    ctx.fill();
-                });
-                ctx.globalAlpha = 1;
-                requestAnimationFrame(loop);
-            }
-
-            window.addEventListener('resize', resize);
-            resize();
-            loop();
-        })();
-
-        // Gate Ambient Background Stars
-        (function () {
-            var canvas = document.getElementById('gate-stars-canvas');
-            var ctx = canvas.getContext('2d');
-            var stars = [];
-
-            function resize() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                initStars();
-            }
-
-            function initStars() {
-                stars = [];
-                var count = Math.round((canvas.width * canvas.height) * 0.0001);
-                for (var i = 0; i < count; i++) {
-                    stars.push({
-                        x: Math.random() * canvas.width,
-                        y: Math.random() * canvas.height,
-                        sz: Math.random() * 1.2,
-                        a: 0.1 + Math.random() * 0.8,
-                        dir: Math.random() > 0.5 ? 1 : -1
-                    });
-                }
-            }
-
-            function loop() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#ffffff';
-                stars.forEach(function (s) {
-                    s.a += s.dir * 0.003;
                     if (s.a <= 0.1 || s.a >= 0.9) s.dir *= -1;
                     ctx.globalAlpha = s.a;
                     ctx.beginPath();
