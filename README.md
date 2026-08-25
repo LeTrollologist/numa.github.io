@@ -1,5 +1,7 @@
 ﻿# 🌌 Hollow Grove — Numa's Space
 
+Disclaimer: I am not affiliated with Numa, this website and project was made strictly as a gift to be a study aid and her privacy should be respected. 
+
 A personal web app featuring celestial themes, study tools, a digital garden, a vector sketchpad, and a multi-timezone converter. Built with vanilla web technologies and designed to run entirely in the browser with offline PWA support.
 
 **[Live Site](https://letrollologist.github.io/numa.github.io/)**
