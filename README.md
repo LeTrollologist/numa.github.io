@@ -1,4 +1,4 @@
-﻿# 🌌 Hollow Grove — Numa's Space
+# 🌌 Hollow Grove — Numa's Space
 
 Disclaimer: I am not affiliated with Numa, this website and project was made strictly as a gift to be a study aid and her privacy should be respected. 
 
@@ -66,7 +66,6 @@ numa.github.io/
 ├── compute-optimizer.js    # Task scheduling helper
 ├── mobile-optimizer.js     # Mobile scaling helper
 ├── apple-optimizer.js      # iOS Safari viewport fixes
-├── analytics.js            # Telemetry helper
 ├── archived_tools/         # Offline data scripts (astronomy / star catalogue tools)
 ├── favicon/                # App icons & manifest assets
 └── LICENSE.md

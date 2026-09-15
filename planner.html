@@ -8,7 +8,6 @@
 <script src="mobile-optimizer.js"></script>
 <script src="apple-optimizer.js"></script>
 <script src="compute-optimizer.js"></script>
-<script src="analytics.js?v=3.0.0" async></script>
 <link rel="icon" type="image/png" href="/favicon-96x96.png?v=20260519" sizes="96x96" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=20260519" />
 <link rel="shortcut icon" href="/favicon.ico?v=20260519" />
@@ -2802,27 +2801,6 @@ Example:
 <div id="toast" class="toast"></div>
 
 <script>
-  // ================== SENTINEL ANALYTICS UPLINK ==================
-  (function(){
-    var SENTINEL_URL = 'https://analytics-server-bdrm.onrender.com/log';
-    var sessionId = sessionStorage.getItem('_sid');
-    if (!sessionId) {
-      sessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
-      sessionStorage.setItem('_sid', sessionId);
-    }
-    fetch(SENTINEL_URL, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        ua:navigator.userAgent,
-        page:window.location.pathname||'/',
-        screen:window.innerWidth+'x'+window.innerHeight,
-        referrer:document.referrer||'',
-        sessionId:sessionId
-      }),
-      keepalive:true
-    }).catch(function(){});
-  })();
 // ==================== DATA MODEL ====================
 const DEFAULT_DATA = {
   tasks: [],

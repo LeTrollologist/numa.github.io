@@ -10,7 +10,6 @@ const ASSETS = [
   'compute-optimizer.js',
   'mobile-optimizer.js',
   'apple-optimizer.js',
-  'analytics.js',
   'manifest.json',
   'favicon/favicon.svg',
   'favicon/favicon-96x96.png',

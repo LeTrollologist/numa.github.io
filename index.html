@@ -8,7 +8,6 @@
     <script src="compute-optimizer.js"></script>
     <script src="mobile-optimizer.js"></script>
     <script src="apple-optimizer.js"></script>
-    <script src="analytics.js?v=3.0.0" async></script>
     <meta property="og:title" content="Numa's Space">
     <meta property="og:description" content="A space for Numa, study, dream, play, explore.">
 
@@ -3083,14 +3082,6 @@
             </div>
             <div class="status-card">
                 <div class="status-info">
-                    <h3>Sentinel Core</h3>
-                    <p>Render Node.js</p>
-                </div>
-                <div class="status-indicator"><span id="txt-analytics">STANDBY</span><span id="dot-analytics"
-                        class="dot loading"></span></div>
-            </div>
-            <div class="status-card">
-                <div class="status-info">
                     <h3>Database</h3>
                     <p>MongoDB Atlas</p>
                 </div>
@@ -3451,8 +3442,8 @@
         // ══════════════════════════════════════════════════════════
         function runDiagnostics() {
             var msg = document.getElementById('statusMessage');
-            var nodes = ['analytics', 'database', 'checkIns'];
-            msg.innerText = 'Synchronizing with Sentinel…';
+            var nodes = ['database', 'checkIns'];
+            msg.innerText = 'Synchronizing system…';
 
             // 1. Immediate Main Site Verification
             document.getElementById('txt-mainSite').innerText = 'ONLINE';
@@ -3493,7 +3484,7 @@
                         document.getElementById('txt-' + n).style.color = '#ff4040';
                         document.getElementById('dot-' + n).className = 'dot offline';
                     });
-                    msg.innerText = err.name === 'AbortError' ? 'Diagnostic timeout.' : 'CRITICAL: Sentinel Core unreachable.';
+                    msg.innerText = err.name === 'AbortError' ? 'Diagnostic timeout.' : 'CRITICAL: Diagnostic service unreachable.';
                 });
         }
 
@@ -4006,7 +3997,7 @@
             function handleConnectSuccess() {
                 clearTimeout(handshakeTimeout);
                 console.log('WebRTC P2P DataChannel fully opened!');
-                document.getElementById('multiStatus').innerText = 'Connected! Telemetry synced. 🦦';
+                document.getElementById('multiStatus').innerText = 'Connected! Controls synced. 🦦';
                 document.getElementById('multiStatus').style.color = '#00ff88';
 
                 setTimeout(function () {
@@ -4060,7 +4051,7 @@
             if (!data) return;
 
             if (isHost) {
-                // Host receives input telemetry (Paddle Y) from the guest client
+                // Host receives input (Paddle Y) from the guest client
                 if (data.type === 'INPUT') {
                     if (typeof data.aY === 'number') {
                         aY = data.aY;
