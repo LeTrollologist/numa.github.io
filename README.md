@@ -72,7 +72,3 @@ numa.github.io/
 ```
 
 ---
-
-## License
-
-MIT License — see [LICENSE.md](LICENSE.md) for details.
