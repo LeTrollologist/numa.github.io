@@ -1,4 +1,4 @@
-# 🌌 Hollow Grove — Numa's Space
+# 🌌 Numa's Space
 
 Disclaimer: I am not affiliated with Numa, this website and project was made strictly as a gift to be a study aid and her privacy should be respected. 
 
