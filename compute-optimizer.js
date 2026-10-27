@@ -135,7 +135,11 @@
 
             this.scheduleNext = () => {
                 if ('requestIdleCallback' in window) {
-                    requestIdleCallback(process);
+                    // The timeout guarantees queued work actually runs: without it a
+                    // continuously rendering page (Stargazer, Pong) can starve idle
+                    // callbacks forever. 500 ms is a ceiling, not a delay - a normal
+                    // idle slot fires much sooner.
+                    requestIdleCallback(process, { timeout: 500 });
                 } else {
                     setTimeout(() => process(null), 50);
                 }
@@ -163,8 +167,11 @@
             const originalGetContext = HTMLCanvasElement.prototype.getContext;
             HTMLCanvasElement.prototype.getContext = function(type, attributes) {
                 if (type === '2d') {
+                    // NOTE: 'desynchronized: true' was removed. It opts the canvas out of
+                    // normal compositor synchronisation, which on several GPUs/browsers
+                    // presents blank or partially painted frames - the reason the star
+                    // field sometimes only appeared after switching tabs and back.
                     attributes = Object.assign({}, attributes || {}, {
-                        desynchronized: true,
                         willReadFrequently: false
                     });
                 }

@@ -67,8 +67,7 @@ numa.github.io/
 ├── mobile-optimizer.js     # Mobile scaling helper
 ├── apple-optimizer.js      # iOS Safari viewport fixes
 ├── archived_tools/         # Offline data scripts (astronomy / star catalogue tools)
-├── favicon/                # App icons & manifest assets
-└── LICENSE.md
+└── favicon/                # App icons & manifest assets
 ```
 
 ---
