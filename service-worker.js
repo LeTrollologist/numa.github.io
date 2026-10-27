@@ -1,4 +1,6 @@
-const CACHE_NAME = 'hollow-grove-v5.6';
+// v5.7: bumped so every client drops the previously cached copy. Bump this on
+// every deploy, otherwise cache-first installs keep serving the old index.html.
+const CACHE_NAME = 'hollow-grove-v5.7';
 const ASSETS = [
   'index.html',
   'sketch.html',
@@ -53,18 +55,52 @@ self.addEventListener('activate', e => {
   );
 });
 
-// 3. RETRIEVAL: Serve cached assets first, with network fallback
+// 3. RETRIEVAL: network-first for pages, cache-first for static assets
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
-  
+
   // Bypass Service Worker for localhost, Render APIs, or non-GET requests to prevent CORS/PNA blocks
   if (url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname.includes('onrender.com') || url.pathname.startsWith('/api') || e.request.method !== 'GET') {
     return;
   }
 
+  const isSameOrigin = url.origin === self.location.origin;
+  const isPage = e.request.mode === 'navigate' ||
+    /\.html?$/i.test(url.pathname) ||
+    url.pathname.endsWith('/');
+
+  // Pages must never be served stale: a cached index.html hides every deploy
+  // (including fixes) until CACHE_NAME changes. Network-first, cache as fallback.
+  if (isPage) {
+    e.respondWith(
+      fetch(e.request)
+        .then(res => {
+          if (res && res.ok && isSameOrigin) {
+            const copy = res.clone();
+            caches.open(CACHE_NAME)
+              .then(cache => cache.put(e.request, copy))
+              .catch(() => {});
+          }
+          return res;
+        })
+        .catch(() => caches.match(e.request).then(res => res || caches.match('index.html')))
+    );
+    return;
+  }
+
+  // Static assets: cache-first, then network, and remember successful responses.
   e.respondWith(
     caches.match(e.request).then(res => {
-      return res || fetch(e.request);
+      if (res) return res;
+      return fetch(e.request).then(net => {
+        if (net && net.ok && isSameOrigin) {
+          const copy = net.clone();
+          caches.open(CACHE_NAME)
+            .then(cache => cache.put(e.request, copy))
+            .catch(() => {});
+        }
+        return net;
+      });
     })
   );
 });
