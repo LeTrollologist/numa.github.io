@@ -1,6 +1,6 @@
 // v5.7: bumped so every client drops the previously cached copy. Bump this on
 // every deploy, otherwise cache-first installs keep serving the old index.html.
-const CACHE_NAME = 'hollow-grove-v5.7';
+const CACHE_NAME = 'hollow-grove-v5.8';
 const ASSETS = [
   'index.html',
   'sketch.html',
