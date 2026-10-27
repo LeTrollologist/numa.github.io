@@ -708,40 +708,6 @@ textarea {
 .heatmap-month-labels { display: flex; gap: 3px; margin-bottom: 3px; overflow: hidden; }
 .heatmap-month-label { font-size: 0.6rem; color: rgba(255,255,255,0.35); font-family: var(--fm); min-width: 13px; }
 
-/* ── AI Chat ── */
-.ai-bubble {
-    padding: 12px 16px;
-    border-radius: 16px;
-    margin-bottom: 10px;
-    line-height: 1.6;
-    font-size: 0.9rem;
-    max-width: 85%;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    font-family: var(--fb);
-    transition: all 0.2s ease;
-}
-.ai-bubble.user {
-    background: linear-gradient(135deg, rgba(255, 111, 171, 0.22) 0%, rgba(255, 111, 171, 0.08) 100%);
-    border: 1px solid rgba(255, 111, 171, 0.42);
-    border-bottom-right-radius: 4px;
-    margin-left: auto;
-}
-.ai-bubble.assistant {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-bottom-left-radius: 4px;
-    margin-right: auto;
-}
-.ai-bubble.thinking { opacity: 0.5; font-style: italic; }
-.ai-bubble.error { border-color: rgba(255,80,80,0.35); }
-.ai-bubble.compact {
-    padding: 8px 12px;
-    border-radius: 10px;
-    margin-bottom: 6px;
-    line-height: 1.35;
-    font-size: 0.82rem;
-}
-
 /* ── Task card left stripe ── */
 .task-item { border-left: 3px solid transparent; transition: all 0.2s ease, border-left-color 0s; }
 
@@ -755,19 +721,6 @@ textarea {
 /* ── Staggered task entrance ── */
 @keyframes taskIn { from { opacity:0; transform:translateX(-6px); } to { opacity:1; transform:none; } }
 .task-item { animation: taskIn 0.22s ease both; }
-/* ── Skill pills ── */
-.skill-pill { padding: 6px 14px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; border: 1px solid rgba(255,111,171,0.25); background: rgba(255,111,171,0.07); color: rgba(255,255,255,0.7); cursor: pointer; transition: all 0.18s; }
-.skill-pill:hover { background: rgba(255,111,171,0.18); color: white; }
-.skill-pill.active { background: rgba(255,111,171,0.25); border-color: rgba(255,111,171,0.6); color: white; box-shadow: 0 0 8px rgba(255,111,171,0.25); }
-
-/* ── Archive items ── */
-.archive-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; background:rgba(255,255,255,0.04); border:1px solid var(--border); cursor:pointer; transition:background 0.15s; }
-.archive-item:hover { background:rgba(255,111,171,0.1); }
-
-/* ── Memory update toast ── */
-/* ── Memory update toast ── */
-.memory-update-notice { font-size:0.72rem; color:rgba(255,200,130,0.9); background:rgba(255,159,67,0.1); border:1px solid rgba(255,159,67,0.3); border-radius:8px; padding:6px 10px; margin-top:6px; }
-
 /* ==========================================================================
    STUDYBUDDY RESPONSIVE, AMBIENT & TABBED UI STYLES
    ========================================================================== */
@@ -822,20 +775,17 @@ textarea {
 }
 
 .study-tab-content::-webkit-scrollbar,
-#studyAiChatLog::-webkit-scrollbar,
 #todoList::-webkit-scrollbar {
     width: 6px;
     height: 6px;
 }
 
 .study-tab-content::-webkit-scrollbar-track,
-#studyAiChatLog::-webkit-scrollbar-track,
 #todoList::-webkit-scrollbar-track {
     background: transparent;
 }
 
 .study-tab-content::-webkit-scrollbar-thumb,
-#studyAiChatLog::-webkit-scrollbar-thumb,
 #todoList::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.15);
     border-radius: 99px;
@@ -843,7 +793,6 @@ textarea {
 }
 
 .study-tab-content::-webkit-scrollbar-thumb:hover,
-#studyAiChatLog::-webkit-scrollbar-thumb:hover,
 #todoList::-webkit-scrollbar-thumb:hover {
     background: var(--pink);
 }
@@ -1397,26 +1346,6 @@ textarea {
     animation: fadeIn 0.3s ease;
 }
 
-/* Dedicated Study AI chat layout */
-#studyAiChatLog {
-    flex: 1;
-    overflow-y: auto;
-    max-height: 380px;
-    min-height: 240px;
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 8px;
-}
-
-#studyAiSuggestionsRow {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
 /* Task integration style additions */
 .sb-import-btn {
     background: rgba(255, 111, 171, 0.15);
@@ -1911,24 +1840,6 @@ textarea {
     width: 100% !important;
   }
 
-  /* 6. Ask AI view scrollable skills list */
-  #view-ai div[style*="display:flex;gap:8px;flex-wrap:wrap;"] {
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    padding-bottom: 6px !important;
-    -ms-overflow-style: none !important;
-    scrollbar-width: none !important;
-  }
-  
-  #view-ai div[style*="display:flex;gap:8px;flex-wrap:wrap;"]::-webkit-scrollbar {
-    display: none !important;
-  }
-  
-  .skill-pill {
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
-  }
-
   /* 7. StudyBuddy (📚 Study) Mobile segment views */
   .study-mobile-selector {
     display: flex !important;
@@ -2062,7 +1973,6 @@ textarea {
     <div class="nav-tab" data-view="assignments">Tasks</div>
     <div class="nav-tab" data-view="notes">Notes</div>
     <div class="nav-tab" data-view="insights">Insights</div>
-    <div class="nav-tab" data-view="ai">✨ Ask AI</div>
     <div class="nav-tab" data-view="study">📚 Study</div>
   </div>
 
@@ -2291,89 +2201,6 @@ textarea {
     </div>
   </div>
 
-  <!-- AI VIEW -->
-  <div id="view-ai" class="view">
-
-
-
-    <!-- Logged in -->
-    <div id="aiChatWall" style="display:none;flex-direction:column;gap:14px;">
-
-      <!-- Header row -->
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-        <div class="section-title" style="margin-bottom:0;">&#129302; Ask Mistral AI</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div id="aiUserBadge" style="display:flex;align-items:center;gap:7px;font-size:0.82rem;background:rgba(88,101,242,0.15);border:1px solid rgba(88,101,242,0.35);padding:5px 12px;border-radius:999px;color:rgba(255,255,255,0.8);"></div>
-          <button onclick="toggleMemoriesPanel()" class="btn btn-secondary" style="font-size:0.75rem;padding:6px 11px;" title="Memories">&#129504; Memories</button>
-          <button onclick="toggleArchivesPanel()" class="btn btn-secondary" style="font-size:0.75rem;padding:6px 11px;" title="Chat Archives">&#128193; Archives</button>
-          <button onclick="aiLogout()" class="btn btn-secondary" style="font-size:0.75rem;padding:6px 10px;">Logout</button>
-        </div>
-      </div>
-
-      <!-- Skills bar -->
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="skill-pill active" data-skill="default" onclick="setSkill('default',this)">&#10024; General</button>
-        <button class="skill-pill" data-skill="plan" onclick="setSkill('plan',this)">&#128197; Plan Week</button>
-        <button class="skill-pill" data-skill="prioritize" onclick="setSkill('prioritize',this)">&#127919; Prioritize</button>
-        <button class="skill-pill" data-skill="reflect" onclick="setSkill('reflect',this)">&#128173; Reflect</button>
-        <button class="skill-pill" data-skill="motivate" onclick="setSkill('motivate',this)">&#128293; Motivate</button>
-      </div>
-
-      <!-- Memories panel (collapsible) -->
-      <div id="memoriesPanel" style="display:none;" class="glass card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-          <div style="font-size:0.85rem;font-weight:600;color:var(--pink-s);">&#129504; Long-term Memories</div>
-          <div style="display:flex;gap:8px;">
-            <button onclick="saveMemories()" class="btn btn-primary" style="font-size:0.72rem;padding:4px 12px;">Save</button>
-            <button onclick="clearMemories()" class="btn btn-secondary" style="font-size:0.72rem;padding:4px 10px;">Clear</button>
-          </div>
-        </div>
-        <textarea id="memoriesEditor" rows="5"
-          placeholder="The AI will remember things here automatically. You can also edit this directly.
-Example:
-- Prefers morning for deep work
-- Working on a research paper
-- Struggles with starting tasks"
-          style="width:100%;font-size:0.83rem;font-family:var(--fm);resize:vertical;"></textarea>
-        <div style="font-size:0.65rem;color:rgba(255,255,255,0.3);margin-top:6px;">Saved locally in your browser. Sent to the AI as context every message.</div>
-      </div>
-
-      <!-- Archives panel (collapsible) -->
-      <div id="archivesPanel" style="display:none;" class="glass card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-          <div style="font-size:0.85rem;font-weight:600;color:var(--pink-s);">&#128193; Chat Archives</div>
-          <button onclick="toggleArchivesPanel()" class="btn btn-secondary" style="font-size:0.72rem;padding:4px 10px;">Close</button>
-        </div>
-        <div id="archivesList" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;"></div>
-        <div style="font-size:0.65rem;color:rgba(255,255,255,0.3);margin-top:8px;">Archived chats are stored in your browser.</div>
-      </div>
-
-      <!-- Chat area -->
-      <div class="glass card" style="display:flex;flex-direction:column;gap:0;min-height:360px;">
-        <div id="aiChatLog" style="flex:1;overflow-y:auto;max-height:400px;padding-bottom:4px;display:flex;flex-direction:column;"></div>
-        <div id="aiSuggestionsRow" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);"></div>
-        <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
-          <input id="aiPromptInput" type="text" placeholder="Ask me anything&#8230;" style="flex:1;"
-            onkeydown="if(event.key==='Enter'){event.preventDefault();sendAIMessage();}">
-          <button onclick="sendAIMessage()" class="btn btn-primary" style="padding:10px 18px;">Send</button>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
-          <div style="font-size:0.65rem;color:rgba(255,255,255,0.25);font-family:var(--fm);">Context &amp; memories sent each message. Not stored on server.</div>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <span style="font-size:0.65rem;color:rgba(255,255,255,0.35);font-family:var(--fm);">Parser Mode:</span>
-            <select id="aiParserModeSel" onchange="changeParserMode(this.value)" class="btn btn-secondary" style="font-size:0.68rem;padding:3px 6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);cursor:pointer;border-radius:4px;font-family:var(--fb);">
-              <option value="default" style="background:var(--bg-card);color:#fff;">Normal</option>
-              <option value="compact" style="background:var(--bg-card);color:#fff;">Compact</option>
-            </select>
-            <button onclick="saveCurrentChat()" class="btn btn-secondary" style="font-size:0.7rem;padding:4px 10px;">&#128190; Save Chat</button>
-            <button onclick="clearChat()" class="btn btn-secondary" style="font-size:0.7rem;padding:4px 10px;">Clear</button>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
   <!-- STUDY VIEW -->
   <div id="view-study" class="view">
     <!-- Atmospheric Ambient Glowing Blobs -->
@@ -2496,58 +2323,12 @@ Example:
         
         <!-- Tab navigation -->
         <div class="study-right-tabs">
-          <div class="study-right-tab active" data-tab="ai">💬 AI Coach</div>
-          <div class="study-right-tab" data-tab="tasks">📋 Tasks &amp; Notes</div>
+          <div class="study-right-tab active" data-tab="tasks">📋 Tasks &amp; Notes</div>
           <div class="study-right-tab" data-tab="stats">📊 Stats &amp; Logs</div>
         </div>
 
-        <!-- Tab 1: AI Study Companion Chat -->
-        <div id="studyTabContent-ai" class="study-tab-content active">
-          
-          <div id="studyAiLoginWall" style="display:none; flex-direction:column; align-items:center; justify-content:center; min-height:280px; gap:12px;">
-            <div style="font-size:2.5rem;">🔒</div>
-            <div style="font-size:1.15rem; font-family:var(--fd); color:var(--pink-s);">AI Coach Locked</div>
-            <div style="font-size:0.8rem; color:rgba(255,255,255,0.5); text-align:center; max-width:280px; line-height:1.5;">
-              Unlock your personalized AI study companion by logging in with your Discord account under the <strong>Ask AI</strong> tab.
-            </div>
-          </div>
-
-          <div id="studyAiChatWall" style="display:flex; flex-direction:column; flex:1; gap:12px;">
-            <div id="studyAiChatLog" class="glass card" style="background:rgba(0,0,0,0.15); border:1px solid rgba(255,255,255,0.04); flex:1; overflow-y:auto; padding:12px; border-radius:10px;">
-              <div class="ai-bubble assistant">
-                👋 Hello! I am your supportive AI Study Coach. I know everything about your planner, your tasks, and what you are studying today.<br><br>
-                Tell me what topic you are working on, ask me to explain a concept, create a practice quiz for you, or ask for encouragement!
-              </div>
-            </div>
-            
-            <div id="studyAiSuggestionsRow">
-              <button class="skill-pill active" onclick="sendStudyAiSuggestion('🤖 Break down my study topic')">🤖 Plan Topic</button>
-              <button class="skill-pill active" onclick="sendStudyAiSuggestion('💡 Explain a concept simply')">💡 Explain Concept</button>
-              <button class="skill-pill active" onclick="sendStudyAiSuggestion('📝 Create a 3-question practice quiz')">📝 Quiz Me</button>
-              <button class="skill-pill active" onclick="sendStudyAiSuggestion('🔥 Give me warm encouragement')">🔥 Encourage Me</button>
-            </div>
-
-            <div style="display:flex; gap:8px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border);">
-              <input id="studyAiPromptInput" type="text" placeholder="Ask your study coach anything..." style="flex:1;"
-                     onkeydown="if(event.key==='Enter'){event.preventDefault();sendStudyAIMessage();}">
-              <button onclick="sendStudyAIMessage()" class="btn btn-primary" style="padding:8px 16px;">Send</button>
-            </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-              <div style="font-size:0.65rem; color:rgba(255,255,255,0.25);">Auto-saves study progress.</div>
-              <div style="display:flex; gap:6px; align-items:center;">
-                <span style="font-size:0.65rem; color:rgba(255,255,255,0.35);">Parser Mode:</span>
-                <select id="studyAiParserModeSel" onchange="changeParserMode(this.value)" class="btn btn-secondary" style="font-size:0.68rem; padding:3px 6px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.7); cursor:pointer; border-radius:4px; font-family:var(--fb);">
-                  <option value="default" style="background:var(--bg-card);color:#fff;">Normal</option>
-                  <option value="compact" style="background:var(--bg-card);color:#fff;">Compact</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Tab 2: lightweight tasks list and notepad -->
-        <div id="studyTabContent-tasks" class="study-tab-content">
+        <!-- Tab 1: lightweight tasks list and notepad -->
+        <div id="studyTabContent-tasks" class="study-tab-content active">
           
           <!-- Lightweight Task Manager -->
           <div class="todo-container" style="margin-bottom: 20px;">
@@ -2581,7 +2362,7 @@ Example:
 
         </div>
 
-        <!-- Tab 3: stats grid & completed session logs -->
+        <!-- Tab 2: stats grid & completed session logs -->
         <div id="studyTabContent-stats" class="study-tab-content">
           
           <div class="sb-goal-lbl" style="margin-bottom:8px;">TODAY'S STUDY METRICS</div>
@@ -2926,7 +2707,6 @@ function switchView(view) {
   if (view === 'assignments') { refreshCategoryFilter(); renderAssignments(); }
   if (view === 'notes')       renderNotes();
   if (view === 'insights')    renderInsights();
-  if (view === 'ai')          renderAIView();
   if (view === 'study')       initStudyView();
 }
 
@@ -3823,7 +3603,10 @@ function initPlanner() {
 
   console.log('%c[Numa Planner] Ready', 'color:#ff6fab;font-weight:bold');
   initDragDrop();
-  initAIAuth();
+
+  // AI features were removed. Purge anything the old build left in this browser.
+  ['aiMemories', 'aiArchives', 'aiParserMode'].forEach(k => localStorage.removeItem(k));
+  sessionStorage.removeItem('aiSession');
 }
 
 // ==================== HEATMAP ====================
@@ -3863,14 +3646,6 @@ function renderHeatmap() {
     }
   }
 }
-
-// ==================== MISTRAL AI (Discord-gated) ====================
-// Replace with your actual Render service URL after deploying ai-proxy/server.js
-const AI_WORKER_URL = 'https://ai-proxy-4lt3.onrender.com';
-
-let aiSession = { token: 'guest_token', username: 'Guest' }; // { token, id, username, exp }
-let aiHistory = [];
-let currentSkill = 'default';
 
 // ==================== STUDYBUDDY STATE & GLOBALS ====================
 let timerInt2 = null, isRun = false, defMins = 25, totSec = 1500, remSec = 1500;
@@ -3915,7 +3690,6 @@ const motivBreak = [
 
 let studyTasks = [];
 let studyActiveFilter = 'all';
-let studyAiHistory = [];
 
 
 function escapeHtml(str) {
@@ -3928,488 +3702,9 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-function initAIAuth() {
-
-
-  // Load memories from localStorage into the editor
-  const memoriesEditor = document.getElementById('memoriesEditor');
-  if (memoriesEditor) {
-    memoriesEditor.value = localStorage.getItem('aiMemories') || '';
-  }
-
-  // Initialize parser mode dropdowns
-  const savedParserMode = localStorage.getItem('aiParserMode') || 'default';
-  const sel1 = document.getElementById('aiParserModeSel');
-  const sel2 = document.getElementById('studyAiParserModeSel');
-  if (sel1) sel1.value = savedParserMode;
-  if (sel2) sel2.value = savedParserMode;
-}
-
-function renderAIView() {
-  const chatWall  = document.getElementById('aiChatWall');
-  if (!chatWall) return;
-  chatWall.style.display  = 'flex';
-  const badge = document.getElementById('aiUserBadge');
-  if (badge) badge.innerHTML = `Guest`;
-  renderChatLog();
-  renderAISuggestions(currentSkill);
-}
-
-function renderChatLog() {
-  const log = document.getElementById('aiChatLog');
-  if (!log) return;
-  
-  // Preserve transient thinking bubble if active
-  const wasThinking = !!log.querySelector('.thinking');
-  
-  log.innerHTML = '';
-
-  if (aiHistory.length === 0) {
-    log.innerHTML = '<div class="empty-state" style="padding:48px 0;margin:auto;">Hi ' + escapeHtml(aiSession?.username || '') + '! ✨<br><span style="font-size:0.8rem;opacity:0.6;">Ask me about your tasks, deadlines, or weekly focus.</span></div>';
-    if (wasThinking) {
-      const thinking = document.createElement('div');
-      thinking.className = 'ai-bubble assistant thinking';
-      thinking.textContent = 'Thinking…';
-      log.appendChild(thinking);
-    }
-    return;
-  }
-
-  aiHistory.forEach(m => {
-    const b = document.createElement('div');
-    b.className = 'ai-bubble ' + m.role;
-    if (localStorage.getItem('aiParserMode') === 'compact') {
-      b.classList.add('compact');
-    }
-    if (m.role === 'assistant') {
-      b.innerHTML = parseMarkdown(m.content);
-    } else {
-      b.textContent = m.content;
-    }
-    log.appendChild(b);
-  });
-  
-  if (wasThinking) {
-    const thinking = document.createElement('div');
-    thinking.className = 'ai-bubble assistant thinking';
-    thinking.textContent = 'Thinking…';
-    log.appendChild(thinking);
-  }
-  
-  log.scrollTop = log.scrollHeight;
-}
-
-function aiLogout() {
-  aiHistory = [];
-  renderChatLog();
-  showToast('Chat cleared');
-}
-
-function setSkill(skill, btn) {
-  currentSkill = skill;
-  document.querySelectorAll('.skill-pill').forEach(p => p.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  showToast(`Skill set to: ${skill.charAt(0).toUpperCase() + skill.slice(1)}`);
-  renderAISuggestions(skill);
-}
-
-function toggleMemoriesPanel() {
-  const panel = document.getElementById('memoriesPanel');
-  if (!panel) return;
-  const isHidden = panel.style.display === 'none';
-  panel.style.display = isHidden ? 'block' : 'none';
-  if (isHidden) {
-    const editor = document.getElementById('memoriesEditor');
-    if (editor) editor.value = localStorage.getItem('aiMemories') || '';
-  }
-}
-
-function saveMemories() {
-  const editor = document.getElementById('memoriesEditor');
-  if (!editor) return;
-  localStorage.setItem('aiMemories', editor.value);
-  showToast('Long-term memories saved');
-}
-
-function clearMemories() {
-  if (confirm('Are you sure you want to clear all long-term memories? This cannot be undone.')) {
-    localStorage.removeItem('aiMemories');
-    const editor = document.getElementById('memoriesEditor');
-    if (editor) editor.value = '';
-    showToast('Long-term memories cleared');
-  }
-}
-
-function toggleArchivesPanel() {
-  const panel = document.getElementById('archivesPanel');
-  if (!panel) return;
-  const isHidden = panel.style.display === 'none';
-  panel.style.display = isHidden ? 'block' : 'none';
-  if (isHidden) {
-    loadArchives();
-  }
-}
-
-function loadArchives() {
-  const list = document.getElementById('archivesList');
-  if (!list) return;
-  list.innerHTML = '';
-
-  let archives = [];
-  try {
-    archives = JSON.parse(localStorage.getItem('aiArchives') || '[]');
-  } catch {
-    archives = [];
-  }
-
-  if (archives.length === 0) {
-    list.innerHTML = '<div class="empty-state" style="padding: 10px 0; font-size: 0.8rem;">No archived chats yet.</div>';
-    return;
-  }
-
-  archives.sort((a, b) => b.timestamp - a.timestamp);
-
-  archives.forEach(arc => {
-    const item = document.createElement('div');
-    item.className = 'archive-item';
-    item.style.display = 'flex';
-    item.style.justifyContent = 'space-between';
-    item.style.alignItems = 'center';
-    item.style.width = '100%';
-    item.style.marginBottom = '6px';
-    item.onclick = () => loadArchiveChat(arc.id);
-
-    const info = document.createElement('div');
-    info.style.display = 'flex';
-    info.style.flexDirection = 'column';
-    info.style.gap = '2px';
-
-    const title = document.createElement('div');
-    title.style.fontWeight = '600';
-    title.style.fontSize = '0.85rem';
-    title.textContent = arc.title;
-
-    const date = document.createElement('div');
-    date.style.fontSize = '0.7rem';
-    date.style.color = 'rgba(255,255,255,0.4)';
-    date.textContent = new Date(arc.timestamp).toLocaleString();
-
-    info.appendChild(title);
-    info.appendChild(date);
-
-    const delBtn = document.createElement('button');
-    delBtn.className = 'btn btn-secondary';
-    delBtn.style.padding = '4px 8px';
-    delBtn.style.fontSize = '0.7rem';
-    delBtn.innerHTML = '🗑️';
-    delBtn.onclick = (e) => deleteArchive(arc.id, e);
-
-    item.appendChild(info);
-    item.appendChild(delBtn);
-    list.appendChild(item);
-  });
-}
-
-function saveCurrentChat() {
-  if (aiHistory.length === 0) {
-    showToast('Cannot archive an empty chat.');
-    return;
-  }
-
-  let archives = [];
-  try {
-    archives = JSON.parse(localStorage.getItem('aiArchives') || '[]');
-  } catch {
-    archives = [];
-  }
-
-  const firstUserMsg = aiHistory.find(m => m.role === 'user')?.content || 'Saved Chat';
-  const title = firstUserMsg.length > 25 ? firstUserMsg.slice(0, 25) + '...' : firstUserMsg;
-
-  const newArchive = {
-    id: 'arch_' + Date.now(),
-    title: title,
-    history: JSON.parse(JSON.stringify(aiHistory)),
-    timestamp: Date.now()
-  };
-
-  archives.push(newArchive);
-  localStorage.setItem('aiArchives', JSON.stringify(archives));
-  showToast('Chat archived successfully!');
-  loadArchives();
-}
-
-function loadArchiveChat(id) {
-  let archives = [];
-  try {
-    archives = JSON.parse(localStorage.getItem('aiArchives') || '[]');
-  } catch {
-    return;
-  }
-
-  const arc = archives.find(a => a.id === id);
-  if (!arc) {
-    showToast('Chat archive not found.');
-    return;
-  }
-
-  aiHistory = JSON.parse(JSON.stringify(arc.history));
-  renderChatLog();
-  showToast('Archived chat loaded.');
-}
-
-function deleteArchive(id, e) {
-  if (e) e.stopPropagation();
-  if (confirm('Are you sure you want to delete this chat archive?')) {
-    let archives = [];
-    try {
-      archives = JSON.parse(localStorage.getItem('aiArchives') || '[]');
-    } catch {
-      archives = [];
-    }
-
-    archives = archives.filter(a => a.id !== id);
-    localStorage.setItem('aiArchives', JSON.stringify(archives));
-    showToast('Archive deleted.');
-    loadArchives();
-  }
-}
-
-function clearChat() {
-  aiHistory = [];
-  renderChatLog();
-  showToast('Chat cleared.');
-}
-
-async function sendAIMessage() {
-  if (!aiSession) return;
-  const input = document.getElementById('aiPromptInput');
-  const msg = (input.value || '').trim();
-  if (!msg) return;
-
-  input.value = '';
-  aiHistory.push({ role: 'user', content: msg });
-  renderChatLog();
-
-  const log = document.getElementById('aiChatLog');
-  if (!log) return;
-  const thinking = document.createElement('div');
-  thinking.className = 'ai-bubble assistant thinking';
-  thinking.textContent = 'Thinking…';
-  log.appendChild(thinking);
-  log.scrollTop = log.scrollHeight;
-
-  // Build context for system prompt
-  const doneTasks    = plannerData.tasks.filter(t => t.status === 'done').length;
-  const overdueList  = plannerData.tasks.filter(isOverdue).map(t => t.title).slice(0, 5).join(', ') || 'none';
-  const todayList    = plannerData.tasks.filter(t => t.dueDate && t.dueDate.startsWith(todayStr())).map(t => `${t.title} (${t.status})`).join(', ') || 'none';
-  const dayStr       = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  const plannerContext = `Today: ${dayStr}
-Tasks: ${plannerData.tasks.length} total, ${doneTasks} done.
-Overdue tasks: ${overdueList}
-Today's tasks: ${todayList}
-Streak: ${plannerData.settings.streak} days
-Weekly focus: ${plannerData.weeklyFocus || 'not set'}`;
-
-  const currentMemories = localStorage.getItem('aiMemories') || '';
-
-  try {
-    const resp = await fetch(AI_WORKER_URL + '/api/ai', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + aiSession.token,
-      },
-      body: JSON.stringify({
-        messages: aiHistory,
-        memories: currentMemories,
-        skill: currentSkill,
-        plannerContext: plannerContext
-      }),
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || 'API error');
-
-    thinking.remove();
-
-    const reply = data.choices[0].message.content;
-    aiHistory.push({ role: 'assistant', content: reply });
-
-    // Render updated chat log
-    renderChatLog();
-
-    // Handle memory updates if any
-    if (data.memoryUpdate) {
-      let updatedMemories = currentMemories.trim();
-      if (updatedMemories && !updatedMemories.endsWith('\n')) {
-        updatedMemories += '\n';
-      }
-      updatedMemories += data.memoryUpdate;
-      localStorage.setItem('aiMemories', updatedMemories);
-
-      const memoriesEditor = document.getElementById('memoriesEditor');
-      if (memoriesEditor) {
-        memoriesEditor.value = updatedMemories;
-      }
-
-      // Add a nice inline banner to notify the user
-      const notice = document.createElement('div');
-      notice.className = 'memory-update-notice';
-      notice.innerHTML = `<strong>🧠 Long-term Memory Updated:</strong><br>${escapeHtml(data.memoryUpdate).replace(/\n/g, '<br>')}`;
-      log.appendChild(notice);
-
-      showToast('🧠 AI updated your memories!');
-    }
-
-    log.scrollTop = log.scrollHeight;
-  } catch (e) {
-    thinking.remove();
-    let errMsg = '❌ ' + (e.message || 'Something went wrong.');
-    if (e.message && e.message.includes('expired')) {
-      errMsg += ' Click Logout and log in again.';
-      aiSession = null;
-      sessionStorage.removeItem('aiSession');
-      setTimeout(renderAIView, 2000);
-    }
-    aiHistory.push({ role: 'assistant', content: errMsg });
-    renderChatLog();
-  }
-}
-
-const AI_SUGGESTIONS = {
-  default: [
-    "Explain quantum computing in simple terms",
-    "Help me draft a professional email to my supervisor",
-    "Give me ideas for healthy, fast lunch options",
-    "Summarize the key events of the French Revolution",
-    "Draft a quick study schedule for a biology exam",
-    "Brainstorm a catchy name for a startup about task planning",
-    "How do I format a bibliography in MLA style?",
-    "Write a polite letter asking for a deadline extension",
-    "Suggest five morning mindfulness practices for focus",
-    "Help me practice conversational Spanish",
-    "Draft an outline for a 5-page history research paper",
-    "What are some highly effective note-taking frameworks?"
-  ],
-  plan: [
-    "Plan my study schedule for this week's exams",
-    "Plan a balanced study schedule for this week",
-    "Create a daily theme breakdown for a 5-day cycle",
-    "How should I structure study sprints for heavy workload?",
-    "Design a focus block system to prepare for my exam",
-    "Create a weekly plan focusing on deep creative projects",
-    "How can I allocate study vs resting times this week?",
-    "Help me schedule three separate group project tasks",
-    "Outline a daily study program for a computer science track",
-    "Create a weekly schedule for creative coding sprints",
-    "Suggest a structure to divide my week's homework",
-    "Plan study sessions to balance work and creative sketch projects"
-  ],
-  prioritize: [
-    "Apply the Eisenhower Matrix to prioritize today's tasks",
-    "Find my 'One Thing' that makes everything else easier today",
-    "Rank my pending tasks by urgent vs important criteria",
-    "Analyze my overdue tasks to identify what to tackle first",
-    "Create an energy-aligned priority task list for today",
-    "Which of my project research tasks has the highest payoff?",
-    "Identify the single biggest bottleneck in my daily tasks",
-    "How to prioritize five different homework deadlines?",
-    "Group today's tasks into low, medium, and high-impact actions",
-    "Help me cut two tasks that don't deserve my time today",
-    "Help me choose my top 3 non-negotiable study objectives",
-    "Prioritize my schedule to reduce feeling overwhelmed"
-  ],
-  reflect: [
-    "Guide me through a 5-minute evening reflection check-in",
-    "Synthesize my daily notes for key patterns and lessons",
-    "Let's review my streak metrics and how to stay consistent",
-    "Why am I feeling mentally blocked on my active project?",
-    "Reflect on how my sleep and mood relate to my productivity",
-    "What did I learn from my most successful day this week?",
-    "Walk me through a gratitude check-in to clear my head",
-    "Review my recent productivity blocks and how to beat them",
-    "Help me log a detailed reflection about today's main task",
-    "Reflect on how I handled distraction today",
-    "Analyze my completion rate vs mood patterns",
-    "Draft a list of questions to audit my monthly progress"
-  ],
-  motivate: [
-    "Give me a high-energy, 2-minute motivational pep talk",
-    "Help me beat severe procrastination on my first task",
-    "Celebrate my task completed streak with a customized badge",
-    "Help me reset and rebuild momentum after a low-productivity day",
-    "Give me a supportive boost because I am feeling exhausted today",
-    "Remind me why my active project matters in the long run",
-    "Inspire me with a quote and breakdown on deliberate practice",
-    "Pep talk to help me start on an intimidating study task",
-    "Let's celebrate a small victory from my notes list",
-    "How to stay motivated when a project gets tedious?",
-    "A short mindfulness exercise to rebuild my focus energy",
-    "Help me transition from passive scrolling to active deep focus"
-  ]
-};
-
-function renderAISuggestions(skill) {
-  const row = document.getElementById('aiSuggestionsRow');
-  if (!row) return;
-  row.innerHTML = '';
-
-  const options = AI_SUGGESTIONS[skill] || AI_SUGGESTIONS.default;
-  // Shuffled copy to select 6 random items
-  const shuffled = [...options].sort(() => 0.5 - Math.random());
-  const selected = shuffled.slice(0, 6);
-
-  selected.forEach(sug => {
-    const pill = document.createElement('button');
-    pill.className = 'suggestion-pill';
-    pill.style.cssText = `
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      border-radius: 999px;
-      padding: 6px 13px;
-      font-size: 0.73rem;
-      color: rgba(255, 255, 255, 0.72);
-      cursor: pointer;
-      transition: all 0.18s ease-in-out;
-      font-family: var(--fb);
-      line-height: 1.2;
-    `;
-    pill.textContent = sug;
-
-    // Hover effects
-    pill.onmouseover = () => {
-      pill.style.background = 'rgba(255, 111, 171, 0.16)';
-      pill.style.borderColor = 'rgba(255, 111, 171, 0.4)';
-      pill.style.color = 'var(--pink-s)';
-      pill.style.transform = 'translateY(-1px)';
-    };
-    pill.onmouseout = () => {
-      pill.style.background = 'rgba(255, 255, 255, 0.04)';
-      pill.style.borderColor = 'rgba(255, 255, 255, 0.09)';
-      pill.style.color = 'rgba(255, 255, 255, 0.72)';
-      pill.style.transform = '';
-    };
-
-    pill.onclick = () => {
-      useSuggestion(sug);
-    };
-
-    row.appendChild(pill);
-  });
-}
-
-function useSuggestion(text) {
-  const input = document.getElementById('aiPromptInput');
-  if (!input) return;
-  input.value = text;
-  input.focus();
-}
-
-// ==================== PARSEMARKDOWN & COMPACT MODES ====================
+// ==================== MARKDOWN ====================
 function parseMarkdown(text) {
   if (!text) return '';
-  const mode = localStorage.getItem('aiParserMode') || 'default';
-  const isCompact = (mode === 'compact');
 
   // Escape HTML tags to prevent XSS except the ones we explicitly generate
   let safe = text
@@ -4419,37 +3714,22 @@ function parseMarkdown(text) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 
-  // Markdown translation:
   // Headers (### and ####)
-  const h3Style = isCompact
-    ? 'font-family:var(--fb);font-weight:700;font-size:0.95rem;margin-top:4px;margin-bottom:2px;color:var(--pink-s);'
-    : 'font-family:var(--fb);font-weight:700;font-size:1.15rem;margin-top:12px;margin-bottom:6px;color:var(--pink-s);';
-
-  const h4Style = isCompact
-    ? 'font-family:var(--fb);font-weight:600;font-size:0.85rem;margin-top:3px;margin-bottom:1px;color:rgba(255,255,255,0.85);'
-    : 'font-family:var(--fb);font-weight:600;font-size:1rem;margin-top:8px;margin-bottom:4px;color:rgba(255,255,255,0.85);';
-
+  const h3Style = 'font-family:var(--fb);font-weight:700;font-size:1.15rem;margin-top:12px;margin-bottom:6px;color:var(--pink-s);';
+  const h4Style = 'font-family:var(--fb);font-weight:600;font-size:1rem;margin-top:8px;margin-bottom:4px;color:rgba(255,255,255,0.85);';
   safe = safe.replace(/^###\s+(.*)$/gm, `<h3 style="${h3Style}">$1</h3>`);
   safe = safe.replace(/^####\s+(.*)$/gm, `<h4 style="${h4Style}">$1</h4>`);
 
   // Blockquotes (>)
-  const bqStyle = isCompact
-    ? 'border-left:2px solid var(--pink);padding-left:6px;color:rgba(255,255,255,0.6);font-style:italic;margin:3px 0;'
-    : 'border-left:2px solid var(--pink);padding-left:10px;color:rgba(255,255,255,0.6);font-style:italic;margin:8px 0;';
-
+  const bqStyle = 'border-left:2px solid var(--pink);padding-left:10px;color:rgba(255,255,255,0.6);font-style:italic;margin:8px 0;';
   safe = safe.replace(/^&gt;\s+(.*)$/gm, `<div style="${bqStyle}">$1</div>`);
 
   // Lists (- )
-  const liStyle = isCompact
-    ? 'display:flex;gap:4px;margin:2px 0 2px 6px;align-items:flex-start;'
-    : 'display:flex;gap:6px;margin:4px 0 4px 10px;align-items:flex-start;';
-
+  const liStyle = 'display:flex;gap:6px;margin:4px 0 4px 10px;align-items:flex-start;';
   safe = safe.replace(/^-\s+(.*)$/gm, `<div style="${liStyle}"><span style="color:var(--pink);">•</span><span>$1</span></div>`);
 
-  // Bold (**text**)
+  // Bold (**text**) and italics (*text*)
   safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-  // Italics (*text*)
   safe = safe.replace(/\*(.*?)\*/g, '<em>$1</em>');
 
   // Inline code (`code`)
@@ -4458,24 +3738,10 @@ function parseMarkdown(text) {
   // Links ([text](url))
   safe = safe.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" style="color:var(--pink);text-decoration:none;border-bottom:1px dashed var(--pink-g);">$1</a>');
 
-  // Newlines to br (compress multiple breaks in compact mode)
-  if (isCompact) {
-    safe = safe.replace(/\n\n+/g, '\n');
-  }
+  // Newlines to br
   safe = safe.replace(/\n/g, '<br>');
 
   return safe;
-}
-
-function changeParserMode(value) {
-  localStorage.setItem('aiParserMode', value);
-  const sel1 = document.getElementById('aiParserModeSel');
-  const sel2 = document.getElementById('studyAiParserModeSel');
-  if (sel1) sel1.value = value;
-  if (sel2) sel2.value = value;
-  if (typeof renderChatLog === 'function') renderChatLog();
-  if (typeof renderStudyChatLog === 'function') renderStudyChatLog();
-  showToast(`Parser mode set to: ${value.toUpperCase()}`);
 }
 
 // ==================== DRAG-DROP IMPORT ====================
@@ -4502,20 +3768,6 @@ function initStudyView() {
   if (ring) {
     ring.style.strokeDasharray = CIRC;
     updateRing(1);
-  }
-
-  // Toggle AI Coach login wall
-  const loginWall = document.getElementById('studyAiLoginWall');
-  const chatWall = document.getElementById('studyAiChatWall');
-  if (loginWall && chatWall) {
-    if (aiSession) {
-      loginWall.style.display = 'none';
-      chatWall.style.display = 'flex';
-      renderStudyChatLog();
-    } else {
-      loginWall.style.display = 'flex';
-      chatWall.style.display = 'none';
-    }
   }
 
   // Bind right panel tab switching listeners
@@ -5139,153 +4391,6 @@ function toggleSessionLog(btn) {
     arrow.textContent = '▸';
   }
 }
-
-// ── AI STUDY COMPANION ──
-async function sendStudyAIMessage() {
-  if (!aiSession) return;
-  const input = document.getElementById('studyAiPromptInput');
-  const msg = (input.value || '').trim();
-  if (!msg) return;
-
-  input.value = '';
-  studyAiHistory.push({ role: 'user', content: msg });
-  renderStudyChatLog();
-
-  const log = document.getElementById('studyAiChatLog');
-  if (!log) return;
-  const thinking = document.createElement('div');
-  thinking.className = 'ai-bubble assistant thinking';
-  thinking.textContent = 'Thinking…';
-  log.appendChild(thinking);
-  log.scrollTop = log.scrollHeight;
-
-  // Build real-time context
-  const subj = document.getElementById('studySubject').value.trim() || 'General Study';
-  const m = Math.floor(remSec / 60);
-  const s = remSec % 60;
-  
-  const studyCoachRole = `[SPECIAL INSTRUCTION] You are Numa's supportive, extremely warm, sweet personal AI Study Companion and Coach.
-She is in the "Study" view of her planner. Keep your responses encouraging, highly focused, helpful, and concise (under 2-3 short paragraphs).
-She is currently studying the subject noted below. Assist her with planning, summarizing, debugging, concepts, or give warm motivation when asked! Use markdown.`;
-
-  const studyContext = `${studyCoachRole}
-
-=== STUDYBUDDY LIVE STATE ===
-Subject Studying: ${subj}
-Active Timer Phase: ${phase} (${sessionType})
-Timer Status: ${isRun ? 'Running' : 'Paused'} (${m}m ${s}s remaining)
-Today's Streak: ${studyStreak} days
-Completed Focus Sessions Today: ${sessCount} / ${dailyGoal}
-Session Tasks: ${studyTasks.length} total, ${studyTasks.filter(t=>t.done).length} completed.
-Remaining study tasks: ${studyTasks.filter(t=>!t.done).map(t=>t.text).join(', ') || 'none'}
-
-=== MAIN PLANNER STATE ===
-Planner Tasks: ${plannerData.tasks.length} total
-Main Streak: ${plannerData.settings.streak} days`;
-
-  const currentMemories = localStorage.getItem('aiMemories') || '';
-
-  try {
-    const resp = await fetch(AI_WORKER_URL + '/api/ai', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + aiSession.token,
-      },
-      body: JSON.stringify({
-        messages: studyAiHistory,
-        memories: currentMemories,
-        skill: 'study', // Set study skill or direct via prompt
-        plannerContext: studyContext
-      }),
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || 'API error');
-
-    thinking.remove();
-
-    const reply = data.choices[0].message.content;
-    studyAiHistory.push({ role: 'assistant', content: reply });
-    
-    renderStudyChatLog();
-
-    // Handle memory updates if any
-    if (data.memoryUpdate) {
-      let updatedMemories = currentMemories.trim();
-      if (updatedMemories && !updatedMemories.endsWith('\n')) {
-        updatedMemories += '\n';
-      }
-      updatedMemories += data.memoryUpdate;
-      localStorage.setItem('aiMemories', updatedMemories);
-      const memoriesEditor = document.getElementById('memoriesEditor');
-      if (memoriesEditor) {
-        memoriesEditor.value = updatedMemories;
-      }
-    }
-  } catch (err) {
-    thinking.remove();
-    studyAiHistory.push({ role: 'assistant', content: '❌ Sorry, Numa! I ran into an error connecting. Let\'s try again.' });
-    renderStudyChatLog();
-  }
-}
-
-function sendStudyAiSuggestion(promptText) {
-  const input = document.getElementById('studyAiPromptInput');
-  if (input) {
-    input.value = promptText;
-    input.focus();
-  }
-}
-
-function renderStudyChatLog() {
-  const log = document.getElementById('studyAiChatLog');
-  if (!log) return;
-  
-  // Preserve transient thinking bubble if active
-  const wasThinking = !!log.querySelector('.thinking');
-  
-  log.innerHTML = '';
-
-  if (studyAiHistory.length === 0) {
-    log.innerHTML = `
-      <div class="ai-bubble assistant">
-        👋 Hello! I am your supportive AI Study Coach. I know everything about your planner, your tasks, and what you are studying today.<br><br>
-        Tell me what topic you are working on, ask me to explain a concept, create a practice quiz for you, or ask for encouragement!
-      </div>
-    `;
-    if (wasThinking) {
-      const thinking = document.createElement('div');
-      thinking.className = 'ai-bubble assistant thinking';
-      thinking.textContent = 'Thinking…';
-      log.appendChild(thinking);
-    }
-    return;
-  }
-
-  studyAiHistory.forEach(m => {
-    const b = document.createElement('div');
-    b.className = 'ai-bubble ' + m.role;
-    if (localStorage.getItem('aiParserMode') === 'compact') {
-      b.classList.add('compact');
-    }
-    if (m.role === 'assistant') {
-      b.innerHTML = parseMarkdown(m.content);
-    } else {
-      b.textContent = m.content;
-    }
-    log.appendChild(b);
-  });
-  
-  if (wasThinking) {
-    const thinking = document.createElement('div');
-    thinking.className = 'ai-bubble assistant thinking';
-    thinking.textContent = 'Thinking…';
-    log.appendChild(thinking);
-  }
-  
-  log.scrollTop = log.scrollHeight;
-}
-
 
 function switchStudyMobileTab(tab) {
   const btnTimer = document.getElementById('sbSelTimer');

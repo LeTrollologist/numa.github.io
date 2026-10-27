@@ -1,7 +1,9 @@
 // v5.7: bumped so every client drops the previously cached copy. Bump this on
 // every deploy, otherwise cache-first installs keep serving the old index.html.
-const CACHE_NAME = 'hollow-grove-v5.8';
-=====
+// v5.9: AI features removed from planner.html - bump so every client evicts the
+// cached planner page and the old AI client code/data with it.
+const CACHE_NAME = 'hollow-grove-v5.9';
+
 const ASSETS = [
   'index.html',
   'sketch.html',
