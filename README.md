@@ -2,7 +2,9 @@
 
 Disclaimer: I am not affiliated with Numa, this website and project was made strictly as a gift to be a study aid and her privacy should be respected. 
 
-A personal web app featuring celestial themes, study tools, a digital garden, a vector sketchpad, and a multi-timezone converter. Built with vanilla web technologies and designed to run entirely in the browser with offline PWA support. This web app is considered completed, and as such there will be no new features added. The theme will remain the same and no changes will be made to the two existing themes on the PWA/SPA and the peripheral pages. There will only be casual maintenance done on existing features.
+A personal web app featuring celestial and twilight-forest themes, study tools, a digital garden, a vector sketchpad, and a multi-timezone converter. Built with vanilla web technologies and designed to run entirely in the browser with offline PWA support. 
+
+This web app is considered completed, and as such there will be no new features added. The theme will remain the same and no changes will be made to the two existing themes on the PWA/SPA and the peripheral pages. There will only be casual maintenance done on existing features.
 
 **[Live Site](https://letrollologist.github.io/numa.github.io/)**
 
