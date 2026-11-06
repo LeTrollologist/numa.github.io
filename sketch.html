@@ -8,7 +8,7 @@
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com;
   img-src 'self' data: https://raw.githubusercontent.com;
-  connect-src 'self' https://analytics-server-bdrm.onrender.com;">
+  connect-src 'self';">
 <title>The Hollow · Numa's Sketchbook</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400;1,500&family=Cinzel:wght@400;500&family=Josefin+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="compute-optimizer.js"></script>
@@ -1507,6 +1507,113 @@ const BLEND_OPTIONS = [
   ['darken','Darken'],['lighten','Lighten'],['color-dodge','Dodge'],['color-burn','Burn'],
   ['hard-light','Hard Lt'],['soft-light','Soft Lt'],['difference','Diff'],['luminosity','Luma']
 ];
+const BLEND_VALUES = new Set(BLEND_OPTIONS.map(([value]) => value));
+const ALLOWED_THEMES = new Set(['mist', 'moonlit', 'ember']);
+
+/* ── Imported data is untrusted ──
+   Sketchbook JSON can come from anyone. Only accept the small schema this app
+   actually writes, cap every value, and never accept arbitrary URLs or markup. */
+const MAX_IMPORT_BYTES = 50 * 1024 * 1024;
+const MAX_IMPORTED_WORKS = 200;
+const MAX_PROJECT_LAYERS = 60;
+const MAX_IMAGE_DATA_URL_LENGTH = 16 * 1024 * 1024;
+const MAX_WORK_NAME_LENGTH = 80;
+const SAFE_IMAGE_DATA_RE = /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+
+function sanitizeText(value, fallback) {
+  if (typeof value !== 'string') return fallback;
+  const cleaned = value
+    .replace(/[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/g, '')
+    .trim()
+    .slice(0, MAX_WORK_NAME_LENGTH);
+  return cleaned || fallback;
+}
+
+function safeImageData(value) {
+  return typeof value === 'string' &&
+    value.length <= MAX_IMAGE_DATA_URL_LENGTH &&
+    SAFE_IMAGE_DATA_RE.test(value)
+    ? value
+    : '';
+}
+
+function sanitizeDate(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
+}
+
+function newWorkId() {
+  if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+    return 'work-' + window.crypto.randomUUID();
+  }
+  return 'work-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+}
+
+function sanitizeProject(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const size = raw.canvasSize;
+  if (!size || !Number.isFinite(+size.w) || !Number.isFinite(+size.h)) return null;
+  const W = Math.floor(+size.w);
+  const H = Math.floor(+size.h);
+  if (W < 16 || H < 16 || W > 8192 || H > 8192) return null;
+  if (!Array.isArray(raw.layers) || raw.layers.length < 1 || raw.layers.length > MAX_PROJECT_LAYERS) {
+    return null;
+  }
+
+  const layers = [];
+  for (const src of raw.layers) {
+    if (!src || typeof src !== 'object' || Array.isArray(src)) return null;
+    const data = safeImageData(src.data);
+    if (!data) return null;
+    layers.push({
+      id: 'layer_' + (layers.length + 1),
+      name: sanitizeText(src.name, `Layer ${layers.length + 1}`),
+      visible: src.visible !== false,
+      locked: !!src.locked,
+      opacity: Number.isFinite(+src.opacity) ? Math.max(0, Math.min(1, +src.opacity)) : 1,
+      blendMode: BLEND_VALUES.has(src.blendMode) ? src.blendMode : 'source-over',
+      offsetX: Number.isFinite(+src.offsetX) ? Math.max(-8192, Math.min(8192, +src.offsetX)) : 0,
+      offsetY: Number.isFinite(+src.offsetY) ? Math.max(-8192, Math.min(8192, +src.offsetY)) : 0,
+      data
+    });
+  }
+
+  const project = {
+    version: 3,
+    app: 'hollow-sketchbook',
+    canvasSize: { w: W, h: H },
+    bgVal: Number.isFinite(+raw.bgVal) ? Math.max(0, Math.min(100, +raw.bgVal)) : 50,
+    isTransparent: !!raw.isTransparent,
+    theme: ALLOWED_THEMES.has(raw.theme) ? raw.theme : 'mist',
+    activeIndex: Number.isInteger(raw.activeIndex)
+      ? Math.max(0, Math.min(layers.length - 1, raw.activeIndex))
+      : 0,
+    layers
+  };
+  const preview = safeImageData(raw.preview);
+  if (preview) project.preview = preview;
+  return project;
+}
+
+function sanitizeImportedWork(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const project = sanitizeProject(
+    raw.project && typeof raw.project === 'object' ? raw.project : raw
+  );
+  const data = safeImageData(raw.data) ||
+    (project && project.preview) ||
+    (project && project.layers.find(layer => layer.data)?.data) ||
+    '';
+  if (!data && !project) return null;
+  return {
+    id: newWorkId(),
+    name: sanitizeText(raw.name, 'Imported work'),
+    data,
+    date: sanitizeDate(raw.date),
+    theme: ALLOWED_THEMES.has(raw.theme) ? raw.theme : (project?.theme || 'mist'),
+    ...(project ? { project } : {})
+  };
+}
 
 // We'll use a proxy to keep 'ctx' pointing to activeLayer.ctx for compatibility
 let ctx = null; 
@@ -1554,8 +1661,9 @@ function serializeProject() {
   };
 }
 
-function applyProject(project, opts = {}) {
-  if (!project || !project.canvasSize || !Array.isArray(project.layers)) {
+function applyProject(rawProject, opts = {}) {
+  const project = sanitizeProject(rawProject);
+  if (!project) {
     status('Invalid project data');
     return Promise.resolve(false);
   }
@@ -1644,7 +1752,7 @@ async function restoreAutoSave() {
 function addLayer(name = '', select = true) {
   layerCounter++;
   const id = 'layer_' + layerCounter;
-  const layerName = name || `Layer ${layerCounter}`;
+  const layerName = sanitizeText(name, `Layer ${layerCounter}`);
   
   const canvas = document.createElement('canvas');
   canvas.id = 'cvs_' + id;
@@ -1805,7 +1913,7 @@ function renameActiveLayer() {
   if (!activeLayer) return;
   const next = prompt('Layer name:', activeLayer.name);
   if (!next || !next.trim()) return;
-  activeLayer.name = next.trim().slice(0, 40);
+  activeLayer.name = sanitizeText(next, activeLayer.name);
   updateLayerUI();
   autoSave();
   status('Layer renamed');
@@ -1827,28 +1935,72 @@ function clearActiveLayer() {
 function updateLayerUI() {
   const list = document.getElementById('layer-list');
   if (!list) return;
-  list.innerHTML = '';
+  list.replaceChildren();
   layers.slice().reverse().forEach(l => {
     const item = document.createElement('div');
     item.className = 'layer-item' + (activeLayer && activeLayer.id === l.id ? ' active' : '');
-    item.onclick = () => setActiveLayer(l.id);
+    item.addEventListener('click', () => setActiveLayer(l.id));
 
-    const blendOpts = BLEND_OPTIONS.map(([val, lab]) =>
-      `<option value="${val}" ${l.blendMode === val ? 'selected' : ''}>${lab}</option>`
-    ).join('');
+    const visibility = document.createElement('span');
+    visibility.className = 'layer-vis' + (l.visible ? ' on' : '');
+    visibility.title = 'Visibility';
+    visibility.textContent = l.visible ? '👁' : '◌';
+    visibility.addEventListener('click', event => {
+      event.stopPropagation();
+      toggleLayerVisibility(l.id);
+    });
 
-    item.innerHTML = `
-      <span class="layer-vis ${l.visible ? 'on' : ''}" onclick="event.stopPropagation(); toggleLayerVisibility('${l.id}')" title="Visibility">${l.visible ? '👁' : '◌'}</span>
-      <span class="layer-vis ${l.locked ? 'on' : ''}" onclick="event.stopPropagation(); toggleLayerLock('${l.id}')" title="Lock">${l.locked ? '🔒' : '🔓'}</span>
-      <span class="layer-name">${l.name}</span>
-      <input type="number" class="layer-op-input" min="0" max="100" value="${Math.round(l.opacity * 100)}"
-        onclick="event.stopPropagation()" onchange="setLayerOpacity('${l.id}',this.value)">
-      <div style="flex-basis:100%"></div>
-      <select class="layer-blend-sm" onclick="event.stopPropagation()" onchange="setLayerBlend('${l.id}',this.value)">${blendOpts}</select>
-      <div class="layer-row-btns">
-        <button type="button" onclick="event.stopPropagation();moveLayerInStack('${l.id}',+1)">▲</button>
-        <button type="button" onclick="event.stopPropagation();moveLayerInStack('${l.id}',-1)">▼</button>
-      </div>`;
+    const lock = document.createElement('span');
+    lock.className = 'layer-vis' + (l.locked ? ' on' : '');
+    lock.title = 'Lock';
+    lock.textContent = l.locked ? '🔒' : '🔓';
+    lock.addEventListener('click', event => {
+      event.stopPropagation();
+      toggleLayerLock(l.id);
+    });
+
+    const name = document.createElement('span');
+    name.className = 'layer-name';
+    name.textContent = sanitizeText(l.name, 'Layer');
+
+    const opacityInput = document.createElement('input');
+    opacityInput.type = 'number';
+    opacityInput.className = 'layer-op-input';
+    opacityInput.min = '0';
+    opacityInput.max = '100';
+    opacityInput.value = String(Math.round(l.opacity * 100));
+    opacityInput.addEventListener('click', event => event.stopPropagation());
+    opacityInput.addEventListener('change', () => setLayerOpacity(l.id, opacityInput.value));
+
+    const spacer = document.createElement('div');
+    spacer.style.flexBasis = '100%';
+
+    const blendSelect = document.createElement('select');
+    blendSelect.className = 'layer-blend-sm';
+    blendSelect.addEventListener('click', event => event.stopPropagation());
+    BLEND_OPTIONS.forEach(([value, label]) => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = label;
+      option.selected = (l.blendMode || 'source-over') === value;
+      blendSelect.appendChild(option);
+    });
+    blendSelect.addEventListener('change', () => setLayerBlend(l.id, blendSelect.value));
+
+    const rowButtons = document.createElement('div');
+    rowButtons.className = 'layer-row-btns';
+    [['▲', 1], ['▼', -1]].forEach(([label, direction]) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = label;
+      button.addEventListener('click', event => {
+        event.stopPropagation();
+        moveLayerInStack(l.id, direction);
+      });
+      rowButtons.appendChild(button);
+    });
+
+    item.append(visibility, lock, name, opacityInput, spacer, blendSelect, rowButtons);
     list.appendChild(item);
   });
 }
@@ -2145,7 +2297,12 @@ let works = [];
   try { works = JSON.parse(localStorage.getItem('hollow_v2') || '[]'); } catch(e) { works=[]; }
 })();
 function saveWorks() {
-  try { localStorage.setItem('hollow_v2', JSON.stringify(works)); } catch(e) {}
+  try {
+    localStorage.setItem('hollow_v2', JSON.stringify(works));
+    return true;
+  } catch(e) {
+    return false;
+  }
 }
 
 
@@ -4250,18 +4407,20 @@ function compositeCanvas() {
 }
 
 function doSave() {
-  const name=prompt('Name this work:','Sketch '+new Date().toLocaleDateString());
-  if(!name) return;
+  const rawName=prompt('Name this work:','Sketch '+new Date().toLocaleDateString());
+  if(!rawName) return;
+  const name=sanitizeText(rawName, 'Untitled work');
   const data = compositeCanvas().toDataURL('image/png');
   works.push({
-    id: Date.now(),
+    id: newWorkId(),
     name,
     data,
     date: new Date().toISOString(),
     theme,
     project: serializeProject()
   });
-  saveWorks(); status('Saved: '+name);
+  const saved = saveWorks();
+  status(saved ? 'Saved: '+name : 'Could not save: browser storage is full');
   autoSave();
 }
 
@@ -4271,10 +4430,17 @@ function loadWork(id, silent) {
   if (w.project) {
     applyProject(w.project, { silent: true }).then(ok => {
       if (ok) {
-        if(!silent) status('Loaded: '+w.name);
-        if(w.theme) setTheme(w.theme);
+        if(!silent) status('Loaded: '+sanitizeText(w.name, 'work'));
+        if(ALLOWED_THEMES.has(w.theme)) setTheme(w.theme);
+      } else {
+        status('Invalid saved project');
       }
     });
+    return;
+  }
+  const src=safeImageData(w.data);
+  if(!src) {
+    status('Invalid saved work image');
     return;
   }
   const img=new Image();
@@ -4282,10 +4448,10 @@ function loadWork(id, silent) {
     layers.forEach(l => l.ctx.clearRect(0, 0, cvs.width, cvs.height));
     if (activeLayer) activeLayer.ctx.drawImage(img, 0, 0, cvs.width, cvs.height);
     hist=[]; hIdx=-1; snapHistory();
-    if(!silent) status('Loaded: '+w.name);
-    if(w.theme) setTheme(w.theme);
+    if(!silent) status('Loaded: '+sanitizeText(w.name, 'work'));
+    if(ALLOWED_THEMES.has(w.theme)) setTheme(w.theme);
   };
-  img.src=w.data;
+  img.src=src;
 }
 
 function doExportProject() {
@@ -4352,19 +4518,34 @@ function doImportJSON() {
   inp.type='file'; inp.accept='.json,application/json';
   inp.onchange=e=>{
     const f=e.target.files[0]; if(!f) return;
+    if (f.size > MAX_IMPORT_BYTES) {
+      status('Import rejected: file is too large');
+      return;
+    }
     const reader=new FileReader();
     reader.onload=ev=>{
       try {
+        if (typeof ev.target.result !== 'string' || ev.target.result.length > MAX_IMPORT_BYTES) {
+          status('Import rejected: file is too large');
+          return;
+        }
         const parsed=JSON.parse(ev.target.result);
-        const arr=Array.isArray(parsed) ? parsed : [projectToWork(parsed)];
-        let added=0;
-        arr.filter(Boolean).forEach(w=>{
-          if(!works.find(x=>x.id===w.id)){
-            works.push(w);
-            added++;
-          }
+        const entries=(Array.isArray(parsed) ? parsed : [parsed]).slice(0, MAX_IMPORTED_WORKS);
+        let added=0, skipped=0;
+        entries.forEach(entry=>{
+          const work=sanitizeImportedWork(entry);
+          if (!work) { skipped++; return; }
+          works.push(work);
+          added++;
         });
-        saveWorks(); status(`Imported ${added} work(s)`);
+        if (!added) {
+          status('Import rejected: no valid sketchbook works found');
+          return;
+        }
+        const saved = saveWorks();
+        status(saved
+          ? `Imported ${added} work(s)${skipped ? `, skipped ${skipped} invalid` : ''}`
+          : 'Imported works could not be saved (storage is full)');
       } catch(err) { status('Invalid JSON file'); }
     };
     reader.readAsText(f);
@@ -4373,14 +4554,15 @@ function doImportJSON() {
 }
 
 function projectToWork(project) {
-  if (!project || !Array.isArray(project.layers) || !project.canvasSize) return null;
+  const safeProject = sanitizeProject(project);
+  if (!safeProject) return null;
   return {
-    id: Date.now(),
+    id: newWorkId(),
     name: 'Imported project',
-    data: project.preview || project.layers.find(l => l && l.data)?.data || '',
+    data: safeProject.preview || safeProject.layers.find(layer => layer.data)?.data || '',
     date: new Date().toISOString(),
-    theme: project.theme || 'mist',
-    project
+    theme: safeProject.theme,
+    project: safeProject
   };
 }
 
@@ -4389,30 +4571,54 @@ function projectToWork(project) {
 function showGallery() {
   const modal=document.getElementById('gallery');
   const grid =document.getElementById('gg');
-  grid.innerHTML='';
+  grid.replaceChildren();
   modal.classList.add('open');
   if(!works.length){
-    grid.innerHTML='<div class="gal-empty">No saved works yet.<br>Create something and save it.</div>';
+    const empty=document.createElement('div');
+    empty.className='gal-empty';
+    empty.textContent='No saved works yet. Create something and save it.';
+    grid.appendChild(empty);
     return;
   }
   works.slice().reverse().forEach(w=>{
+    const workName=sanitizeText(w.name, 'Untitled work');
     const item=document.createElement('div');
     item.className='gal-item';
-    item.innerHTML=`
-      <img src="${w.data}" alt="${w.name}" loading="lazy">
-      <div class="gal-info">
-        <div class="gal-name">${w.name}</div>
-        <div class="gal-date">${new Date(w.date).toLocaleDateString()}</div>
-      </div>
-      <button class="gal-item-del" data-id="${w.id}">Delete</button>`;
-    item.querySelector('img').onclick=()=>{ hideGallery(); loadWork(w.id); };
-    item.querySelector('.gal-info').onclick=()=>{ hideGallery(); loadWork(w.id); };
-    item.querySelector('.gal-item-del').onclick=e=>{
+
+    const img=document.createElement('img');
+    const src=safeImageData(w.data);
+    if (src) img.src=src;
+    img.alt=workName;
+    img.loading='lazy';
+
+    const info=document.createElement('div');
+    info.className='gal-info';
+    const name=document.createElement('div');
+    name.className='gal-name';
+    name.textContent=workName;
+    const date=document.createElement('div');
+    date.className='gal-date';
+    const parsedDate=new Date(w.date);
+    date.textContent=Number.isNaN(parsedDate.getTime())
+      ? 'Unknown date'
+      : parsedDate.toLocaleDateString();
+    info.append(name, date);
+
+    const remove=document.createElement('button');
+    remove.className='gal-item-del';
+    remove.textContent='Delete';
+
+    const openWork=()=>{ hideGallery(); loadWork(w.id); };
+    img.addEventListener('click', openWork);
+    info.addEventListener('click', openWork);
+    remove.addEventListener('click', e=>{
       e.stopPropagation();
-      if(!confirm(`Delete "${w.name}"?`)) return;
+      if(!confirm(`Delete "${workName}"?`)) return;
       works=works.filter(x=>x.id!==w.id);
       saveWorks(); showGallery();
-    };
+    });
+
+    item.append(img, info, remove);
     grid.appendChild(item);
   });
 }
