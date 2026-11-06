@@ -1518,7 +1518,13 @@ const MAX_IMPORTED_WORKS = 200;
 const MAX_PROJECT_LAYERS = 60;
 const MAX_IMAGE_DATA_URL_LENGTH = 16 * 1024 * 1024;
 const MAX_WORK_NAME_LENGTH = 80;
-const SAFE_IMAGE_DATA_RE = /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+const MAX_CANVAS_SIDE = 4096;
+const MAX_CANVAS_PIXELS = MAX_CANVAS_SIDE * MAX_CANVAS_SIDE;
+const MAX_TOTAL_LAYER_PIXELS = 24 * 1024 * 1024;
+const MAX_TOTAL_SOURCE_PIXELS = 24 * 1024 * 1024;
+const MAX_DECODE_CONCURRENCY = 2;
+const MAX_IMAGE_HEADER_BYTES = 2 * 1024 * 1024;
+const SAFE_IMAGE_DATA_RE = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
 
 function sanitizeText(value, fallback) {
   if (typeof value !== 'string') return fallback;
@@ -1535,6 +1541,96 @@ function safeImageData(value) {
     SAFE_IMAGE_DATA_RE.test(value)
     ? value
     : '';
+}
+
+// Read dimensions from the encoded header before the browser decodes the image.
+// This lets the import guard reject a huge image without first allocating its
+// full RGBA buffer. Only PNG, JPEG and WebP (the formats accepted above) run.
+function readImageDimensions(value) {
+  const match = /^data:image\/(png|jpeg|webp);base64,/.exec(value);
+  if (!match) return null;
+
+  const base64 = value.slice(match[0].length);
+  const headerChars = Math.min(base64.length, MAX_IMAGE_HEADER_BYTES);
+  const header = base64.slice(0, headerChars - (headerChars % 4));
+  let binary;
+  try {
+    binary = atob(header);
+  } catch (_) {
+    return null;
+  }
+  if (!binary.length) return null;
+
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  const readU16BE = offset => (bytes[offset] << 8) | bytes[offset + 1];
+  const readU24LE = offset => bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16);
+
+  if (match[1] === 'png') {
+    if (bytes.length < 24) return null;
+    if (bytes[0] !== 0x89 || bytes[1] !== 0x50 || bytes[2] !== 0x4e || bytes[3] !== 0x47) return null;
+    const width = ((bytes[16] << 24) | (bytes[17] << 16) | (bytes[18] << 8) | bytes[19]) >>> 0;
+    const height = ((bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23]) >>> 0;
+    return { width, height };
+  }
+
+  if (match[1] === 'jpeg') {
+    if (bytes.length < 4 || bytes[0] !== 0xff || bytes[1] !== 0xd8) return null;
+    let offset = 2;
+    while (offset + 3 < bytes.length) {
+      while (offset < bytes.length && bytes[offset] !== 0xff) offset++;
+      while (offset < bytes.length && bytes[offset] === 0xff) offset++;
+      if (offset >= bytes.length) break;
+      const marker = bytes[offset++];
+      if (marker === 0xd8 || marker === 0xd9 || marker === 0x01 ||
+          (marker >= 0xd0 && marker <= 0xd7)) continue;
+      if (offset + 1 >= bytes.length) break;
+      const segmentLength = readU16BE(offset);
+      if (segmentLength < 2 || offset + segmentLength > bytes.length) break;
+      if (marker >= 0xc0 && marker <= 0xcf &&
+          marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+        if (segmentLength < 7) return null;
+        return {
+          height: readU16BE(offset + 3),
+          width: readU16BE(offset + 5)
+        };
+      }
+      offset += segmentLength;
+    }
+    return null;
+  }
+
+  if (bytes.length < 30 ||
+      bytes[0] !== 0x52 || bytes[1] !== 0x49 || bytes[2] !== 0x46 || bytes[3] !== 0x46 ||
+      bytes[8] !== 0x57 || bytes[9] !== 0x45 || bytes[10] !== 0x42 || bytes[11] !== 0x50) {
+    return null;
+  }
+  const chunk = String.fromCharCode(bytes[12], bytes[13], bytes[14], bytes[15]);
+  if (chunk === 'VP8X') {
+    return { width: 1 + readU24LE(24), height: 1 + readU24LE(27) };
+  }
+  if (chunk === 'VP8L' && bytes[20] === 0x2f) {
+    const width = 1 + ((bytes[21] | (bytes[22] << 8)) & 0x3fff);
+    const height = 1 + (((bytes[22] >> 6) | (bytes[23] << 2) | (bytes[24] << 10)) & 0x3fff);
+    return { width, height };
+  }
+  if (chunk === 'VP8 ' && bytes[23] === 0x9d && bytes[24] === 0x01 && bytes[25] === 0x2a) {
+    return {
+      width: (bytes[26] | (bytes[27] << 8)) & 0x3fff,
+      height: (bytes[28] | (bytes[29] << 8)) & 0x3fff
+    };
+  }
+  return null;
+}
+
+function safeWorkImage(value) {
+  const data = safeImageData(value);
+  if (!data) return '';
+  const dimensions = readImageDimensions(data);
+  if (!dimensions || dimensions.width < 1 || dimensions.height < 1) return '';
+  if (dimensions.width > MAX_CANVAS_SIDE || dimensions.height > MAX_CANVAS_SIDE) return '';
+  if (dimensions.width * dimensions.height > MAX_CANVAS_PIXELS) return '';
+  return data;
 }
 
 function sanitizeDate(value) {
@@ -1555,16 +1651,28 @@ function sanitizeProject(raw) {
   if (!size || !Number.isFinite(+size.w) || !Number.isFinite(+size.h)) return null;
   const W = Math.floor(+size.w);
   const H = Math.floor(+size.h);
-  if (W < 16 || H < 16 || W > 8192 || H > 8192) return null;
+  if (W < 16 || H < 16 || W > MAX_CANVAS_SIDE || H > MAX_CANVAS_SIDE) return null;
+  if (W * H > MAX_CANVAS_PIXELS) return null;
   if (!Array.isArray(raw.layers) || raw.layers.length < 1 || raw.layers.length > MAX_PROJECT_LAYERS) {
     return null;
   }
 
   const layers = [];
+  let totalLayerPixels = 0;
+  let totalSourcePixels = 0;
   for (const src of raw.layers) {
     if (!src || typeof src !== 'object' || Array.isArray(src)) return null;
     const data = safeImageData(src.data);
     if (!data) return null;
+    const dimensions = readImageDimensions(data);
+    if (!dimensions || dimensions.width < 1 || dimensions.height < 1) return null;
+    if (dimensions.width > W || dimensions.height > H) return null;
+
+    totalLayerPixels += W * H;
+    totalSourcePixels += dimensions.width * dimensions.height;
+    if (totalLayerPixels > MAX_TOTAL_LAYER_PIXELS) return null;
+    if (totalSourcePixels > MAX_TOTAL_SOURCE_PIXELS) return null;
+
     layers.push({
       id: 'layer_' + (layers.length + 1),
       name: sanitizeText(src.name, `Layer ${layers.length + 1}`),
@@ -1590,7 +1698,7 @@ function sanitizeProject(raw) {
       : 0,
     layers
   };
-  const preview = safeImageData(raw.preview);
+  const preview = safeWorkImage(raw.preview);
   if (preview) project.preview = preview;
   return project;
 }
@@ -1600,7 +1708,7 @@ function sanitizeImportedWork(raw) {
   const project = sanitizeProject(
     raw.project && typeof raw.project === 'object' ? raw.project : raw
   );
-  const data = safeImageData(raw.data) ||
+  const data = safeWorkImage(raw.data) ||
     (project && project.preview) ||
     (project && project.layers.find(layer => layer.data)?.data) ||
     '';
@@ -1693,7 +1801,7 @@ function applyProject(rawProject, opts = {}) {
   activeLayer = null;
   layerCounter = 0;
 
-  const jobs = project.layers.map((src, idx) => new Promise(resolve => {
+  const layerEntries = project.layers.map((src, idx) => {
     const layer = addLayer(src.name || `Layer ${idx + 1}`, false);
     layer.visible = src.visible !== false;
     layer.locked = !!src.locked;
@@ -1702,15 +1810,44 @@ function applyProject(rawProject, opts = {}) {
     layer.offsetX = +src.offsetX || 0;
     layer.offsetY = +src.offsetY || 0;
     layer.canvas.style.display = layer.visible ? 'block' : 'none';
+    return { layer, src };
+  });
+
+  // Decode at most two layers concurrently. The import guard already limits
+  // dimensions/pixels, but this keeps peak decoded memory bounded as well.
+  let decodeCursor = 0;
+  const decodeNextLayer = () => new Promise(resolve => {
+    if (decodeCursor >= layerEntries.length) { resolve(); return; }
+    const { layer, src } = layerEntries[decodeCursor++];
     const img = new Image();
-    img.onload = () => {
-      layer.ctx.clearRect(0, 0, cvs.width, cvs.height);
-      layer.ctx.drawImage(img, 0, 0);
+    const finish = () => {
+      img.onload = null;
+      img.onerror = null;
       resolve();
     };
-    img.onerror = resolve;
+    img.onload = () => {
+      const imgW = img.naturalWidth || img.width;
+      const imgH = img.naturalHeight || img.height;
+      if (!imgW || !imgH || imgW > W || imgH > H) {
+        finish();
+        return;
+      }
+      layer.ctx.clearRect(0, 0, W, H);
+      layer.ctx.drawImage(img, 0, 0);
+      finish();
+    };
+    img.onerror = finish;
     img.src = src.data;
-  }));
+  });
+  const decodeWorker = async () => {
+    while (decodeCursor < layerEntries.length) {
+      await decodeNextLayer();
+    }
+  };
+  const jobs = Array.from(
+    { length: Math.min(MAX_DECODE_CONCURRENCY, layerEntries.length) },
+    decodeWorker
+  );
 
   return Promise.all(jobs).then(() => {
     if (!layers.length) addLayer('Layer 1', true);
@@ -2380,6 +2517,8 @@ function resizeCanvas(isManual) {
   } else {
     [W, H] = currentRes.split('x').map(Number);
   }
+  W = Math.max(16, Math.min(MAX_CANVAS_SIDE, Math.floor(W) || 200));
+  H = Math.max(16, Math.min(MAX_CANVAS_SIDE, Math.floor(H) || 200));
 
   const container = document.getElementById('canvas-container');
   container.style.width = W + 'px';
@@ -4438,7 +4577,7 @@ function loadWork(id, silent) {
     });
     return;
   }
-  const src=safeImageData(w.data);
+  const src=safeWorkImage(w.data);
   if(!src) {
     status('Invalid saved work image');
     return;
@@ -4586,7 +4725,7 @@ function showGallery() {
     item.className='gal-item';
 
     const img=document.createElement('img');
-    const src=safeImageData(w.data);
+    const src=safeWorkImage(w.data);
     if (src) img.src=src;
     img.alt=workName;
     img.loading='lazy';
