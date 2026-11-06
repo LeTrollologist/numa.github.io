@@ -962,106 +962,6 @@
             animation: floatT 6s ease-in-out infinite
         }
 
-        /* ── CONTACT ── */
-        .contact-container {
-            display: flex;
-            justify-content: center;
-            gap: 22px;
-            flex-wrap: wrap;
-            width: min(92%, 780px);
-            margin: 14px auto 0;
-            padding-bottom: 14px
-        }
-
-        .contact-card {
-            width: min(252px, 88vw);
-            background: var(--glass);
-            border: 1px solid var(--border);
-            border-radius: var(--rc);
-            padding: 30px 22px;
-            text-align: center;
-            cursor: pointer;
-            color: white;
-            position: relative;
-            overflow: hidden;
-            box-shadow: var(--sh-c);
-            transition: all .4s cubic-bezier(.25, .8, .25, 1);
-            backdrop-filter: blur(12px);
-        }
-
-        .contact-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, .11) 0%, transparent 65%);
-            opacity: 0;
-            transition: .5s;
-            pointer-events: none;
-            transform: scale(.5);
-        }
-
-        .contact-card:hover::before {
-            opacity: 1;
-            transform: scale(1)
-        }
-
-        .contact-card:hover {
-            transform: translateY(-9px);
-            border-color: var(--border-p);
-            box-shadow: var(--sh-p)
-        }
-
-
-
-        .contact-card:hover .snapchat svg {
-            fill: #FFFC00;
-            filter: drop-shadow(0 0 10px #FFFC00)
-        }
-
-        .card-icon svg {
-            width: 50px;
-            height: 50px;
-            fill: white;
-            margin-bottom: 11px;
-            transition: fill .4s, transform .3s
-        }
-
-        .contact-card:hover .card-icon svg {
-            transform: scale(1.1)
-        }
-
-        .card-title {
-            font-family: var(--fd);
-            font-size: 1.95rem;
-            margin-bottom: 3px
-        }
-
-        .card-username {
-            font-family: var(--fm);
-            font-size: .9rem;
-            margin-bottom: 12px;
-            letter-spacing: .04em
-        }
-
-        .copy-hint {
-            font-family: var(--fm);
-            font-size: .68rem;
-            background: rgba(0, 0, 0, .3);
-            padding: 6px 13px;
-            border-radius: var(--rp);
-            display: inline-block;
-            transition: .3s;
-            letter-spacing: .05em
-        }
-
-        .contact-card:hover .copy-hint {
-            background: var(--pink-d);
-            border: 1px solid var(--border-p)
-        }
-
         @keyframes popCard {
             50% {
                 transform: translateY(-9px) scale(.95)
@@ -3047,30 +2947,10 @@
         </div>
     </div>
 
-    <!-- ══ CONTACT ══ -->
-    <div id="page-contact" class="page-section" style="display:none!important">
-        <div class="page-title">Reach Me ✨</div>
-        <div class="alt-counter" id="contact-counter"></div>
-        <div class="contact-container">
-
-            <div class="contact-card" onclick="copyText(event,'audaxrein',this)">
-                <div class="card-icon snapchat">
-                    <svg viewBox="0 0 448 512">
-                        <path
-                            d="M439 330.1c-13.6-20.9-25.5-31.5-36.8-40.2 2.7-27.1 2.4-78.6-20.3-134.6-17.7-43.6-47-74.8-85-94-35.3-17.9-74.3-21.3-113.6-10.7-36.8 9.9-66.5 32.7-87.8 67.4-20 32.7-25 70-25 110.1 0 20.3 1.1 41.5 3.3 62-11.2 8.7-23 19.3-36.8 40.2-13.9 21-17.6 34.3-7.2 45.4 9 9.6 22 10.9 36.8 11.1 19.4.3 39.4-4.8 56.4-13.2 4.4-2.2 9.5-2.2 13.9.1 27.5 14.1 57.3 21.6 87.8 21.6 30.5 0 60.3-7.5 87.8-21.6 4.4-2.3 9.5-2.3 13.9-.1 17 8.4 37 13.5 56.4 13.2 14.8-.2 27.8-1.5 36.8-11.1 10.4-11.1 6.7-24.4-7.2-45.4z" />
-                    </svg>
-                </div>
-                <div class="card-title">Snapchat</div>
-                <div class="card-username">audaxrein</div>
-                <div class="copy-hint">click to copy 👻</div>
-            </div>
-        </div>
-    </div>
-
     <!-- ══ STATUS ══ -->
     <div id="page-status" class="page-section">
-        <div class="page-title">System Uplink 📡</div>
-        <p id="statusMessage">Awaiting diagnostic sequence…</p>
+        <div class="page-title">System Status 📡</div>
+        <p id="statusMessage">Awaiting status check…</p>
         <div class="status-grid">
             <div class="status-card">
                 <div class="status-info">
@@ -3080,24 +2960,8 @@
                 <div class="status-indicator"><span id="txt-mainSite">STANDBY</span><span id="dot-mainSite"
                         class="dot loading"></span></div>
             </div>
-            <div class="status-card">
-                <div class="status-info">
-                    <h3>Database</h3>
-                    <p>MongoDB Atlas</p>
-                </div>
-                <div class="status-indicator"><span id="txt-database">STANDBY</span><span id="dot-database"
-                        class="dot loading"></span></div>
-            </div>
-            <div class="status-card">
-                <div class="status-info">
-                    <h3>Check-Ins Node</h3>
-                    <p>Ngrok Tunnel</p>
-                </div>
-                <div class="status-indicator"><span id="txt-checkIns">STANDBY</span><span id="dot-checkIns"
-                        class="dot loading"></span></div>
-            </div>
         </div>
-        <button class="refresh-btn" onclick="runDiagnostics()">RUN DIAGNOSTICS</button>
+        <button class="refresh-btn" onclick="runDiagnostics()">CHECK SITE STATUS</button>
     </div>
 
     <!-- ══ MINIGAME ══ -->
@@ -3112,12 +2976,12 @@
                 <!-- Main Menu Screen -->
                 <div id="pongMainMenu" style="display: flex; flex-direction: column; align-items: center;">
                     <h1>Pong</h1>
-                    <p>Connect and play across the miles. 🌸</p>
+                    <p>Play a solo match against the AI. 🌸</p>
                     <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px; width: 220px;">
                         <button onclick="showSubMenu('solo')" style="font-size: 1.2rem; padding: 10px 20px;">Solo vs AI
                             🤖</button>
-                        <button onclick="showSubMenu('multi')" style="font-size: 1.2rem; padding: 10px 20px;">Play
-                            Online 🌌</button>
+                        <button onclick="showSubMenu('multi')" style="font-size: 0.95rem; padding: 10px 20px;">Online
+                            Multiplayer (Disabled)</button>
                     </div>
                 </div>
 
@@ -3138,42 +3002,20 @@
                     </div>
                 </div>
 
-                <!-- Sub-Menu: Online Multiplayer Lobby -->
+                <!-- Online multiplayer is intentionally retired. -->
                 <div id="pongMultiMenu"
-                    style="display: none; flex-direction: column; align-items: center; width: 100%; max-width: 320px;">
-                    <h1>Play Online</h1>
-                    <p id="multiStatus" style="color: gold; margin-bottom: 12px; font-size: 0.9rem;">Connecting to
-                        cosmic network...</p>
-
-                    <!-- Action Buttons -->
-                    <div id="lobbyActions" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
-                        <!-- Host Card -->
-                        <div
-                            style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-p); padding: 12px; border-radius: var(--rp); text-align: center;">
-                            <button id="btnHost" onclick="initHost()"
-                                style="font-size: 1rem; padding: 8px 16px; width: 80%;">Create a Room</button>
-                            <div id="hostCodeDisplay"
-                                style="display: none; margin-top: 10px; font-family: monospace; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; border: 1px solid var(--pink-g);">
-                                Room Code: <span id="lblRoomCode"
-                                    style="color: var(--pink); font-weight: bold; font-size: 1.1rem; letter-spacing: 1px;">...</span>
-                                <div style="font-size: 0.68rem; opacity: 0.6; margin-top: 4px;">Share this code with
-                                    Numa</div>
-                            </div>
-                        </div>
-
-                        <!-- Join Card -->
-                        <div
-                            style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-p); padding: 12px; border-radius: var(--rp); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                            <input type="text" id="txtJoinCode" placeholder="Enter Room Code"
-                                style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-p); background: rgba(0,0,0,0.5); color: white; font-family: monospace; text-align: center; font-size: 1rem; width: 80%;">
-                            <button id="btnJoin" onclick="initJoin()"
-                                style="font-size: 1rem; padding: 8px 16px; width: 80%;">Join Room</button>
-                        </div>
-                    </div>
-
-
-
-                    <button onclick="showSubMenu('main')" class="diff-btn" style="margin-top: 18px; opacity:0.8;">❮ Back
+                    style="display: none; flex-direction: column; align-items: center; width: 100%; max-width: 420px;">
+                    <h1>Online Multiplayer Disabled</h1>
+                    <p style="color: #ffb3d1; line-height: 1.55; margin: 10px 0 4px;">
+                        Online Pong has been disabled due to security and privacy vulnerabilities.
+                        The previous WebRTC implementation exposed relay credentials and could reveal
+                        participants' network addresses to their connected peer.
+                    </p>
+                    <p style="color: rgba(255,255,255,.68); line-height: 1.5; margin-top: 0;">
+                        Solo vs AI remains available. No room codes, peer connections, database checks,
+                        or check-in services are used by this site.
+                    </p>
+                    <button onclick="showSubMenu('main')" class="diff-btn" style="margin-top: 14px; opacity:0.8;">❮ Back
                         to Menu</button>
                 </div>
             </div>
@@ -3310,7 +3152,6 @@
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
     <script defer src="https://www.youtube.com/iframe_api"></script>
     <script>
@@ -3352,12 +3193,10 @@
         var MAX_SP = 22;     // hard cap on ball speed
         var pongDiff = 'numa'; // current difficulty
 
-        // PeerJS P2P Online State
-        var peer = null;
+        // Online multiplayer has been retired; the game runs in solo mode only.
         var peerConn = null;
         var isMultiplayer = false;
         var isHost = false;
-        var myPeerId = '';
 
         // Stargazer
         var sgCanvas, sgCtx, sgStars = [], sgNamed = {}, sgShowLines = false;
@@ -3443,50 +3282,14 @@
         // ══════════════════════════════════════════════════════════
         function runDiagnostics() {
             var msg = document.getElementById('statusMessage');
-            var nodes = ['database', 'checkIns'];
-            msg.innerText = 'Synchronizing system…';
+            msg.innerText = 'Checking the main site…';
 
-            // 1. Immediate Main Site Verification
+            // The old remote health check and its database/check-in nodes have
+            // been removed. This page now reports only the static site itself.
             document.getElementById('txt-mainSite').innerText = 'ONLINE';
             document.getElementById('txt-mainSite').style.color = '#00ff88';
             document.getElementById('dot-mainSite').className = 'dot online';
-
-            // 2. Prepare other nodes
-            nodes.forEach(function (n) {
-                document.getElementById('txt-' + n).innerText = 'PINGING…';
-                document.getElementById('txt-' + n).style.color = '#facc15';
-                document.getElementById('dot-' + n).className = 'dot loading';
-            });
-
-            // 3. Fetch remote health with timeout
-            var controller = new AbortController();
-            var timeoutId = setTimeout(function () { controller.abort(); }, 8000);
-
-            fetch('https://analytics-server-bdrm.onrender.com/api/health', { signal: controller.signal })
-                .then(function (r) { return r.json(); })
-                .then(function (d) {
-                    clearTimeout(timeoutId);
-                    nodes.forEach(function (n) {
-                        // Check if server specifically reported this node, otherwise fallback to STANDBY/UNKNOWN
-                        var status = d[n];
-                        var ok = status === 'ONLINE';
-                        var label = status || 'UNKNOWN';
-
-                        document.getElementById('txt-' + n).innerText = label;
-                        document.getElementById('txt-' + n).style.color = ok ? '#00ff88' : (status === 'OFFLINE' ? '#ff4040' : '#facc15');
-                        document.getElementById('dot-' + n).className = 'dot ' + (ok ? 'online' : (status === 'OFFLINE' ? 'offline' : 'loading'));
-                    });
-                    msg.innerText = 'System synchronization successful.';
-                })
-                .catch(function (err) {
-                    clearTimeout(timeoutId);
-                    nodes.forEach(function (n) {
-                        document.getElementById('txt-' + n).innerText = 'UNREACHABLE';
-                        document.getElementById('txt-' + n).style.color = '#ff4040';
-                        document.getElementById('dot-' + n).className = 'dot offline';
-                    });
-                    msg.innerText = err.name === 'AbortError' ? 'Diagnostic timeout.' : 'CRITICAL: Diagnostic service unreachable.';
-                });
+            msg.innerText = 'Main site is online. No remote database or check-in services are connected.';
         }
 
         // ══════════════════════════════════════════════════════════
@@ -3727,27 +3530,6 @@
 
 
         // ══════════════════════════════════════════════════════════
-        // CONTACT
-        // ══════════════════════════════════════════════════════════
-        function copyText(e, text, card) {
-            navigator.clipboard.writeText(text).then(function () {
-                var rect = card.getBoundingClientRect();
-                var h = document.createElement('div'); h.className = 'click-heart';
-                h.innerText = ['💖', '✨', '💌', '🌸'][Math.floor(Math.random() * 4)];
-                h.style.left = (e.clientX - rect.left) + 'px'; h.style.top = (e.clientY - rect.top) + 'px';
-                card.appendChild(h);
-                var hint = card.querySelector('.copy-hint'), orig = hint.innerHTML;
-                card.classList.add('anim-pop', 'success-glow');
-                hint.innerHTML = 'Copied! ✓'; hint.classList.add('success-hint');
-                setTimeout(function () {
-                    card.classList.remove('anim-pop', 'success-glow');
-                    hint.innerHTML = orig; hint.classList.remove('success-hint');
-                    h.remove();
-                }, 2000);
-            }).catch(function () { alert('Copy failed.'); });
-        }
-
-        // ══════════════════════════════════════════════════════════
         // DREAMLAND
         // ══════════════════════════════════════════════════════════
         function onYouTubeIframeAPIReady() {
@@ -3856,231 +3638,17 @@
             if (btn) btn.classList.add('active');
         }
 
-        // ── PeerJS Online Multiplayer Helpers ──
+        // Online multiplayer is disabled; this screen only shows the security notice.
         function showSubMenu(menu) {
             document.getElementById('pongMainMenu').style.display = menu === 'main' ? 'flex' : 'none';
             document.getElementById('pongSoloMenu').style.display = menu === 'solo' ? 'flex' : 'none';
             document.getElementById('pongMultiMenu').style.display = menu === 'multi' ? 'flex' : 'none';
-            if (menu === 'multi') {
-                document.getElementById('multiStatus').innerText = 'Ready to connect... 🌌';
-                document.getElementById('multiStatus').style.color = 'gold';
-            }
         }
 
         function startSoloGame() {
             isMultiplayer = false;
             isHost = false;
             startGame();
-        }
-
-        function initPeer(callback) {
-            if (peer) {
-                if (callback) callback();
-                return;
-            }
-            document.getElementById('multiStatus').innerText = 'Linking to PeerJS cluster...';
-
-            // Alphanumeric room code helper: e.g. NUMA-XXXX
-            // Generate a secure 4-digit code to keep room joining simple.
-            var roomNum = Math.floor(1000 + Math.random() * 9000);
-            var generatedId = 'NUMA-' + roomNum;
-
-            // Hardcoded secure STUN/TURN servers configurations for direct P2P NAT traversal
-            var iceServersList = [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:global.stun.twilio.com:3478' },
-                { urls: 'stun:stun.relay.metered.ca:80' },
-                {
-                    urls: 'turn:global.relay.metered.ca:80',
-                    username: 'db89656906bd87d96e070c76',
-                    credential: '0s1/4DRcCGnHywFg'
-                },
-                {
-                    urls: 'turn:global.relay.metered.ca:80?transport=tcp',
-                    username: 'db89656906bd87d96e070c76',
-                    credential: '0s1/4DRcCGnHywFg'
-                },
-                {
-                    urls: 'turn:global.relay.metered.ca:443',
-                    username: 'db89656906bd87d96e070c76',
-                    credential: '0s1/4DRcCGnHywFg'
-                },
-                {
-                    urls: 'turns:global.relay.metered.ca:443?transport=tcp',
-                    username: 'db89656906bd87d96e070c76',
-                    credential: '0s1/4DRcCGnHywFg'
-                }
-            ];
-
-            console.log('Initializing PeerJS client with ID:', generatedId);
-            peer = new Peer(generatedId, {
-                debug: 2,
-                config: {
-                    iceServers: iceServersList
-                }
-            });
-
-            peer.on('open', function (id) {
-                console.log('PeerJS client online. Reg ID:', id);
-                myPeerId = id;
-                document.getElementById('multiStatus').innerText = 'System online. Ready to create/join rooms.';
-                document.getElementById('multiStatus').style.color = '#00ff88';
-                if (callback) callback();
-            });
-
-            peer.on('error', function (err) {
-                console.error('PeerJS error event:', err);
-                document.getElementById('multiStatus').innerText = 'Network error: ' + err.type;
-                document.getElementById('multiStatus').style.color = '#ff4040';
-            });
-
-            peer.on('connection', function (conn) {
-                console.log('Host received connection request from:', conn.peer);
-                // Incoming guest connection (runs on host)
-                if (isHost) {
-                    peerConn = conn;
-                    setupPeerConnection();
-                }
-            });
-        }
-
-        function initHost() {
-            isMultiplayer = true;
-            isHost = true;
-            initPeer(function () {
-                document.getElementById('lblRoomCode').innerText = myPeerId;
-                document.getElementById('hostCodeDisplay').style.display = 'block';
-                document.getElementById('multiStatus').innerText = 'Awaiting Numa... 🌸';
-                document.getElementById('multiStatus').style.color = 'gold';
-                document.getElementById('btnHost').disabled = true;
-                document.getElementById('btnJoin').disabled = true;
-            });
-        }
-
-        function initJoin() {
-            var rawCode = document.getElementById('txtJoinCode').value.trim();
-            if (!rawCode) {
-                alert('Please enter a room code.');
-                return;
-            }
-            var targetId = rawCode.toUpperCase();
-            if (!targetId.startsWith('NUMA-')) {
-                targetId = 'NUMA-' + targetId;
-            }
-
-            // Check if the user is attempting to join their own host session in the same browser tab
-            if (peer && targetId === myPeerId) {
-                alert("You cannot join your own room in the same tab! To test multiplayer locally on one computer, please open a second, separate browser tab and enter the code there.");
-                return;
-            }
-
-            isMultiplayer = true;
-            isHost = false;
-
-            initPeer(function () {
-                console.log('Connecting from Guest to Host:', targetId);
-                document.getElementById('multiStatus').innerText = 'Connecting to room ' + targetId + '...';
-                peerConn = peer.connect(targetId, { serialization: 'json' });
-                setupPeerConnection();
-            });
-        }
-
-        function setupPeerConnection() {
-            console.log('setupPeerConnection triggered. peerConn.open =', peerConn.open);
-            document.getElementById('multiStatus').innerText = 'Initializing handshake...';
-
-            // Handshake timeout warning if strict NAT/firewalls delay WebRTC connection
-            var handshakeTimeout = setTimeout(function () {
-                if (peerConn && !peerConn.open) {
-                    console.warn("WebRTC handshake delayed. This typically happens when direct P2P is blocked by cell/router NATs.");
-                    document.getElementById('multiStatus').innerText = 'Handshake delayed. Try playing on the same Wi-Fi, or reload and retry! 🌸';
-                    document.getElementById('multiStatus').style.color = '#ffaa00';
-                }
-            }, 6000);
-
-            function handleConnectSuccess() {
-                clearTimeout(handshakeTimeout);
-                console.log('WebRTC P2P DataChannel fully opened!');
-                document.getElementById('multiStatus').innerText = 'Connected! Controls synced. 🦦';
-                document.getElementById('multiStatus').style.color = '#00ff88';
-
-                setTimeout(function () {
-                    // Hide overlay and launch gameplay loop
-                    document.getElementById('startOverlay').classList.remove('active');
-                    gState = 'PLAYING';
-                    pScore = 0;
-                    aScore = 0;
-                    updScore();
-                    ball = null;
-                    if (isHost) {
-                        resetBall(true);
-                    }
-                    lastTime = 0;
-                    resizePong();
-                }, 1200);
-            }
-
-            if (peerConn.open) {
-                handleConnectSuccess();
-            } else {
-                peerConn.on('open', handleConnectSuccess);
-            }
-
-            peerConn.on('data', function (data) {
-                handleIncomingData(data);
-            });
-
-            peerConn.on('error', function (err) {
-                clearTimeout(handshakeTimeout);
-                console.error('DataConnection error event:', err);
-                document.getElementById('multiStatus').innerText = 'Handshake error: ' + err.message;
-                document.getElementById('multiStatus').style.color = '#ff4040';
-            });
-
-            peerConn.on('close', function () {
-                clearTimeout(handshakeTimeout);
-                console.log('WebRTC connection closed.');
-                document.getElementById('multiStatus').innerText = 'Partner disconnected. 🌸';
-                document.getElementById('multiStatus').style.color = '#ff4040';
-                gState = 'START';
-                document.getElementById('startOverlay').classList.add('active');
-                showSubMenu('main');
-                document.getElementById('btnHost').disabled = false;
-                document.getElementById('btnJoin').disabled = false;
-                document.getElementById('hostCodeDisplay').style.display = 'none';
-            });
-        }
-
-        function handleIncomingData(data) {
-            if (!data) return;
-
-            if (isHost) {
-                // Host receives input (Paddle Y) from the guest client
-                if (data.type === 'INPUT') {
-                    if (typeof data.aY === 'number') {
-                        aY = data.aY;
-                    }
-                }
-            } else {
-                // Guest receives full authoritative game state and event notifications from the host
-                if (data.type === 'STATE') {
-                    if (data.ball) ball = data.ball;
-                    if (typeof data.pY === 'number') pY = data.pY;
-                    // Only update guest's local aY if we are NOT in the active gameplay state, to prevent input feedback jitter/lag snapbacks
-                    if (gState !== 'PLAYING' && typeof data.aY === 'number') {
-                        aY = data.aY;
-                    }
-                    if (typeof data.pScore === 'number') pScore = data.pScore;
-                    if (typeof data.aScore === 'number') aScore = data.aScore;
-                    if (typeof data.combo === 'number') combo = data.combo;
-                    if (typeof data.shk === 'number') shk = data.shk;
-                    updScore();
-                } else if (data.type === 'IMPACT') {
-                    pImpact(data.x, data.y, data.col);
-                } else if (data.type === 'ENDGAME') {
-                    endGame(!data.won); // Guest won if Host did not win
-                }
-            }
         }
 
         function resizePong() {

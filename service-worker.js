@@ -3,7 +3,8 @@
 // v5.9: AI features removed from planner.html - bump so every client evicts the
 // cached planner page and the old AI client code/data with it.
 // removed duplicate development/test pages such as grovein.html, sketchin.html as no new features will be added.
-const CACHE_NAME = 'hollow-grove-v6.0';
+// v6.1: sketchbook import hardening and removal of remote multiplayer/status services.
+const CACHE_NAME = 'hollow-grove-v6.1';
 
 const ASSETS = [
   'index.html',
@@ -63,8 +64,8 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Bypass Service Worker for localhost, Render APIs, or non-GET requests to prevent CORS/PNA blocks
-  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname.includes('onrender.com') || url.pathname.startsWith('/api') || e.request.method !== 'GET') {
+  // Bypass the Service Worker for local development and non-GET requests.
+  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1' || e.request.method !== 'GET') {
     return;
   }
 

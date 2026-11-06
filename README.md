@@ -12,7 +12,7 @@ This web app is considered completed, and as such there will be no new features 
 
 ## Features
 
-- **Celestial Lounge (`index.html`)**: Study timers, ambient audio, dynamic starry sky canvas, and retro Pong mini-game with optional local/P2P multiplayer.
+- **Celestial Lounge (`index.html`)**: Study timers, ambient audio, dynamic starry sky canvas, and a solo Pong mini-game. Online peer-to-peer multiplayer has been retired for security and privacy reasons.
 - **Stargazer**: Interactive night sky viewer mapping bright stars and constellation lines based on real astronomical coordinates and local sidereal time.
 - **The Grove (`grove.html`)**: A relaxing virtual garden where you plant seeds, track growth cycles, and toggle ambient themes (Ember, Moonlit, Mist).
 - **Sketchbook (`sketch.html`)**: Vector drawing tool with smoothing, grid toggles, layer management, and SVG export.
