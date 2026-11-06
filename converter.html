@@ -37,7 +37,7 @@
             --uk-glow: var(--accent);
             --ist-glow: var(--gold);
             --dub-glow: #00f0ff;
-            --cara-glow: #ffb6d9;
+            --italy-glow: #ffb6d9;
             --sis-glow: #ffb6d9;
             --glass: var(--panel);
             --font-display: 'Cinzel', serif;
@@ -291,8 +291,8 @@
         .input-card.ist { border-right: 3px solid var(--ist-glow); }
         .input-card.ist:focus-within { border-color: var(--ist-glow); box-shadow: 0 0 25px rgba(201,168,76,0.08); }
 
-        .input-card.cara { border-right: 3px solid var(--cara-glow); }
-        .input-card.cara:focus-within { border-color: var(--cara-glow); box-shadow: 0 0 25px rgba(255,182,217,0.08); }
+        .input-card.italy { border-right: 3px solid var(--italy-glow); }
+        .input-card.italy:focus-within { border-color: var(--italy-glow); box-shadow: 0 0 25px rgba(255,182,217,0.08); }
 
         .card-header-row {
             display: flex;
@@ -314,7 +314,7 @@
         .card-title.uk { color: var(--uk-glow); }
         .card-title.dub { color: var(--dub-glow); }
         .card-title.ist { color: var(--ist-glow); }
-        .card-title.cara { color: var(--cara-glow); }
+        .card-title.italy { color: var(--italy-glow); }
 
         .timezone-offset {
             font-family: var(--font-mono);
@@ -354,7 +354,7 @@
         .uk .live-clock::before { background: var(--uk-glow); box-shadow: 0 0 8px var(--uk-glow); }
         .dub .live-clock::before { background: var(--dub-glow); box-shadow: 0 0 8px var(--dub-glow); }
         .ist .live-clock::before { background: var(--ist-glow); box-shadow: 0 0 8px var(--ist-glow); }
-        .cara .live-clock::before { background: var(--cara-glow); box-shadow: 0 0 8px var(--cara-glow); }
+        .italy .live-clock::before { background: var(--italy-glow); box-shadow: 0 0 8px var(--italy-glow); }
 
         @keyframes pulse-glow {
             0%, 100% { opacity: 0.3; }
@@ -446,7 +446,7 @@
         .uk .ampm-slider { background: linear-gradient(135deg, var(--uk-glow), #a224ff); }
         .dub .ampm-slider { background: linear-gradient(135deg, var(--dub-glow), #0055ff); }
         .ist .ampm-slider { background: linear-gradient(135deg, var(--ist-glow), #ffb6d9); }
-        .cara .ampm-slider { background: linear-gradient(135deg, var(--cara-glow), #ff007f); }
+        .italy .ampm-slider { background: linear-gradient(135deg, var(--italy-glow), #ff007f); }
 
         .ampm-slider.pm { transform: translateX(100%); }
 
@@ -507,7 +507,7 @@
         .uk .custom-slider::-webkit-slider-thumb { background: var(--uk-glow); box-shadow: 0 0 8px var(--uk-glow); }
         .dub .custom-slider::-webkit-slider-thumb { background: var(--dub-glow); box-shadow: 0 0 8px var(--dub-glow); }
         .ist .custom-slider::-webkit-slider-thumb { background: var(--ist-glow); box-shadow: 0 0 8px var(--ist-glow); }
-        .cara .custom-slider::-webkit-slider-thumb { background: var(--cara-glow); box-shadow: 0 0 8px var(--cara-glow); }
+        .italy .custom-slider::-webkit-slider-thumb { background: var(--italy-glow); box-shadow: 0 0 8px var(--italy-glow); }
 
         /* Calendar Styling */
         .calendar-box {
@@ -628,7 +628,7 @@
 
         .timeline-col-title.uk { color: var(--uk-glow); }
         .timeline-col-title.dub { color: var(--dub-glow); }
-        .timeline-col-title.cara { color: var(--cara-glow); }
+        .timeline-col-title.italy { color: var(--italy-glow); }
         .timeline-col-title.ist { color: var(--ist-glow); }
 
         .timeline-scroll {
@@ -704,7 +704,7 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, var(--uk-glow), var(--dub-glow), var(--cara-glow), var(--ist-glow));
+            background: linear-gradient(90deg, var(--uk-glow), var(--dub-glow), var(--italy-glow), var(--ist-glow));
             box-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
             z-index: 5;
             pointer-events: none;
@@ -842,7 +842,7 @@
         <div class="mobile-tabs">
             <button class="mobile-tab active" data-tab="uk" onclick="switchMobileTab('uk')">UK</button>
             <button class="mobile-tab" data-tab="dub" onclick="switchMobileTab('dub')">Dubai</button>
-            <button class="mobile-tab" data-tab="cara" onclick="switchMobileTab('cara')">Cara 🌸</button>
+            <button class="mobile-tab" data-tab="italy" onclick="switchMobileTab('italy')">Italy</button>
             <button class="mobile-tab" data-tab="ist" onclick="switchMobileTab('ist')">IST</button>
             <button class="mobile-tab" data-tab="timeline" onclick="switchMobileTab('timeline')">Timeline</button>
         </div>
@@ -946,7 +946,7 @@
                 <div class="timeline-header">
                     <div class="timeline-col-title uk">UK</div>
                     <div class="timeline-col-title dub">Dubai</div>
-                    <div class="timeline-col-title cara">Cara 🌸</div>
+                    <div class="timeline-col-title italy">Italy</div>
                     <div class="timeline-col-title ist">IST</div>
                 </div>
 
@@ -966,46 +966,46 @@
             <!-- Right Wing -->
             <div class="wing-column">
 
-                <!-- CARD 3: Cara 🌸 -->
-                <div class="input-card cara">
+                <!-- CARD 3: Italy -->
+                <div class="input-card italy">
                     <div class="card-header-row">
-                        <div class="card-title cara">
-                            <span>Cara 🌸</span>
-                            <span class="timezone-offset" id="cara-offset">CET (UTC+1)</span>
+                        <div class="card-title italy">
+                            <span>Italy</span>
+                            <span class="timezone-offset" id="italy-offset">CET (UTC+1)</span>
                         </div>
-                        <span class="live-clock" id="cara-live-clock">--:--:--</span>
+                        <span class="live-clock" id="italy-live-clock">--:--:--</span>
                     </div>
 
                     <div class="time-box">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <span class="time-label">Set Time</span>
-                            <span class="time-label" id="cara-phase" style="color:var(--cara-glow);text-transform:none;font-weight:500;">Daylight ☀️</span>
+                            <span class="time-label" id="italy-phase" style="color:var(--italy-glow);text-transform:none;font-weight:500;">Daylight ☀️</span>
                         </div>
                         <div class="time-inputs">
-                            <input type="text" class="num-input" id="cara-hour" maxlength="2" value="10" oninput="handleTimeInput(this, 'hour')" onblur="formatTimeInput(this, 'hour')">
+                            <input type="text" class="num-input" id="italy-hour" maxlength="2" value="10" oninput="handleTimeInput(this, 'hour')" onblur="formatTimeInput(this, 'hour')">
                             <span class="separator">:</span>
-                            <input type="text" class="num-input" id="cara-min" maxlength="2" value="00" oninput="handleTimeInput(this, 'min')" onblur="formatTimeInput(this, 'min')">
+                            <input type="text" class="num-input" id="italy-min" maxlength="2" value="00" oninput="handleTimeInput(this, 'min')" onblur="formatTimeInput(this, 'min')">
 
-                            <div class="ampm-toggle" onclick="toggleAmPm('cara')">
-                                <div class="ampm-slider" id="cara-ampm-slider"></div>
-                                <div class="ampm-btn active" id="cara-am-btn">AM</div>
-                                <div class="ampm-btn" id="cara-pm-btn">PM</div>
+                            <div class="ampm-toggle" onclick="toggleAmPm('italy')">
+                                <div class="ampm-slider" id="italy-ampm-slider"></div>
+                                <div class="ampm-btn active" id="italy-am-btn">AM</div>
+                                <div class="ampm-btn" id="italy-pm-btn">PM</div>
                             </div>
                         </div>
                         <div class="presets-row" style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
-                            <button class="preset-chip" onclick="setPreset('cara', 540)">9 AM</button>
-                            <button class="preset-chip" onclick="setPreset('cara', 720)">Noon</button>
-                            <button class="preset-chip" onclick="setPreset('cara', 1080)">6 PM</button>
-                            <button class="preset-chip" onclick="setPreset('cara', 1320)">10 PM</button>
+                            <button class="preset-chip" onclick="setPreset('italy', 540)">9 AM</button>
+                            <button class="preset-chip" onclick="setPreset('italy', 720)">Noon</button>
+                            <button class="preset-chip" onclick="setPreset('italy', 1080)">6 PM</button>
+                            <button class="preset-chip" onclick="setPreset('italy', 1320)">10 PM</button>
                         </div>
                     </div>
 
                     <div class="slider-box">
                         <div class="slider-header">
                             <span>Timeline Slide</span>
-                            <span id="cara-slider-val">10:00 AM</span>
+                            <span id="italy-slider-val">10:00 AM</span>
                         </div>
-                        <input type="range" class="custom-slider" id="cara-slider" min="0" max="1439" value="600" oninput="syncFromCaraSlider()">
+                        <input type="range" class="custom-slider" id="italy-slider" min="0" max="1439" value="600" oninput="syncFromItalySlider()">
                     </div>
                 </div>
 
@@ -1079,7 +1079,7 @@
                                 <select id="calc-zone" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); color: #ffffff; font-family: var(--font-ui); border-radius: 8px; padding: 4px; font-size: 0.72rem; flex: 1; outline:none;">
                                     <option value="Europe/London">UK Time</option>
                                     <option value="Asia/Dubai">Dubai</option>
-                                    <option value="Europe/Rome">Cara 🌸</option>
+                                    <option value="Europe/Rome">Italy</option>
                                     <option value="Asia/Kolkata">IST</option>
                                 </select>
                                 <input type="number" id="calc-hour" placeholder="Hr" min="1" max="12" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); color: #ffffff; width: 38px; text-align: center; border-radius: 8px; font-family: var(--font-mono); font-size: 0.8rem; outline:none;">
@@ -1234,7 +1234,7 @@
                 var tzMap = {
                     uk: 'Europe/London',
                     dub: 'Asia/Dubai',
-                    cara: 'Europe/Rome',
+                    italy: 'Europe/Rome',
                     ist: 'Asia/Kolkata'
                 };
                 var diff = getOffsetDiff(tzMap[zone]);
@@ -1349,7 +1349,7 @@
                 var tzMap = {
                     uk: 'Europe/London',
                     dub: 'Asia/Dubai',
-                    cara: 'Europe/Rome',
+                    italy: 'Europe/Rome',
                     ist: 'Asia/Kolkata'
                 };
                 var diff = getOffsetDiff(tzMap[zone]);
@@ -1369,10 +1369,10 @@
             activeMinutesUk = (dubMins - diff + 2880) % 1440;
             updateAllZonesFromUk();
         }
-        function syncFromCaraSlider() {
-            var caraMins = parseInt(document.getElementById('cara-slider').value, 10);
+        function syncFromItalySlider() {
+            var italyMins = parseInt(document.getElementById('italy-slider').value, 10);
             var diff = getOffsetDiff('Europe/Rome');
-            activeMinutesUk = (caraMins - diff + 2880) % 1440;
+            activeMinutesUk = (italyMins - diff + 2880) % 1440;
             updateAllZonesFromUk();
         }
         function syncFromIstSlider() {
@@ -1391,7 +1391,7 @@
             var tzList = [
                 { id: 'uk', tz: 'Europe/London' },
                 { id: 'dub', tz: 'Asia/Dubai' },
-                { id: 'cara', tz: 'Europe/Rome' },
+                { id: 'italy', tz: 'Europe/Rome' },
                 { id: 'ist', tz: 'Asia/Kolkata' }
             ];
 
@@ -1399,11 +1399,11 @@
                 var diff = getOffsetDiff(item.tz);
                 var localMins = (activeMinutesUk + diff + 2880) % 1440;
 
-                // Update Cara offset dynamically
-                if (item.id === 'cara') {
-                    var caraOffset = getOffsetMinutes('Europe/Rome', baseDate);
-                    var caraName = caraOffset === 120 ? 'CEST' : 'CET';
-                    document.getElementById('cara-offset').textContent = caraName + ' (' + formatOffset(caraOffset) + ')';
+                // Update Italy offset dynamically
+                if (item.id === 'italy') {
+                    var italyOffset = getOffsetMinutes('Europe/Rome', baseDate);
+                    var italyName = italyOffset === 120 ? 'CEST' : 'CET';
+                    document.getElementById('italy-offset').textContent = italyName + ' (' + formatOffset(italyOffset) + ')';
                 }
 
                 // Update slider and label
@@ -1453,7 +1453,7 @@
             var activeHour = Math.floor(ukMins / 60);
             var offsetUk = getOffsetMinutes('Europe/London', baseDate);
             var offsetDub = getOffsetMinutes('Asia/Dubai', baseDate);
-            var offsetCara = getOffsetMinutes('Europe/Rome', baseDate);
+            var offsetItaly = getOffsetMinutes('Europe/Rome', baseDate);
             var offsetIst = getOffsetMinutes('Asia/Kolkata', baseDate);
 
             for (var h = 0; h < 24; h++) {
@@ -1464,7 +1464,7 @@
                 
                 var uMins = (utcBaseMins + offsetUk + 2880) % 1440;
                 var dMins = (utcBaseMins + offsetDub + 2880) % 1440;
-                var cMins = (utcBaseMins + offsetCara + 2880) % 1440;
+                var cMins = (utcBaseMins + offsetItaly + 2880) % 1440;
                 var iMins = (utcBaseMins + offsetIst + 2880) % 1440;
 
                 var uh = Math.floor(uMins / 60);
@@ -1493,11 +1493,11 @@
 
                 var ukDate = new Date(baseDate);
                 var dubDate = new Date(baseDate);
-                var caraDate = new Date(baseDate);
+                var italyDate = new Date(baseDate);
                 var istDate = new Date(baseDate);
 
                 if (h * 60 + offsetDub - offsetUk >= 1440) dubDate.setDate(dubDate.getDate() + 1);
-                if (h * 60 + offsetCara - offsetUk >= 1440) caraDate.setDate(caraDate.getDate() + 1);
+                if (h * 60 + offsetItaly - offsetUk >= 1440) italyDate.setDate(italyDate.getDate() + 1);
                 if (h * 60 + offsetIst - offsetUk >= 1440) istDate.setDate(istDate.getDate() + 1);
 
                 row.innerHTML = `
@@ -1512,7 +1512,7 @@
                     </div>
                     <div class="hour-cell">
                         <div class="hour-time">${formatCellHour(ch, cM)}</div>
-                        <div class="hour-date">${caraDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</div>
+                        <div class="hour-date">${italyDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</div>
                     </div>
                     <div class="hour-cell">
                         <div class="hour-time">${formatCellHour(ih, iM)}</div>
@@ -1562,7 +1562,7 @@
             var config = [
                 { id: 'uk-live-clock', tz: 'Europe/London' },
                 { id: 'dub-live-clock', tz: 'Asia/Dubai' },
-                { id: 'cara-live-clock', tz: 'Europe/Rome' },
+                { id: 'italy-live-clock', tz: 'Europe/Rome' },
                 { id: 'ist-live-clock', tz: 'Asia/Kolkata' }
             ];
 
@@ -1575,23 +1575,23 @@
             });
         }
 
-        // Dynamic Overlap countdown for UK, Dubai, Cara, and IST
+        // Dynamic Overlap countdown for UK, Dubai, Italy, and IST
         function updateOverlapCountdown() {
             var now = new Date();
             var currentUtcMins = now.getUTCHours() * 60 + now.getUTCMinutes();
             
             var offUk = getOffsetMinutes('Europe/London', now);
             var offDub = getOffsetMinutes('Asia/Dubai', now);
-            var offCara = getOffsetMinutes('Europe/Rome', now);
+            var offItaly = getOffsetMinutes('Europe/Rome', now);
             var offIst = getOffsetMinutes('Asia/Kolkata', now);
 
             // Find overlap minutes in UTC where all 4 zones are within 07:00 to 23:00 local time
             var isMinuteOverlap = function(utcM) {
                 var hUk = Math.floor(((utcM + offUk + 2880) % 1440) / 60);
                 var hDub = Math.floor(((utcM + offDub + 2880) % 1440) / 60);
-                var hCara = Math.floor(((utcM + offCara + 2880) % 1440) / 60);
+                var hItaly = Math.floor(((utcM + offItaly + 2880) % 1440) / 60);
                 var hIst = Math.floor(((utcM + offIst + 2880) % 1440) / 60);
-                return (hUk >= 7 && hUk < 23) && (hDub >= 7 && hDub < 23) && (hCara >= 7 && hCara < 23) && (hIst >= 7 && hIst < 23);
+                return (hUk >= 7 && hUk < 23) && (hDub >= 7 && hDub < 23) && (hItaly >= 7 && hItaly < 23) && (hIst >= 7 && hIst < 23);
             };
 
             var countdownEl = document.getElementById('overlap-countdown');
@@ -1698,7 +1698,7 @@
             var activeEl;
             if (tabName === 'uk') activeEl = document.querySelector('.input-card.uk');
             else if (tabName === 'dub') activeEl = document.querySelector('.input-card.dub');
-            else if (tabName === 'cara') activeEl = document.querySelector('.input-card.cara');
+            else if (tabName === 'italy') activeEl = document.querySelector('.input-card.italy');
             else if (tabName === 'ist') activeEl = document.querySelector('.input-card.ist');
             else if (tabName === 'timeline') activeEl = document.querySelector('.timeline-card');
 
